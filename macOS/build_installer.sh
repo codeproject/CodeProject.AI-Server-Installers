@@ -23,11 +23,11 @@ INSTALLER_DIRNAME="installer"
 
 ### Parameters
 
-# This script
-SCRIPT_PATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+# The location of the root of the server repo relative to this script
+repo_base="../../CodeProject.AI-Server-Private"
 
 # Utilities
-source "${SCRIPT_PATH}/../../src/SDK/Scripts/utils.sh"
+source "${repo_base}/src/SDK/Scripts/utils.sh"
 
 # The path, relative to the root of the install, used to launch the application
 # eg "myapp" or "server/myserver". A shortcut to /usr/local/bin will be created
@@ -37,9 +37,9 @@ APPLICATION_FILE_PATH="server/CodeProject.AI.Server.dll"
 PRODUCT="CodeProject.AI Server"
 
 # We're building for the current server version
-MAJOR=$(grep -o '"Major"\s*:\s*[^,}]*' "${SCRIPT_PATH}/../../src/server/version.json" | sed 's/.*: \(.*\)/\1/')
-MINOR=$(grep -o '"Minor"\s*:\s*[^,}]*' "${SCRIPT_PATH}/../../src/server/version.json" | sed 's/.*: \(.*\)/\1/')
-PATCH=$(grep -o '"Patch"\s*:\s*[^,}]*' "${SCRIPT_PATH}/../../src/server/version.json" | sed 's/.*: \(.*\)/\1/')
+MAJOR=$(grep -o '"Major"\s*:\s*[^,}]*' "${"${repo_base}/src/server/version.json" | sed 's/.*: \(.*\)/\1/')
+MINOR=$(grep -o '"Minor"\s*:\s*[^,}]*' "${"${repo_base}/src/server/version.json" | sed 's/.*: \(.*\)/\1/')
+PATCH=$(grep -o '"Patch"\s*:\s*[^,}]*' "${"${repo_base}/src/server/version.json" | sed 's/.*: \(.*\)/\1/')
 VERSION="${MAJOR}.${MINOR}.${PATCH}"
 
 # For places where we need no spaces (eg identifiers)

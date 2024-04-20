@@ -1,8 +1,12 @@
 @echo off
+
 set starttime=%time%
+
+REM The location of the root of the server repo relative to this script
+set repo_base=..\..\..\CodeProject.AI-Server-Private
+
 :: go to the solution root.
-:: we should currently be at "<solution-root>\Installers\Windows\Inno Setup"
-pushd ..\..\..
+pushd repo_base
 
 :: make sure that the code is up to date
 echo.

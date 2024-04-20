@@ -13,6 +13,9 @@
 #  rpi    - push Raspberry Pi image
 #
 
+# The location of the root of the server repo relative to this script
+repo_base="../../CodeProject.AI-Server-Private"
+
 # Sniff Parameters
 
 do_all=false
@@ -58,12 +61,9 @@ echo "Pushing: ${images}"
 
 # Get Version: We're building for the current server version
 
-# This script
-SCRIPT_PATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
-
-MAJOR=$(grep -o '"Major"\s*:\s*[^,}]*' "${SCRIPT_PATH}/../../src/server/version.json" | sed 's/.*: \(.*\)/\1/')
-MINOR=$(grep -o '"Minor"\s*:\s*[^,}]*' "${SCRIPT_PATH}/../../src/server/version.json" | sed 's/.*: \(.*\)/\1/')
-PATCH=$(grep -o '"Patch"\s*:\s*[^,}]*' "${SCRIPT_PATH}/../../src/server/version.json" | sed 's/.*: \(.*\)/\1/')
+MAJOR=$(grep -o '"Major"\s*:\s*[^,}]*' "${"${repo_base}/src/server/version.json" | sed 's/.*: \(.*\)/\1/')
+MINOR=$(grep -o '"Minor"\s*:\s*[^,}]*' "${"${repo_base}/src/server/version.json" | sed 's/.*: \(.*\)/\1/')
+PATCH=$(grep -o '"Patch"\s*:\s*[^,}]*' "${"${repo_base}/src/server/version.json" | sed 's/.*: \(.*\)/\1/')
 VERSION="${MAJOR}.${MINOR}.${PATCH}"
 
 
