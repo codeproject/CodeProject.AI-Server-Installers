@@ -13,6 +13,9 @@
 @echo off
 setlocal enabledelayedexpansion
 
+REM The location of the root of the server repo relative to this script
+set repo_base=..\..\CodeProject.AI-Server-Private
+
 REM Sniff Parameters
 
 set do_all=false
@@ -57,17 +60,17 @@ if /i "!do_all!" == "true" (
 )
 
 REM Get Version: We're building for the current server version
-for /f "usebackq tokens=2 delims=:," %%a in (`findstr /I /R /C:"\"Major\"[^^{]*$" "..\..\src\server\version.json"`) do (
+for /f "usebackq tokens=2 delims=:," %%a in (`findstr /I /R /C:"\"Major\"[^^{]*$" "!repo_base!\src\server\version.json"`) do (
     set "major=%%a"
     set major=!major:"=!
     set major=!major: =!
 )
-for /f "usebackq tokens=2 delims=:," %%a in (`findstr /I /R /C:"\"Minor\"[^^{]*$" "..\..\src\server\version.json"`) do (
+for /f "usebackq tokens=2 delims=:," %%a in (`findstr /I /R /C:"\"Minor\"[^^{]*$" "!repo_base!\src\server\version.json"`) do (
     set "minor=%%a"
     set minor=!minor:"=!
     set minor=!minor: =!
 )
-for /f "usebackq tokens=2 delims=:," %%a in (`findstr /I /R /C:"\"Patch\"[^^{]*$" "..\..\src\server\version.json"`) do (
+for /f "usebackq tokens=2 delims=:," %%a in (`findstr /I /R /C:"\"Patch\"[^^{]*$" "!repo_base!\src\server\version.json"`) do (
     set "patch=%%a"
     set patch=!patch:"=!
     set patch=!patch: =!
@@ -82,7 +85,7 @@ REM Build Images and tag with generic "latest" version for each platform
 REM (add --progress=plain --no-cache to param list to see stdout output)
 
 if /i "!do_cpu!" == "true" (
-    docker buildx build --platform linux/amd64 --no-cache --build-arg CPAI_VERSION=!version! --tag codeproject/ai-server -f Dockerfile ..\..
+    docker buildx build --platform linux/amd64 --no-cache --build-arg CPAI_VERSION=!version! --tag codeproject/ai-server -f Dockerfile "!repo_base!"
 )
 
 if /i "!do_gpu!" == "true" (
@@ -90,21 +93,21 @@ REM docker pull cupy/nvidia-cuda:10.2-runtime-ubuntu18.04
 REM docker pull nvidia/cuda:11.7.1-cudnn8-runtime-ubuntu22.04 
 REM docker pull nvidia/cuda:12.2.2-cudnn8-runtime-ubuntu22.04
     
-REM docker buildx build --platform linux/amd64 --no-cache --build-arg CPAI_VERSION=!version! --build-arg CUDA_VERSION=10.2          --build-arg CUDA_MAJOR=10 --tag codeproject/ai-server:cuda10_2 -f Dockerfile-GPU-CUDA10_2 ..\..
-    docker buildx build --platform linux/amd64 --no-cache --build-arg CPAI_VERSION=!version! --build-arg CUDA_VERSION=11.7.1-cudnn8 --build-arg CUDA_MAJOR=11 --tag codeproject/ai-server:cuda11_7 -f Dockerfile-GPU-CUDA ..\..
-    docker buildx build --platform linux/amd64 --no-cache --build-arg CPAI_VERSION=!version! --build-arg CUDA_VERSION=12.2.2-cudnn8 --build-arg CUDA_MAJOR=12 --tag codeproject/ai-server:cuda12_2 -f Dockerfile-GPU-CUDA ..\..
+REM docker buildx build --platform linux/amd64 --no-cache --build-arg CPAI_VERSION=!version! --build-arg CUDA_VERSION=10.2          --build-arg CUDA_MAJOR=10 --tag codeproject/ai-server:cuda10_2 -f Dockerfile-GPU-CUDA10_2 "!repo_base!"
+    docker buildx build --platform linux/amd64 --no-cache --build-arg CPAI_VERSION=!version! --build-arg CUDA_VERSION=11.7.1-cudnn8 --build-arg CUDA_MAJOR=11 --tag codeproject/ai-server:cuda11_7 -f Dockerfile-GPU-CUDA "!repo_base!"
+    docker buildx build --platform linux/amd64 --no-cache --build-arg CPAI_VERSION=!version! --build-arg CUDA_VERSION=12.2.2-cudnn8 --build-arg CUDA_MAJOR=12 --tag codeproject/ai-server:cuda12_2 -f Dockerfile-GPU-CUDA "!repo_base!"
 )
 
 if /i "!do_arm!" == "true" (
-    docker buildx build --platform linux/arm64 --no-cache --build-arg CPAI_VERSION=!version! --no-cache --tag codeproject/ai-server:arm64 -f Dockerfile-Arm64 ..\..
+    docker buildx build --platform linux/arm64 --no-cache --build-arg CPAI_VERSION=!version! --no-cache --tag codeproject/ai-server:arm64 -f Dockerfile-Arm64 "!repo_base!"
 )
 
 if /i "!do_jetson!" == "true" (
-   docker buildx build --platform linux/arm64 --no-cache --build-arg CPAI_VERSION=!version! --no-cache --tag codeproject/ai-server:jetson -f Dockerfile-Jetson ..\..
+   docker buildx build --platform linux/arm64 --no-cache --build-arg CPAI_VERSION=!version! --no-cache --tag codeproject/ai-server:jetson -f Dockerfile-Jetson "!repo_base!"
 )
 
 if /i "!do_rpi!" == "true" (
-    docker buildx build --platform linux/arm64 --no-cache --build-arg CPAI_VERSION=!version! --no-cache --tag codeproject/ai-server:rpi64 -f Dockerfile-RPi64 ..\..
+    docker buildx build --platform linux/arm64 --no-cache --build-arg CPAI_VERSION=!version! --no-cache --tag codeproject/ai-server:rpi64 -f Dockerfile-RPi64 "!repo_base!"
 )
 
 
