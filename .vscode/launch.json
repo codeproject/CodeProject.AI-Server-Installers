@@ -1,0 +1,19 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "presentation": {
+                "group": "Build",
+                "hidden": false
+            },
+
+            "name": "InnoSetup",
+            "type": "python", 
+            "code": "#",  // dummy command
+            "console": "internalConsole",
+            "request": "launch",
+            "preLaunchTask": "Inno Setup: Compile Script",
+            // "cwd": "${workspaceFolder}/src/",
+        }
+    ]
+}
