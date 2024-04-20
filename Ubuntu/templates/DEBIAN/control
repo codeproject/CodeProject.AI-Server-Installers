@@ -1,0 +1,8 @@
+Package: __PACKAGE_ID__
+Version: __VERSION__
+Section: utils
+Priority: optional
+Architecture: all
+Maintainer: CodeProject <info@codeproject.com>
+Description: __PRODUCT__
+Homepage: https://codeproject.com/ai

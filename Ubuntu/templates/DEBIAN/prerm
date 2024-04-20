@@ -1,0 +1,37 @@
+#!/bin/bash
+#set -e
+
+# Customize this for your application
+APPLICATION_FILE_PATH=__APPLICATION_FILE_PATH__
+
+# Parameters
+PRODUCT_HOME="/usr/bin/__PRODUCT_DIRNAME__"
+
+echo "Pre remove:"
+
+echo " - Removing from systemd"
+systemctl stop __PACKAGE_ID__             2>/dev/null
+systemctl disable __PACKAGE_ID__          2>/dev/null
+rm /etc/systemd/system/__PACKAGE_ID__     >/dev/null 2>&1 
+rm /etc/systemd/system/__PACKAGE_ID__     >/dev/null 2>&1 # and symlinks that might be related
+rm /usr/lib/systemd/system/__PACKAGE_ID__ >/dev/null 2>&1 
+rm /usr/lib/systemd/system/__PACKAGE_ID__ >/dev/null 2>&1 # and symlinks that might be related
+systemctl daemon-reload
+
+echo " - Removing application folders"
+rm -rf "${PRODUCT_HOME}/runtimes/"
+rm -rf "${PRODUCT_HOME}/modules/"
+rm -rf "${PRODUCT_HOME}/downloads/"
+rm -rf "${PRODUCT_HOME}/logs/"
+
+echo " - Removing application shortcut to /usr/local/bin"
+rm -f "/usr/local/bin/__PRODUCT_DIRNAME__"
+
+
+echo " - Removing settings folder"
+rm -rf "/etc/codeproject/ai/"
+
+echo "Pre remove complete"
+
+# Must exit with 0 for the installer to report success
+exit 0

@@ -1,0 +1,192 @@
+<html>
+<head>
+<style>
+    html { 
+        font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-size: 100%;
+    }
+    code {
+        color: #990000;
+        font: 15px Consolas, monospace, mono;
+    }
+    pre {
+        color: black;
+        background-color: #FBEDBB;
+        padding: 6px;
+        font: 14px Consolas, monospace, mono;
+        white-space: pre;
+        overflow: auto !important;
+        border: solid 1px #FBEDBB;
+        -moz-tab-size: 4;
+        -o-tab-size: 4;
+        -webkit-tab-size: 4;
+        tab-size: 4;
+    }
+</style>
+</head>
+<body>
+    <div style="width:800px;margin:0 auto">
+
+        <h1>The Easiest Way to Build macOS Installer for Your Application</h1>
+        <p>From: https://medium.com/swlh/the-easiest-way-to-build-macos-installer-for-your-application-34a11dd08744</p>
+
+        <h2>Build your macOS installer by a single command.</h2>
+
+        <p>After Apple has been removing simple and useful tools from their XCode IDE such as PackageMaker, developers had faced a huge problem with creating packages for their applications. However, now you can build OS X component packages and product archives with simple command line tools such as pkgbuild and productbuild.</p>
+
+        <p>Both pkgbuild and productbuild provide developers the following functionalities:</p>
+
+        <ul>
+            <li>Build OS X installer component packages. (using pkgbuild)</li>
+            <li>Build a product archive for the OS X installer. (using productbuild)</li>
+        </ul>
+
+        <p>The one issue with these command-line tools is they do not have a GUI. However, these tools give full support to generate your macOS installer for your application.</p>
+
+        <h1>🤔 How can I use these tools?</h1>
+
+        <p>Do not worry! I am here to help you. You do not need to worry about the command line tools and their complex configurations. In this article, I will provide you fully automated macOS installer generating a script and will guide you to build your application&rsquo;s installer with a single command.</p>
+
+        <p>In this article, I am hoping to build a macOS installer for&nbsp;<a href="https://wso2.com/api-management/">WSO2 API Manager&nbsp;</a>using my automated build script as an example. WSO2 API Manager addresses full API lifecycle management, monetization, and policy enforcement. It allows extensibility and customization and ensures freedom from lock-in and it has been named as a Leader in&nbsp;<a href="https://wso2.com/resources/analyst-reports/the-forrester-wave-api-management-solutions-q4-2018/?utm_source=bannerprodpg&amp;utm_medium=mailer&amp;utm_campaign=forrester_wave_apim_2018B2">The Forrester Wave&trade;: API Management Solutions, Q4 2018 Report</a>.</p>
+
+        <h1>📦 Let&rsquo;s Build our macOS Installer</h1>
+
+        <p>First, you need to clone macOS installer builder repository your machine and then add needed configurations to it. After that, you only need to run the command to build your application&rsquo;s installer. Let&rsquo;s start our journey.</p>
+
+        <ol>
+            <li>
+                Clone&nbsp;<a href="https://github.com/KosalaHerath/macos-installer-builder">macos-installer-builder</a>&nbsp;repository to your local machine. You can clone the repository by the following command. Let&rsquo;s define the repository&rsquo;s home as &lt;REPO_HOME&gt;.<br />
+
+                <pre>https://github.com/KosalaHerath/macos-installer-builder.git</pre>
+            </li>
+            <li>
+                Copy your application&rsquo;s distribution files (which you need to be copied after the installation) to application directory which located at:<br />
+
+                <pre>&lt;REPO_HOME&gt;/macOS-x64/application</pre>
+
+                As an example, I downloaded&nbsp;<a href="https://bintray.com/wso2/binary/download_file?file_path=wso2am-2.6.0.zip">WSO2 API binary distribution</a>&nbsp;and unzipped. Then copied all the files to &lsquo;application&rsquo; directory.<br />
+                <br />
+                <em>[Img:&nbsp;WSO2 API Manager&rsquo;s distribution copied to the application directory]</em><br />
+                &nbsp;
+            </li>
+            <li>
+                Modify the following files with your application&#39;s information. You can find these resource files in the following location.<br />
+                
+                <pre>&lt;REPO_HOME&gt;/macOS-x64/darwin/Resources/</pre>
+
+                <ol type="i">
+                    <li>
+                        <strong>welcome.html</strong><br />
+                        <br />
+                        Welcome page of the installer can be defined by this HTML file. I have modified it for WSO2 API Manager.<br />
+                        &nbsp;
+                    </li>
+                    <li>
+                        <strong>conclusion.html</strong><br />
+                        <br />
+                        This file contains the conclusion file&rsquo;s HTML design and you can change it as you wish. I change this file using WSO2 API Manager details.<br />
+                        &nbsp;
+                    </li>
+                    <li>
+                        <strong>banner.png:</strong><br />
+                        <br />
+                        Add an image of your application&rsquo;s logo after renaming as banner.png. I added WSO2 API Manager logo as this file.
+                    </li>
+                </ol>
+                <br />
+            </li>
+            <li>
+                Add your need modifications to the post-installation script file. This script will run automatically after the installation and you can add your needed functionalities to this file. The file is located at:<br />
+
+                <pre>&lt;REPO_HOME&gt;/macOS-x64/darwin/scripts/postinstall</pre>
+
+                As an example in my postinstall file, I added a shortcut creation function which creates a shortcut to my application&rsquo;s executable file. In WSO2 API Manager, we need to run wso2server.sh file to start the server. Therefore, in this example, it will create a command line shortcut to wso2server.sh file and you can start the WSO2 API Manager server following command. You can set the following parameter to your application distribution&rsquo;s executable file and create a shortcut.<br />
+
+                <pre>APPLICATION_FILE_PATH=&lt;PATH_TO_EXECUTABLE_FILE&gt;</pre>
+            </li>
+            <li>
+                Run the following command to build your macOS installer.<br />
+                <pre>bash &lt;PRODUCT_HOME&gt;/macOS-x64/build-macos-x64.sh [APPLICATION_NAME] [APPLICATION_VERSION]</pre>
+
+                Note: You should provide an application name and application version. In addition, application version should be [0&ndash;9].[0&ndash;9].[0&ndash;9] pattern. ( Example: 2.6.0 )<br />
+                <br />
+                This will start the installer generating process (a 3-step process) and after two progress it will ask your preference on installer signing. Please refer this section for more details on installer signing. If you have an Apple Developer Installer Certificate issued by the Developer ID Certification Authority of Apple you can sign your installer by giving you certificate ID. If you wish to create the installer without signing you can skip that step. (You need an internet connection to sign the installer)<br />
+                <br />
+                <em>[Img Provide the Apple Developer Installer Certificate ID]</em><br />
+                <br />
+                After the successful three steps, the macOS installer builder will create .pkg file of your application on the following locations:<br />
+                <br />
+                <strong>Signed Package</strong>:<br />
+
+                <pre>&lt;REPO_HOME&gt;/macOS-x64/target/pkg-signed/</pre>
+
+                <strong>Un-signed Package:</strong>
+
+                <pre>&lt;REPO_HOME&gt;/macOS-x64/target/pkg/</pre>
+            </li>
+        </ol>
+
+        <p>Bravo!! 💪That&rsquo;s it. Now you can start the installation process by clicking the .pkg file.</p>
+
+        <h1>⚙ Installation Process</h1>
+
+        <p>Installation process steps are given below:</p>
+
+        <ul>
+            <li>Page 01: Welcome page (change the content using welcome.html file)</li>
+            <li>Page 02: Destination selection page (Can not change the content but can disable the page from the Distribution file)</li>
+            <li>Page 03: Storage Size Analyzer (Can not change the content)</li>
+            <li>Page 04: Conclusion Page (Can change the content using conclusion.html)</li>
+        </ul>
+
+        <p>After the installation, your application&rsquo;s distribution files will be copied to the following location: (You can change this path also by changing build-macos-x64.sh file)</p>
+
+<pre>
+/Library/&lt;APPLICATION_NAME&gt;/&lt;APPLICATION_VERSION&gt;/</pre>
+
+        <h1>🗑 Uninstallation Process</h1>
+
+        <p>You can easily uninstall the application by running the uninstall.sh script that will be located at,</p>
+
+<pre>
+/Library/&lt;APPLICATION_NAME&gt;/&lt;APPLICATION_VERSION&gt;/</pre>
+
+        <p>In addition, you can add more functionalities to the uninstall.sh file. You only need to add these tasks to the following file before you generate the installer. (As an example I added a function to delete the application shortcut after the installation).</p>
+
+<pre>
+&lt;REPO_HOME&gt;/macOS-x64/darwin/Resources/uninstall.sh</pre>
+
+        <h1>📜 Mac Developer ID Certificate Guide</h1>
+
+        <h2> Add Developer Id Certificate</h2>
+
+        <ol>
+            <li>If you do not have a signing certificate get a Developer ID Installer Certificate (Mac applications) from&nbsp;<a href="https://developer.apple.com/support/certificates/" rel="noopener ugc nofollow" target="_blank">Apple Developer Web Site</a>.</li>
+            <li>Open Keychain Access tool on your Mac machine.</li>
+            <li>File &rarr; Import Items and select the key you downloaded from Step 1.</li>
+            <li>Enter the password of the key where necessary and you will have to provide your password to access the keychain of your machine.</li>
+        </ol>
+
+        <h2>📝 Signing .pkg files</h2>
+
+        <p>Run the below command to sign the .pkg file</p>
+
+<pre>productsign --sign &quot;Developer ID Installer: &lt;CERTIFICATE_NAME_AND_ID&gt;&quot; &lt;INSTALLER_NAME&gt;.pkg</pre>
+
+        <p>To verify the signed .pkg file run the following command:</p>
+
+<pre>pkgutil --check-signature signed/&lt;SIGNED_INSTALLER_NAME&gt;.pkg</pre>
+
+        <p>You will see an output with SHA1 fingerprint after the above command if the .pkg file&rsquo;s sign validation is successful.</p>
+
+        <p>So, You can use this automated macOS installer builder to easily generate installers for your any application that can be run on macOS. Please suggest any modifications that will improve the macOS installer builder to&nbsp;<a href="https://github.com/KosalaHerath/macos-installer-builder/issues" rel="noopener ugc nofollow" target="_blank">here</a>.</p>
+
+        <p>Cheers!! 🍺🍺</p>
+
+        <h3>More details on command-line package building tools :</h3>
+
+        <p><a href="http://thegreyblog.blogspot.com/2014/06/os-x-creating-packages-from-command_2.html" rel="noopener  ugc nofollow" target="_blank">OS X: Creating Packages from the Command Line - Tutorial and a Makefile - Part I</a></p>
+
+    </div>
+</body>
+</html>

@@ -1,0 +1,86 @@
+#!/bin/bash
+
+# Parameters
+APPLICATION_FILE_PATH=__APPLICATION_FILE_PATH__
+
+# Whether to add the app to the startup items
+ADD_TO_STARTUP="__ADD_TO_STARTUP__"
+
+# Daemon = goes in LaunchDaemons, and launches at boot. 
+# Agent  = goes in LaunchAgents and starts up at login. Add to "Allow in the background" list
+SERVICE_TYPE="Agent"
+
+ARCH='x64'
+if [ $(uname -m) == 'arm64' ]; then ARCH='arm64'; fi
+
+
+echo "Post installation process started"
+
+echo "Creating settings folder"
+mkdir -p "/Library/Application Support/CodeProject/AI"
+chmod -R a+w "/Library/Application Support/CodeProject/"
+
+echo "Setting execute permissions"
+pushd "/Library/__PRODUCT__/__VERSION__/server"
+sudo chmod -R 755 .
+popd
+
+echo "Settings application folder permissions"
+chmod -R a+w "/Library/__PRODUCT__/__VERSION__/runtimes/"
+chmod -R a+w "/Library/__PRODUCT__/__VERSION__/modules/"
+chmod -R a+w "/Library/__PRODUCT__/__VERSION__/downloads/"
+
+echo "Setting file permissions"
+chmod a+w "/Library/__PRODUCT__/__VERSION__/setup.sh"
+chmod -R a+w "/Library/__PRODUCT__/__VERSION__/SDK/"
+
+echo "Ensuring .NET installed"
+bash "/Library/__PRODUCT__/__VERSION__/SDK/Scripts/dotnet-install.sh" --channel 7.0 --runtime aspnetcore
+
+echo "Adding application shortcut to /usr/local/bin"
+[ -d /usr/local/bin ] || mkdir -p /usr/local/bin
+[ -e "/usr/local/bin/__PRODUCT_SHORTCUT__" ] && rm -f "/usr/local/bin/__PRODUCT_SHORTCUT__"
+ln -s "/Library/__PRODUCT__/__VERSION__/__APPLICATION_FILE_PATH__" "/usr/local/bin/__PRODUCT_SHORTCUT__"
+
+if [ "${ADD_TO_STARTUP}" == "true" ]; then
+    # Add as a launchd item
+    if [ "${SERVICE_TYPE}" == "Daemon" ]; then
+        echo "Adding CodeProject.AI Server to Daemon list"
+        cp "/Library/__PRODUCT__/__VERSION__/__SERVICE_ID__.plist" /Library/LaunchDaemons/  
+        # To resolve "plist file Path had bad ownership/permissions" error
+        chown root:wheel /Library/LaunchDaemons/__SERVICE_ID__.plist
+        # This is required for security purposes
+        chmod o-w /Library/LaunchDaemons/__SERVICE_ID__.plist    
+        # Register
+        launchctl load /Library/LaunchDaemons/__SERVICE_ID__.plist
+    else
+        echo "Adding CodeProject.AI Server to login items list"
+        cp "/Library/__PRODUCT__/__VERSION__/__SERVICE_ID__.plist" /Library/LaunchAgents/
+        # To resolve "plist file Path had bad ownership/permissions" error
+        chown root:wheel /Library/LaunchAgents/__SERVICE_ID__.plist
+        # This is required for security purposes
+        chmod o-w /Library/LaunchAgents/__SERVICE_ID__.plist
+        # Register   
+        launchctl load /Library/LaunchAgents/__SERVICE_ID__.plist
+    fi
+fi
+
+# Not appropriate - it's not a .app
+# cp "/Library/__PRODUCT__/__VERSION__/__PRODUCT__.command" /Applications
+
+# Create an AppleScript to add the command to Login Items
+echo "Adding Login item"
+osascript <<EOD
+tell application "System Events"
+    make new login item at end with properties {name:"__PRODUCT__", path:"/Library/__PRODUCT__/__VERSION__/__PRODUCT__.command", hidden:false}
+end tell
+EOD
+
+# This just isn't working...
+# echo "Launching server"
+# open -a "/Library/__PRODUCT__/__VERSION__/__PRODUCT__.command"
+
+echo "Post installation process finished"
+
+# Must exit with 0 for the installer to report success
+exit 0

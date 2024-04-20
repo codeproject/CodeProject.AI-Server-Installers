@@ -1,0 +1,134 @@
+#!/bin/bash
+
+
+# Parameters
+APPLICATION_FILE_PATH=__APPLICATION_FILE_PATH__
+PRODUCT_HOME="/usr/bin/__PRODUCT_DIRNAME__"
+
+# Whether to add the app to the startup items
+ADD_TO_STARTUP="__ADD_TO_STARTUP__"
+
+MIN_DOTNET_VERSION=7.0
+
+# Utility functions
+
+# compares two version numbers (eg 3.9.12 < 3.10.1).
+# Returns $1 == $2 -> 0 
+#         $1 < $2 -> -1
+#         $1 > $2 ->  1
+versionCompare () {
+ 
+      # trivial equal case
+    if [[ $1 == $2 ]]; then
+        echo "0"
+        return 0
+    fi
+ 
+    local IFS=.
+    local i ver1=($1) ver2=($2)
+
+    # fill empty fields in ver1 with zeros
+    for ((i=${#ver1[@]}; i<${#ver2[@]}; i++))
+    do
+        ver1[i]=0
+    done
+
+    for ((i=0; i<${#ver1[@]}; i++))
+    do
+        if [[ -z ${ver2[i]} ]]
+        then
+            # fill empty fields in ver2 with zeros
+            ver2[i]=0
+        fi
+
+        if ((10#${ver1[i]} > 10#${ver2[i]}))
+        then
+            echo "1" # $1 > $2
+            return 0
+        fi
+        if ((10#${ver1[i]} < 10#${ver2[i]}))
+        then
+            echo "-1" # $1 < $2
+            return 0
+        fi
+    done
+
+    echo "0"
+}
+
+
+
+echo "Post installation process started"
+
+echo "Creating settings folder"
+mkdir -p "/etc/codeproject/ai/"
+chmod -R a+w "/etc/codeproject/ai/"
+
+echo "Setting execute permissions"
+pushd "${PRODUCT_HOME}/server" >/dev/null 2>&1
+chmod -R 755 .
+popd >/dev/null 2>&1
+
+echo "Settings application folder permissions"
+chmod -R a+w "${PRODUCT_HOME}/runtimes/"
+chmod -R a+w "${PRODUCT_HOME}/modules/"
+chmod -R a+w "${PRODUCT_HOME}/downloads/"
+
+echo "Setting file permissions"
+chmod a+w "${PRODUCT_HOME}/setup.sh"
+chmod -R a+w "${PRODUCT_HOME}/SDK/"
+
+echo "Adding application shortcut to /usr/local/bin"
+[ -d /usr/local/bin ] || mkdir -p /usr/local/bin
+[ -e "/usr/local/bin/__PRODUCT_DIRNAME__" ] && rm -f "/usr/local/bin/__PRODUCT_DIRNAME__"
+ln -s "${PRODUCT_HOME}/${APPLICATION_FILE_PATH}" "/usr/local/bin/__PRODUCT_DIRNAME__"
+
+# Can't do this: apt-get inside postinst isn't allowed
+# echo "Setting up Application requirements"
+# pushd "${PRODUCT_HOME}/SDK/" >/dev/null 2>&1
+# bash ../setup.sh
+# popd >/dev/null 2>&1
+
+currentDotNetVersion="(None)"
+dotnet_version_compare=-1
+
+IFS=$'\n' # set the Internal Field Separator as end of line
+while read -r line
+do
+    if [[ ${line} == *'Microsoft.NETCore.App '* ]]; then
+        dotnet_version=$(echo "$line}" | cut -d ' ' -f 2)
+        current_dotnet_version_compare=$(versionCompare $dotnet_version $MIN_DOTNET_VERSION)
+
+        if (( $current_dotnet_version_compare > $dotnet_version_compare )); then
+            currentDotNetVersion="$dotnet_version"
+            dotnet_version_compare=$current_dotnet_version_compare
+        fi
+    fi
+done <<< "$(dotnet --list-runtimes 2>/dev/null)"
+unset IFS
+
+
+if [ "${ADD_TO_STARTUP}" = "true" ]; then
+    echo "Adding CodeProject.AI Server to Daemon list"
+    sudo cp "/usr/bin/__PRODUCT_DIRNAME__/__PACKAGE_ID__.service" /etc/systemd/system/__PACKAGE_ID__.service
+    sudo systemctl daemon-reload
+    # sudo systemctl start __PACKAGE_ID__
+fi
+
+echo "Post installation process finished"
+echo ""
+echo "__PRODUCT__ will launch on startup. If you need to launch manually, run:"
+echo ""
+echo "  sudo bash /usr/bin/__PRODUCT_DIRNAME__/start.sh"
+echo ""
+echo "To uninstall, run"
+echo ""
+echo "  sudo dpkg -r __PACKAGE_ID__"
+echo ""
+echo 'PLEASE INSTALL FINAL REQUIREMENTS by running:'
+echo ""
+echo '   pushd "/usr/bin/__PRODUCT_DIRNAME__/" && bash setup.sh && popd'
+echo ""
+
+# Must exit with 0 for the installer to report success
+exit 0
