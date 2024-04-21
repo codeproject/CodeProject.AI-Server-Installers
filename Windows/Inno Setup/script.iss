@@ -5,6 +5,7 @@
 #define AppVersion "2.6.4"
 #define SetupExeName "CodeProject.AI-Server-win-x64"
 
+#define ServerRepoRelPath "..\..\..\CodeProject.AI-Server-Private"
 #define AppExe            "Server\CodeProject.AI.Server.exe"
 #define GettingStartedURL "https://www.codeproject.com/Articles/5322557/CodeProject-AI-Server-AI-the-easy-way"
 #define DocumentationURL  "https://www.codeproject.com/AI/docs/"
@@ -89,38 +90,38 @@ Name: "custom";  Description: "Custom installation"; Flags: iscustom
 
 [Files]
 ; main program files
-Source: "..\..\..\src\server\bin\Release\net7.0\*"; Excludes:"*.development.json,"; DestDir: "{app}\Server\"; \
+Source: "{#ServerRepoRelPath}\src\server\bin\Release\net7.0\*"; Excludes:"*.development.json,"; DestDir: "{app}\Server\"; \
 		Flags: ignoreversion recursesubdirs createallsubdirs
 
-Source: "..\..\..\src\setup.bat"; DestDir: "{app}"; 
+Source: "{#ServerRepoRelPath}\src\setup.bat"; DestDir: "{app}"; 
 
-Source: "..\..\..\src\SDK\Python\*"; Excludes:"*.pyc,*.pyproj,*.pyproj.user"; DestDir: "{app}\SDK\Python\"; \
+Source: "{#ServerRepoRelPath}\src\SDK\Python\*"; Excludes:"*.pyc,*.pyproj,*.pyproj.user"; DestDir: "{app}\SDK\Python\"; \
 		Flags: ignoreversion recursesubdirs createallsubdirs
 
-;Source: "..\..\..\src\server\install.bat"; DestDir: "{app}\server\"
+;Source: "{#ServerRepoRelPath}\src\server\install.bat"; DestDir: "{app}\server\"
 
-Source: "..\..\..\src\SDK\Scripts\*"; Excludes:"*.sh,"; DestDir: "{app}\SDK\Scripts\"; \
+Source: "{#ServerRepoRelPath}\src\SDK\Scripts\*"; Excludes:"*.sh,"; DestDir: "{app}\SDK\Scripts\"; \
 		Flags: ignoreversion recursesubdirs createallsubdirs
 
-Source: "..\..\..\src\SDK\Utilities\*"; Excludes:"*.sh,"; DestDir: "{app}\SDK\Utilities\"; \
+Source: "{#ServerRepoRelPath}\src\SDK\Utilities\*"; Excludes:"*.sh,"; DestDir: "{app}\SDK\Utilities\"; \
 		Flags: ignoreversion
 
-Source: "..\..\..\src\SDK\Utilities\ParseJSON\bin\Release\net7.0\*"; Excludes:"*.pdb,"; DestDir: "{app}\SDK\Utilities\ParseJSON\"; \
+Source: "{#ServerRepoRelPath}\src\SDK\Utilities\ParseJSON\bin\Release\net7.0\*"; Excludes:"*.pdb,"; DestDir: "{app}\SDK\Utilities\ParseJSON\"; \
 		Flags: ignoreversion
 
 ; No longer including the demo in the Windows installer
 ; demo files
-; Source: "..\..\..\demos\clients\dotNet\CodeProject.AI.Explorer\bin\Release\net7.0-windows\*"; Excludes:"*.development.json,"; \
+; Source: "{#ServerRepoRelPath}\demos\clients\dotNet\CodeProject.AI.Explorer\bin\Release\net7.0-windows\*"; Excludes:"*.development.json,"; \
 		 DestDir: "{app}\Demo\"; Flags: ignoreversion recursesubdirs createallsubdirs; Components: demo
 
 ; No longer including the full test data
 ; test data files
-; Source: "..\..\..\demos\TestData\*"; DestDir: "{app}\TestData\"; Flags: ignoreversion recursesubdirs createallsubdirs; \
+; Source: "{#ServerRepoRelPath}\demos\TestData\*"; DestDir: "{app}\TestData\"; Flags: ignoreversion recursesubdirs createallsubdirs; \
 		 Components: testdata
 
 ; Modules now have their own test folder which contains a test image.
-; Source: "..\..\..\demos\TestData\Objects\office-presentation.jpg"; DestDir: "{app}\TestData\"
-; Source: "..\..\..\demos\TestData\License plates\toyota-with-plate.jpg"; DestDir: "{app}\TestData\"
+; Source: "{#ServerRepoRelPath}\demos\TestData\Objects\office-presentation.jpg"; DestDir: "{app}\TestData\"
+; Source: "{#ServerRepoRelPath}\demos\TestData\License plates\toyota-with-plate.jpg"; DestDir: "{app}\TestData\"
 
 [Icons]
 Name: "{group}\Docs - Overview";                  Filename: "{#AboutURL}"; 
