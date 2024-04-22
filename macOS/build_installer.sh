@@ -25,6 +25,12 @@ INSTALLER_DIRNAME="installer"
 
 # The location of the root of the server repo relative to this script
 repo_base="../../CodeProject.AI-Server-Private"
+pushd "$repo_base" > /dev/null
+repo_base="$(pwd)"
+popd > /dev/null
+
+# This script
+SCRIPT_PATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 
 # Utilities
 source "${repo_base}/src/SDK/Scripts/utils.sh"
@@ -37,9 +43,9 @@ APPLICATION_FILE_PATH="server/CodeProject.AI.Server.dll"
 PRODUCT="CodeProject.AI Server"
 
 # We're building for the current server version
-MAJOR=$(grep -o '"Major"\s*:\s*[^,}]*' "${"${repo_base}/src/server/version.json" | sed 's/.*: \(.*\)/\1/')
-MINOR=$(grep -o '"Minor"\s*:\s*[^,}]*' "${"${repo_base}/src/server/version.json" | sed 's/.*: \(.*\)/\1/')
-PATCH=$(grep -o '"Patch"\s*:\s*[^,}]*' "${"${repo_base}/src/server/version.json" | sed 's/.*: \(.*\)/\1/')
+MAJOR=$(grep -o '"Major"\s*:\s*[^,}]*' "${repo_base}/src/server/version.json" | sed 's/.*: \(.*\)/\1/')
+MINOR=$(grep -o '"Minor"\s*:\s*[^,}]*' "${repo_base}/src/server/version.json" | sed 's/.*: \(.*\)/\1/')
+PATCH=$(grep -o '"Patch"\s*:\s*[^,}]*' "${repo_base}/src/server/version.json" | sed 's/.*: \(.*\)/\1/')
 VERSION="${MAJOR}.${MINOR}.${PATCH}"
 
 # For places where we need no spaces (eg identifiers)
@@ -147,7 +153,11 @@ copyTemplatesDirectory(){
     chmod 755 "${BUILD_DIRECTORY}/${TEMPLATES_DEST_DIRNAME}/Distribution"
 
     # handle slashes in paths
-    exe_path="${APPLICATION_FILE_PATH//\//\/}"
+    exe_path="${APPLICATION_FILE_PATH//\//\\\/}"
+    exe_path="${exe_path//\./\\.}"
+
+    # echo "$APPLICATION_FILE_PATH"
+    # echo "$exe_path"
 
     log_info "Configuring postinstall script"
     sed -i '' -e "s/__VERSION__/${VERSION}/g"                 "${BUILD_DIRECTORY}/${TEMPLATES_DEST_DIRNAME}/scripts/postinstall"
@@ -182,21 +192,21 @@ copyApplicationDirectory() {
 
     # 1. Build server
     log_info "Building Application"
-    dotnet build ../../src/server /property:GenerateFullPaths=true /consoleloggerparameters:NoSummary -c Release > /dev/null 2>&1
+    dotnet build ${repo_base}/src/server /property:GenerateFullPaths=true /consoleloggerparameters:NoSummary -c Release > /dev/null 2>&1
 
     # 2. Move files to the Staging area
     log_info "Copying application into build directory"
 
     mkdir -p "${APPLICATION_DIRECTORY}/server"
-    cp -r "../../src/server/bin/Release/net7.0/." "${APPLICATION_DIRECTORY}/server/"
-    cp "../../LICENCE.md" "${APPLICATION_DIRECTORY}"
+    cp -r "${repo_base}/src/server/bin/Release/net7.0/." "${APPLICATION_DIRECTORY}/server/"
+    cp "${repo_base}/LICENCE.md" "${APPLICATION_DIRECTORY}"
 
     mkdir -p "$APPLICATION_DIRECTORY/SDK"
-    cp -r "../../src/SDK/Python" "${APPLICATION_DIRECTORY}/SDK/Python/"
-    cp -r "../../src/SDK/Scripts" "${APPLICATION_DIRECTORY}/SDK/Scripts/"
-    cp "../../src/server/install.sh" "${APPLICATION_DIRECTORY}/server/"
+    cp -r "${repo_base}/src/SDK/Python" "${APPLICATION_DIRECTORY}/SDK/Python/"
+    cp -r "${repo_base}/src/SDK/Scripts" "${APPLICATION_DIRECTORY}/SDK/Scripts/"
+    cp "${repo_base}/src/server/install.sh" "${APPLICATION_DIRECTORY}/server/"
 
-    cp "../../src/setup.sh" "${APPLICATION_DIRECTORY}/"
+    cp "${repo_base}/src/setup.sh" "${APPLICATION_DIRECTORY}/"
 
     # Quick cleanup
     find "${APPLICATION_DIRECTORY}" -name __pycache__ -type d -exec rm -rf {} \; >/dev/null 2>&1
@@ -307,9 +317,9 @@ open http://localhost:32168 &
 while true; do sleep 86400; done
 EOF
     chmod a+x "${APPLICATION_DIRECTORY}/${PRODUCT}.command"
-    bash setIcon.sh "../../src/server/codeproject125x125.png" "${APPLICATION_DIRECTORY}/${PRODUCT}.command"
+    bash setIcon.sh "${repo_base}/src/server/codeproject125x125.png" "${APPLICATION_DIRECTORY}/${PRODUCT}.command"
     # mv "${APPLICATION_DIRECTORY}/${PRODUCT}.command" "${APPLICATION_DIRECTORY}/${PRODUCT}.app"
-    # bash setIcon.sh "../../src/server/codeproject125x125.png" "${APPLICATION_DIRECTORY}/${PRODUCT}.app"
+    # bash setIcon.sh "${repo_base}/src/server/codeproject125x125.png" "${APPLICATION_DIRECTORY}/${PRODUCT}.app"
 }
 
 # run the package builder, product builder, and product signer
