@@ -24,7 +24,7 @@ INSTALLER_DIRNAME="installer"
 ### Parameters
 
 # The location of the root of the server repo relative to this script
-repo_base="../../CodeProject.AI-Server-Private"
+repo_base="../../CodeProject.AI-Server"
 
 # Utilities
 source "${repo_base}/src/SDK/Scripts/utils.sh"

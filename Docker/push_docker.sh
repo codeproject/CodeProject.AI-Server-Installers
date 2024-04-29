@@ -14,7 +14,7 @@
 #
 
 # The location of the root of the server repo relative to this script
-repo_base="../../CodeProject.AI-Server-Private"
+repo_base="../../CodeProject.AI-Server"
 
 # Sniff Parameters
 
