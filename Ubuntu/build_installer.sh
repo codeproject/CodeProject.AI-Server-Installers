@@ -23,8 +23,11 @@ INSTALLER_DIRNAME="installer"
 
 ### Parameters
 
+# This script
+SCRIPT_PATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+
 # The location of the root of the server repo relative to this script
-repo_base="../../CodeProject.AI-Server-Private"
+repo_base="../../CodeProject.AI-Server"
 
 # Utilities
 source "${repo_base}/src/SDK/Scripts/utils.sh"
@@ -182,22 +185,22 @@ copyApplicationDirectory() {
 
     # 1. Build server
     log_info "Building Application"
-    dotnet build ../../src/server /property:GenerateFullPaths=true /consoleloggerparameters:NoSummary -c Release > /dev/null # 2>&1
+    dotnet build ${repo_base}/src/server /property:GenerateFullPaths=true /consoleloggerparameters:NoSummary -c Release > /dev/null # 2>&1
 
     # 2. Move files to the Staging area
     log_info "Copying application into build directory"
 
     mkdir -p "${APPLICATION_DIRECTORY}/server"
-    cp -r "../../src/server/bin/Release/net7.0/." "${APPLICATION_DIRECTORY}/server/"
-    cp "../../LICENCE.md" "${APPLICATION_DIRECTORY}"
+    cp -r "${repo_base}/src/server/bin/Release/net7.0/." "${APPLICATION_DIRECTORY}/server/"
+    cp "${repo_base}/LICENCE.md" "${APPLICATION_DIRECTORY}"
 
     mkdir -p "$APPLICATION_DIRECTORY/SDK"
-    cp -r "../../src/SDK/Python" "${APPLICATION_DIRECTORY}/SDK/Python/"
-    cp -r "../../src/SDK/Scripts" "${APPLICATION_DIRECTORY}/SDK/Scripts/"
-    cp "../../src/SDK/install.sh" "${APPLICATION_DIRECTORY}/SDK/"
-    cp "../../src/server/install.sh" "${APPLICATION_DIRECTORY}/server/"
+    cp -r "${repo_base}/src/SDK/Python" "${APPLICATION_DIRECTORY}/SDK/Python/"
+    cp -r "${repo_base}/src/SDK/Scripts" "${APPLICATION_DIRECTORY}/SDK/Scripts/"
+    cp "${repo_base}/src/SDK/install.sh" "${APPLICATION_DIRECTORY}/SDK/"
+    cp "${repo_base}/src/server/install.sh" "${APPLICATION_DIRECTORY}/server/"
 
-    cp "../../src/setup.sh" "${APPLICATION_DIRECTORY}/"
+    cp "${repo_base}/src/setup.sh" "${APPLICATION_DIRECTORY}/"
 
     # Quick cleanup
     find "${APPLICATION_DIRECTORY}" -name __pycache__ -type d -exec rm -rf {} \;  >/dev/null 2>&1

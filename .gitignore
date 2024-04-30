@@ -1,4 +1,15 @@
-macOS/build
-macOS/CodeProject.AI-Server_*.*
-/.vs/CodeProject.AI.Installers/FileContentIndex
-/.vs/CodeProject.AI.Installers/v17
+/macOS/application
+/macOS/build/
+/macOS/target
+/macOS/*.pkg
+/macOS/CodeProject.AI-Server_*_macOS_*.zip
+
+/Ubuntu/build/
+/Ubuntu/installer/
+/Ubuntu/*.deb
+/Ubuntu/codeproject.ai-server_*_Ubuntu_*.zip
+
+/Windows/Inno Setup/Output
+/Windows/Inno Setup/assets/dotnet-hosting-*.exe
+
+.DS_Store

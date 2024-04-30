@@ -24,7 +24,7 @@ INSTALLER_DIRNAME="installer"
 ### Parameters
 
 # The location of the root of the server repo relative to this script
-repo_base="../../CodeProject.AI-Server-Private"
+repo_base="../../CodeProject.AI-Server"
 pushd "$repo_base" > /dev/null
 repo_base="$(pwd)"
 popd > /dev/null
@@ -33,7 +33,7 @@ popd > /dev/null
 SCRIPT_PATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 
 # Utilities
-source "${repo_base}/src/SDK/Scripts/utils.sh"
+source "${repo_base}/devops/scripts/utils.sh"
 
 # The path, relative to the root of the install, used to launch the application
 # eg "myapp" or "server/myserver". A shortcut to /usr/local/bin will be created
@@ -153,7 +153,7 @@ copyTemplatesDirectory(){
     chmod 755 "${BUILD_DIRECTORY}/${TEMPLATES_DEST_DIRNAME}/Distribution"
 
     # handle slashes in paths
-    exe_path="${APPLICATION_FILE_PATH//\//\\\/}"
+    exe_path="${APPLICATION_FILE_PATH//\//\/}"
     exe_path="${exe_path//\./\\.}"
 
     # echo "$APPLICATION_FILE_PATH"
@@ -202,8 +202,10 @@ copyApplicationDirectory() {
     cp "${repo_base}/LICENCE.md" "${APPLICATION_DIRECTORY}"
 
     mkdir -p "$APPLICATION_DIRECTORY/SDK"
-    cp -r "${repo_base}/src/SDK/Python" "${APPLICATION_DIRECTORY}/SDK/Python/"
-    cp -r "${repo_base}/src/SDK/Scripts" "${APPLICATION_DIRECTORY}/SDK/Scripts/"
+    mkdir -p "$APPLICATION_DIRECTORY/devops"
+
+    cp -r "${repo_base}/src/SDK/Python"     "${APPLICATION_DIRECTORY}/SDK/Python/"
+    cp -r "${repo_base}/devops/scripts"     "${APPLICATION_DIRECTORY}/devops/scripts/"
     cp "${repo_base}/src/server/install.sh" "${APPLICATION_DIRECTORY}/server/"
 
     cp "${repo_base}/src/setup.sh" "${APPLICATION_DIRECTORY}/"
@@ -214,9 +216,9 @@ copyApplicationDirectory() {
     # Create directories
     log_info "Creating placeholder directories"
 
+    mkdir -p "${APPLICATION_DIRECTORY}/devops/scripts"
     mkdir -p "${APPLICATION_DIRECTORY}/runtimes"
     mkdir -p "${APPLICATION_DIRECTORY}/modules"
-    mkdir -p "${APPLICATION_DIRECTORY}/modules/downloads"
     mkdir -p "${APPLICATION_DIRECTORY}/downloads"
 
     chmod -R 755 "${APPLICATION_DIRECTORY}"
