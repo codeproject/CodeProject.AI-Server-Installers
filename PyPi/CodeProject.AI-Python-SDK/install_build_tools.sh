@@ -8,4 +8,7 @@ sudo apt-get install -y --no-install-recommends  \
         python3-apt                         \
         python3-setuptools                  \
         python3-venv
- sudo python3 -m pip install setuptools build twine
+sudo python -m pip install --trusted-host pypi.python.org        \
+                           --trusted-host files.pythonhosted.org \
+                           --trusted-host pypi.org --upgrade setuptools 
+sudo python3 -m pip install build twine
