@@ -153,7 +153,7 @@ copyTemplatesDirectory(){
     chmod 755 "${BUILD_DIRECTORY}/${TEMPLATES_DEST_DIRNAME}/Distribution"
 
     # handle slashes in paths
-    exe_path="${APPLICATION_FILE_PATH//\//\\\/}"
+    exe_path="${APPLICATION_FILE_PATH//\//\/}"
     exe_path="${exe_path//\./\\.}"
 
     # echo "$APPLICATION_FILE_PATH"
@@ -202,8 +202,10 @@ copyApplicationDirectory() {
     cp "${repo_base}/LICENCE.md" "${APPLICATION_DIRECTORY}"
 
     mkdir -p "$APPLICATION_DIRECTORY/SDK"
-    cp -r "${repo_base}/src/SDK/Python" "${APPLICATION_DIRECTORY}/SDK/Python/"
-    cp -r "${repo_base}/devops/scripts" "${APPLICATION_DIRECTORY}/devops/scripts/"
+    mkdir -p "$APPLICATION_DIRECTORY/devops"
+
+    cp -r "${repo_base}/src/SDK/Python"     "${APPLICATION_DIRECTORY}/SDK/Python/"
+    cp -r "${repo_base}/devops/scripts"     "${APPLICATION_DIRECTORY}/devops/scripts/"
     cp "${repo_base}/src/server/install.sh" "${APPLICATION_DIRECTORY}/server/"
 
     cp "${repo_base}/src/setup.sh" "${APPLICATION_DIRECTORY}/"
@@ -214,6 +216,7 @@ copyApplicationDirectory() {
     # Create directories
     log_info "Creating placeholder directories"
 
+    mkdir -p "${APPLICATION_DIRECTORY}/devops/scripts"
     mkdir -p "${APPLICATION_DIRECTORY}/runtimes"
     mkdir -p "${APPLICATION_DIRECTORY}/modules"
     mkdir -p "${APPLICATION_DIRECTORY}/downloads"
