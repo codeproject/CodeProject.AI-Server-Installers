@@ -1,9 +1,10 @@
 {
   "ExpandedNodes": [
     "",
-    "\\Docker",
+    "\\PyPi",
+    "\\PyPi\\CodeProject.AI-Python-SDK",
     "\\Ubuntu"
   ],
-  "SelectedNode": "\\Docker\\Dockerfile",
+  "SelectedNode": "\\PyPi\\CodeProject.AI-Python-SDK",
   "PreviewInSolutionExplorer": false
 }
