@@ -7,16 +7,40 @@
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:PyPi\\CodeProject.AI-Python-SDK\\setup.cfg||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
     {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Dev\\CodeProject.AI\\CodeProject.AI.Installers\\PyPi\\CodeProject.AI-Python-SDK\\codeproject_ai_sdk.egg-info\\top_level.txt||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:PyPi\\CodeProject.AI-Python-SDK\\codeproject_ai_sdk.egg-info\\top_level.txt||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Dev\\CodeProject.AI\\CodeProject.AI.Installers\\PyPi\\CodeProject.AI-Python-SDK\\codeproject_ai_sdk.egg-info\\requires.txt||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:PyPi\\CodeProject.AI-Python-SDK\\codeproject_ai_sdk.egg-info\\requires.txt||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Dev\\CodeProject.AI\\CodeProject.AI.Installers\\PyPi\\CodeProject.AI-Python-SDK\\codeproject_ai_sdk.egg-info\\SOURCES.txt||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:PyPi\\CodeProject.AI-Python-SDK\\codeproject_ai_sdk.egg-info\\SOURCES.txt||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Dev\\CodeProject.AI\\CodeProject.AI.Installers\\PyPi\\CodeProject.AI-Python-SDK\\codeproject_ai_sdk.egg-info\\PKG-INFO||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:PyPi\\CodeProject.AI-Python-SDK\\codeproject_ai_sdk.egg-info\\PKG-INFO||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Dev\\CodeProject.AI\\CodeProject.AI.Installers\\PyPi\\CodeProject.AI-Python-SDK\\codeproject_ai_sdk.egg-info\\dependency_links.txt||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:PyPi\\CodeProject.AI-Python-SDK\\codeproject_ai_sdk.egg-info\\dependency_links.txt||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Dev\\CodeProject.AI\\CodeProject.AI.Installers\\PyPi\\CodeProject.AI-Python-SDK\\upload2PyPi.bat||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:PyPi\\CodeProject.AI-Python-SDK\\upload2PyPi.bat||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Dev\\CodeProject.AI\\CodeProject.AI.Installers\\PyPi\\CodeProject.AI-Python-SDK\\build.bat||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:PyPi\\CodeProject.AI-Python-SDK\\build.bat||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Dev\\CodeProject.AI\\CodeProject.AI.Installers\\PyPi\\CodeProject.AI-Python-SDK\\pyproject.toml||{8B382828-6202-11D1-8870-0000F87579D2}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:PyPi\\CodeProject.AI-Python-SDK\\pyproject.toml||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Dev\\CodeProject.AI\\CodeProject.AI.Installers\\PyPi\\CodeProject.AI-Python-SDK\\build.sh||{3B902123-F8A7-4915-9F01-361F908088D0}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:PyPi\\CodeProject.AI-Python-SDK\\build.sh||{3B902123-F8A7-4915-9F01-361F908088D0}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Dev\\CodeProject.AI\\CodeProject.AI.Installers\\PyPi\\CodeProject.AI-Python-SDK\\build.bat||{3B902123-F8A7-4915-9F01-361F908088D0}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:PyPi\\CodeProject.AI-Python-SDK\\build.bat||{3B902123-F8A7-4915-9F01-361F908088D0}"
     }
   ],
   "DocumentGroupContainers": [
@@ -26,7 +50,7 @@
       "DocumentGroups": [
         {
           "DockedHeight": 250,
-          "SelectedChildIndex": 64,
+          "SelectedChildIndex": 70,
           "Children": [
             {
               "$type": "Bookmark",
@@ -269,8 +293,85 @@
               "Name": "ST:130:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
             },
             {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "top_level.txt",
+              "DocumentMoniker": "C:\\Dev\\CodeProject.AI\\CodeProject.AI.Installers\\PyPi\\CodeProject.AI-Python-SDK\\codeproject_ai_sdk.egg-info\\top_level.txt",
+              "RelativeDocumentMoniker": "PyPi\\CodeProject.AI-Python-SDK\\codeproject_ai_sdk.egg-info\\top_level.txt",
+              "ToolTip": "C:\\Dev\\CodeProject.AI\\CodeProject.AI.Installers\\PyPi\\CodeProject.AI-Python-SDK\\codeproject_ai_sdk.egg-info\\top_level.txt",
+              "RelativeToolTip": "PyPi\\CodeProject.AI-Python-SDK\\codeproject_ai_sdk.egg-info\\top_level.txt",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003109|",
+              "WhenOpened": "2024-04-30T20:32:24.874Z",
+              "EditorCaption": ""
+            },
+            {
               "$type": "Document",
               "DocumentIndex": 2,
+              "Title": "requires.txt",
+              "DocumentMoniker": "C:\\Dev\\CodeProject.AI\\CodeProject.AI.Installers\\PyPi\\CodeProject.AI-Python-SDK\\codeproject_ai_sdk.egg-info\\requires.txt",
+              "RelativeDocumentMoniker": "PyPi\\CodeProject.AI-Python-SDK\\codeproject_ai_sdk.egg-info\\requires.txt",
+              "ToolTip": "C:\\Dev\\CodeProject.AI\\CodeProject.AI.Installers\\PyPi\\CodeProject.AI-Python-SDK\\codeproject_ai_sdk.egg-info\\requires.txt",
+              "RelativeToolTip": "PyPi\\CodeProject.AI-Python-SDK\\codeproject_ai_sdk.egg-info\\requires.txt",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003109|",
+              "WhenOpened": "2024-04-30T20:32:08.294Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "PKG-INFO",
+              "DocumentMoniker": "C:\\Dev\\CodeProject.AI\\CodeProject.AI.Installers\\PyPi\\CodeProject.AI-Python-SDK\\codeproject_ai_sdk.egg-info\\PKG-INFO",
+              "RelativeDocumentMoniker": "PyPi\\CodeProject.AI-Python-SDK\\codeproject_ai_sdk.egg-info\\PKG-INFO",
+              "ToolTip": "C:\\Dev\\CodeProject.AI\\CodeProject.AI.Installers\\PyPi\\CodeProject.AI-Python-SDK\\codeproject_ai_sdk.egg-info\\PKG-INFO",
+              "RelativeToolTip": "PyPi\\CodeProject.AI-Python-SDK\\codeproject_ai_sdk.egg-info\\PKG-INFO",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2024-04-30T20:32:04.207Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "dependency_links.txt",
+              "DocumentMoniker": "C:\\Dev\\CodeProject.AI\\CodeProject.AI.Installers\\PyPi\\CodeProject.AI-Python-SDK\\codeproject_ai_sdk.egg-info\\dependency_links.txt",
+              "RelativeDocumentMoniker": "PyPi\\CodeProject.AI-Python-SDK\\codeproject_ai_sdk.egg-info\\dependency_links.txt",
+              "ToolTip": "C:\\Dev\\CodeProject.AI\\CodeProject.AI.Installers\\PyPi\\CodeProject.AI-Python-SDK\\codeproject_ai_sdk.egg-info\\dependency_links.txt",
+              "RelativeToolTip": "PyPi\\CodeProject.AI-Python-SDK\\codeproject_ai_sdk.egg-info\\dependency_links.txt",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003109|",
+              "WhenOpened": "2024-04-30T20:32:02.446Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "SOURCES.txt",
+              "DocumentMoniker": "C:\\Dev\\CodeProject.AI\\CodeProject.AI.Installers\\PyPi\\CodeProject.AI-Python-SDK\\codeproject_ai_sdk.egg-info\\SOURCES.txt",
+              "RelativeDocumentMoniker": "PyPi\\CodeProject.AI-Python-SDK\\codeproject_ai_sdk.egg-info\\SOURCES.txt",
+              "ToolTip": "C:\\Dev\\CodeProject.AI\\CodeProject.AI.Installers\\PyPi\\CodeProject.AI-Python-SDK\\codeproject_ai_sdk.egg-info\\SOURCES.txt",
+              "RelativeToolTip": "PyPi\\CodeProject.AI-Python-SDK\\codeproject_ai_sdk.egg-info\\SOURCES.txt",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003109|",
+              "WhenOpened": "2024-04-30T20:31:35.093Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "upload2PyPi.bat",
+              "DocumentMoniker": "C:\\Dev\\CodeProject.AI\\CodeProject.AI.Installers\\PyPi\\CodeProject.AI-Python-SDK\\upload2PyPi.bat",
+              "RelativeDocumentMoniker": "PyPi\\CodeProject.AI-Python-SDK\\upload2PyPi.bat",
+              "ToolTip": "C:\\Dev\\CodeProject.AI\\CodeProject.AI.Installers\\PyPi\\CodeProject.AI-Python-SDK\\upload2PyPi.bat",
+              "RelativeToolTip": "PyPi\\CodeProject.AI-Python-SDK\\upload2PyPi.bat",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000614|",
+              "WhenOpened": "2024-04-30T20:29:58.989Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
               "Title": "build.sh",
               "DocumentMoniker": "C:\\Dev\\CodeProject.AI\\CodeProject.AI.Installers\\PyPi\\CodeProject.AI-Python-SDK\\build.sh",
               "RelativeDocumentMoniker": "PyPi\\CodeProject.AI-Python-SDK\\build.sh",
@@ -278,29 +379,23 @@
               "RelativeToolTip": "PyPi\\CodeProject.AI-Python-SDK\\build.sh",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAAAEAAAAqAAAA",
               "Icon": "00000000-0000-0000-0000-000000000000.000000|",
-              "WhenOpened": "2024-04-30T15:01:11.019Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:128:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+              "WhenOpened": "2024-04-30T15:01:11.019Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 8,
               "Title": "pyproject.toml",
               "DocumentMoniker": "C:\\Dev\\CodeProject.AI\\CodeProject.AI.Installers\\PyPi\\CodeProject.AI-Python-SDK\\pyproject.toml",
               "RelativeDocumentMoniker": "PyPi\\CodeProject.AI-Python-SDK\\pyproject.toml",
               "ToolTip": "C:\\Dev\\CodeProject.AI\\CodeProject.AI.Installers\\PyPi\\CodeProject.AI-Python-SDK\\pyproject.toml",
               "RelativeToolTip": "PyPi\\CodeProject.AI-Python-SDK\\pyproject.toml",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAA8AAAANAAAA",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAYAAAARAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2024-04-30T15:27:46.414Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-04-30T15:27:46.414Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 7,
               "Title": "build.bat",
               "DocumentMoniker": "C:\\Dev\\CodeProject.AI\\CodeProject.AI.Installers\\PyPi\\CodeProject.AI-Python-SDK\\build.bat",
               "RelativeDocumentMoniker": "PyPi\\CodeProject.AI-Python-SDK\\build.bat",
@@ -308,8 +403,7 @@
               "RelativeToolTip": "PyPi\\CodeProject.AI-Python-SDK\\build.bat",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAAAEAAAAyAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000614|",
-              "WhenOpened": "2024-04-30T15:00:54.828Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-04-30T15:00:54.828Z"
             },
             {
               "$type": "Document",
@@ -319,7 +413,7 @@
               "RelativeDocumentMoniker": "PyPi\\CodeProject.AI-Python-SDK\\setup.cfg",
               "ToolTip": "C:\\Dev\\CodeProject.AI\\CodeProject.AI.Installers\\PyPi\\CodeProject.AI-Python-SDK\\setup.cfg",
               "RelativeToolTip": "PyPi\\CodeProject.AI-Python-SDK\\setup.cfg",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAYAAAA4AAAA",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAYAAAAJAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
               "WhenOpened": "2024-04-30T14:57:53.191Z",
               "EditorCaption": ""
