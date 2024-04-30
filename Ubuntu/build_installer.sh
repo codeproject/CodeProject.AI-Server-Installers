@@ -30,7 +30,7 @@ SCRIPT_PATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 repo_base="../../CodeProject.AI-Server"
 
 # Utilities
-source "${repo_base}/src/SDK/Scripts/utils.sh"
+source "${repo_base}/devops/scripts/utils.sh"
 
 # The path, relative to the root of the install, used to launch the application
 # eg "myapp" or "server/myserver". A shortcut to /usr/local/bin will be created
@@ -195,8 +195,9 @@ copyApplicationDirectory() {
     cp "${repo_base}/LICENCE.md" "${APPLICATION_DIRECTORY}"
 
     mkdir -p "$APPLICATION_DIRECTORY/SDK"
+    mkdir -p "$APPLICATION_DIRECTORY/devops"
     cp -r "${repo_base}/src/SDK/Python" "${APPLICATION_DIRECTORY}/SDK/Python/"
-    cp -r "${repo_base}/src/SDK/Scripts" "${APPLICATION_DIRECTORY}/SDK/Scripts/"
+    cp -r "${repo_base}/devops/scripts" "${APPLICATION_DIRECTORY}/devops/scripts/"
     cp "${repo_base}/src/SDK/install.sh" "${APPLICATION_DIRECTORY}/SDK/"
     cp "${repo_base}/src/server/install.sh" "${APPLICATION_DIRECTORY}/server/"
 
