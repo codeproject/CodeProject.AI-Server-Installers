@@ -14,3 +14,6 @@
 
 .DS_Store
 /.vs/CodeProject.AI.Installers/FileContentIndex
+/PyPi/CodeProject.AI-Python-SDK/codeproject_ai_sdk.egg-info
+/PyPi/CodeProject.AI-Python-SDK/dist
+/PyPi/CodeProject.AI-Python-SDK/build/lib/codeproject_ai_sdk
