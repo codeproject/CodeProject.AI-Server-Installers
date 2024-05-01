@@ -3,10 +3,8 @@
     "",
     "\\PyPi",
     "\\PyPi\\CodeProject.AI-Python-SDK",
-    "\\PyPi\\CodeProject.AI-Python-SDK\\codeproject_ai_sdk.egg-info",
-    "\\PyPi\\CodeProject.AI-Python-SDK\\dist",
     "\\Ubuntu"
   ],
-  "SelectedNode": "\\PyPi\\CodeProject.AI-Python-SDK\\codeproject_ai_sdk.egg-info\\top_level.txt",
+  "SelectedNode": "\\PyPi\\CodeProject.AI-Python-SDK\\pyproject.toml",
   "PreviewInSolutionExplorer": false
 }

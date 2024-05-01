@@ -304,7 +304,7 @@
               "RelativeDocumentMoniker": "PyPi\\CodeProject.AI-Python-SDK\\codeproject_ai_sdk.egg-info\\top_level.txt",
               "ToolTip": "C:\\Dev\\CodeProject.AI\\CodeProject.AI.Installers\\PyPi\\CodeProject.AI-Python-SDK\\codeproject_ai_sdk.egg-info\\top_level.txt",
               "RelativeToolTip": "PyPi\\CodeProject.AI-Python-SDK\\codeproject_ai_sdk.egg-info\\top_level.txt",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAIwAAAAAASAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003109|",
               "WhenOpened": "2024-04-30T20:32:24.874Z",
               "EditorCaption": ""
@@ -391,7 +391,8 @@
               "RelativeToolTip": "PyPi\\CodeProject.AI-Python-SDK\\pyproject.toml",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAAAYAAAARAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2024-04-30T15:27:46.414Z"
+              "WhenOpened": "2024-04-30T15:27:46.414Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
