@@ -1,22 +1,23 @@
+# macOS installer
 /macOS/application
 /macOS/build/
 /macOS/target
 /macOS/*.pkg
 /macOS/CodeProject.AI-Server_*_macOS_*.zip
 
+# Ubuntu/Debian installer
 /Ubuntu/build/
 /Ubuntu/installer/
 /Ubuntu/*.deb
 /Ubuntu/codeproject.ai-server_*_Ubuntu_*.zip
 
+# Windows installer
 /Windows/Inno Setup/Output
 /Windows/Inno Setup/assets/dotnet-hosting-*.exe
 
+# PyPi builder
+/.vs/
+/PyPi/
+
+# macOS debris
 .DS_Store
-/.vs/CodeProject.AI.Installers/FileContentIndex
-/PyPi/CodeProject.AI-Python-SDK/codeproject_ai_sdk.egg-info
-/PyPi/CodeProject.AI-Python-SDK/dist
-/PyPi/CodeProject.AI-Python-SDK/build
-/.vs/slnx.sqlite
-/.vs/CodeProject.AI.Installers/v17/.wsuo
-/.vs/CodeProject.AI.Installers/v17/DocumentLayout.json
