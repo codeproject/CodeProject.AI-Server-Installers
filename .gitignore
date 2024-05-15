@@ -16,8 +16,9 @@
 /Windows/Inno Setup/assets/dotnet-hosting-*.exe
 
 # PyPi builder
-/.vs/
-/PyPi/
+/PyPi/dist
 
 # macOS debris
 .DS_Store
+
+/.vs
