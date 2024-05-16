@@ -16,9 +16,11 @@
 /Windows/Inno Setup/assets/dotnet-hosting-*.exe
 
 # PyPi builder
-/PyPi/dist
+PyPi/CodeProject.AI-SDK/dist/
+PyPi/CodeProject.AI-SDK/build/
+PyPi/CodeProject.AI-SDK/codeproject_ai_sdk.egg-info/
 
 # macOS debris
 .DS_Store
 
-/.vs
+.vs/
