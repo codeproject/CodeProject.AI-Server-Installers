@@ -5,7 +5,7 @@
 #define AppVersion "2.6.4"
 #define SetupExeName "CodeProject.AI-Server-win-x64"
 
-#define ServerRepoRelPath "..\..\..\CodeProject.AI-Server"
+#define ServerRepoRelPath "..\..\..\CodeProject.AI-Server-Dev"
 #define AppExe            "Server\CodeProject.AI.Server.exe"
 #define GettingStartedURL "https://www.codeproject.com/Articles/5322557/CodeProject-AI-Server-AI-the-easy-way"
 #define DocumentationURL  "https://www.codeproject.com/AI/docs/"
