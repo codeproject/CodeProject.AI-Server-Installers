@@ -9,8 +9,12 @@
 
 # Configuration Variables and Parameters
 
-# Whether or not to create an installer which adds the service to systemd for auto-start
+# Whether or not to create an installer which adds the service to systemd for
+# auto-start (true) or as a login item (false)
 ADD_TO_STARTUP="false"
+
+# Whether to target CodeProject.AI server 2.x
+TARGET_SERVER_2x="true"
 
 ### Directory names
 
@@ -33,10 +37,11 @@ popd > /dev/null
 SCRIPT_PATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 
 # Utilities
-# for CodeProject.AI-Server 3.0
-source "${repo_base}/devops/scripts/utils.sh"
-# for CodeProject.AI-Server 2.X
-# source "${repo_base}/src/SDK/Scripts/utils.sh"
+if [ "$TARGET_SERVER_2x" = "true" ]; then
+    source "${repo_base}/src/SDK/Scripts/utils.sh"
+else
+    source "${repo_base}/devops/scripts/utils.sh"
+fi
 
 # The path, relative to the root of the install, used to launch the application
 # eg "myapp" or "server/myserver". A shortcut to /usr/local/bin will be created
@@ -205,10 +210,16 @@ copyApplicationDirectory() {
     cp "${repo_base}/LICENCE.md" "${APPLICATION_DIRECTORY}"
 
     mkdir -p "$APPLICATION_DIRECTORY/SDK"
-    mkdir -p "$APPLICATION_DIRECTORY/devops"
-
     cp -r "${repo_base}/src/SDK/Python"     "${APPLICATION_DIRECTORY}/SDK/Python/"
-    cp -r "${repo_base}/devops/scripts"     "${APPLICATION_DIRECTORY}/devops/scripts/"
+
+    if [ "$TARGET_SERVER_2x" = "true" ]; then
+        mkdir -p "$APPLICATION_DIRECTORY/SDK"
+        cp -r "${repo_base}/src/SDK/Scripts" "${APPLICATION_DIRECTORY}/SDK/Scripts/"
+    else
+        mkdir -p "$APPLICATION_DIRECTORY/devops"
+        cp -r "${repo_base}/devops/scripts"     "${APPLICATION_DIRECTORY}/devops/scripts/"
+    fi
+
     cp "${repo_base}/src/server/install.sh" "${APPLICATION_DIRECTORY}/server/"
 
     cp "${repo_base}/src/setup.sh" "${APPLICATION_DIRECTORY}/"
@@ -219,8 +230,8 @@ copyApplicationDirectory() {
     # Create directories
     log_info "Creating placeholder directories"
 
-    mkdir -p "${APPLICATION_DIRECTORY}/devops/scripts"
     mkdir -p "${APPLICATION_DIRECTORY}/runtimes"
+    mkdir -p "${APPLICATION_DIRECTORY}/models"
     mkdir -p "${APPLICATION_DIRECTORY}/modules"
     mkdir -p "${APPLICATION_DIRECTORY}/downloads"
 
