@@ -24,7 +24,7 @@ INSTALLER_DIRNAME="installer"
 ### Parameters
 
 # The location of the root of the server repo relative to this script
-repo_base="../../CodeProject.AI-Server"
+repo_base="../../CodeProject.AI-Server-Dev"
 pushd "$repo_base" > /dev/null
 repo_base="$(pwd)"
 popd > /dev/null
@@ -33,7 +33,10 @@ popd > /dev/null
 SCRIPT_PATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 
 # Utilities
+# for CodeProject.AI-Server 3.0
 source "${repo_base}/devops/scripts/utils.sh"
+# for CodeProject.AI-Server 2.X
+# source "${repo_base}/src/SDK/Scripts/utils.sh"
 
 # The path, relative to the root of the install, used to launch the application
 # eg "myapp" or "server/myserver". A shortcut to /usr/local/bin will be created
