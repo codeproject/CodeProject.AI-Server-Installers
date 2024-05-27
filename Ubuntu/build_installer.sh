@@ -12,6 +12,9 @@
 # Whether or not to create an installer which adds the service to systemd for auto-start
 ADD_TO_STARTUP="true"
 
+# Whether to target CodeProject.AI server 2.x
+TARGET_SERVER_2x="true"
+
 ### Directory names
 
 BUILD_DIRNAME="build"
@@ -27,10 +30,14 @@ INSTALLER_DIRNAME="installer"
 SCRIPT_PATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 
 # The location of the root of the server repo relative to this script
-repo_base="../../CodeProject.AI-Server"
+repo_base="../../CodeProject.AI-Server-Dev"
 
 # Utilities
-source "${repo_base}/devops/scripts/utils.sh"
+if [ "$TARGET_SERVER_2x" = "true" ]; then
+    source "${repo_base}/src/SDK/Scripts/utils.sh"
+else
+    source "${repo_base}/devops/scripts/utils.sh"
+fi
 
 # The path, relative to the root of the install, used to launch the application
 # eg "myapp" or "server/myserver". A shortcut to /usr/local/bin will be created
@@ -139,7 +146,6 @@ createBuildDirectory() {
 
 
 
-
 # Copy the templates into the build directory and adjust their values
 copyTemplatesDirectory(){
 
@@ -195,9 +201,16 @@ copyApplicationDirectory() {
     cp "${repo_base}/LICENCE.md" "${APPLICATION_DIRECTORY}"
 
     mkdir -p "$APPLICATION_DIRECTORY/SDK"
-    mkdir -p "$APPLICATION_DIRECTORY/devops"
     cp -r "${repo_base}/src/SDK/Python" "${APPLICATION_DIRECTORY}/SDK/Python/"
-    cp -r "${repo_base}/devops/scripts" "${APPLICATION_DIRECTORY}/devops/scripts/"
+
+    if [ "$TARGET_SERVER_2x" = "true" ]; then
+        mkdir -p "$APPLICATION_DIRECTORY/SDK"
+        cp -r "${repo_base}/src/SDK/Scripts" "${APPLICATION_DIRECTORY}/SDK/Scripts/"
+    else
+        mkdir -p "$APPLICATION_DIRECTORY/devops"
+        cp -r "${repo_base}/devops/scripts"     "${APPLICATION_DIRECTORY}/devops/scripts/"
+    fi
+
     cp "${repo_base}/src/SDK/install.sh" "${APPLICATION_DIRECTORY}/SDK/"
     cp "${repo_base}/src/server/install.sh" "${APPLICATION_DIRECTORY}/server/"
 
@@ -210,8 +223,8 @@ copyApplicationDirectory() {
     log_info "Creating placeholder directories"
 
     mkdir -p "${APPLICATION_DIRECTORY}/runtimes"
+    mkdir -p "${APPLICATION_DIRECTORY}/models"
     mkdir -p "${APPLICATION_DIRECTORY}/modules"
-    # mkdir -p "${APPLICATION_DIRECTORY}/modules/downloads"
     mkdir -p "${APPLICATION_DIRECTORY}/downloads"
 
     chmod -R 755 "${APPLICATION_DIRECTORY}"
