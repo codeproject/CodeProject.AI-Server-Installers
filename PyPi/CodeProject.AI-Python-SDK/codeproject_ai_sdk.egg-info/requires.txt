@@ -1,0 +1,7 @@
+Pillow
+charset-normalizer
+commentjson
+aiohttp
+aiofiles
+py-cpuinfo
+requests

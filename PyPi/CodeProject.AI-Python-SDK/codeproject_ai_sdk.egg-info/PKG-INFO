@@ -1,0 +1,26 @@
+Metadata-Version: 2.1
+Name: codeproject-ai-sdk
+Version: 0.0.13
+Summary: Python SDK for writing Modules for CodeProject AI Server
+Author: Chris Maunder, Matthew Dennis
+License: SSPL
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Requires-Python: >=3.7
+Description-Content-Type: text/markdown
+Requires-Dist: Pillow
+Requires-Dist: charset-normalizer
+Requires-Dist: commentjson
+Requires-Dist: aiohttp
+Requires-Dist: aiofiles
+Requires-Dist: py-cpuinfo
+Requires-Dist: requests
+
+# CodeProject.AI Server SDK for Python
+
+This is a placeholder for the Python SDK for CodeProject.AI Server ReadMe.MD file. The SDK is currently under development and will be released soon.
