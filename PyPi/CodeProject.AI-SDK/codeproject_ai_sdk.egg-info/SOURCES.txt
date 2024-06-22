@@ -1,0 +1,12 @@
+pyproject.toml
+readme.md
+setup.cfg
+./build/lib/codeproject_ai_sdk/utils/__init__.py
+./build/lib/codeproject_ai_sdk/utils/cpuinfo.py
+./build/lib/codeproject_ai_sdk/utils/environment_check.py
+./build/lib/codeproject_ai_sdk/utils/image_utils.py
+codeproject_ai_sdk.egg-info/PKG-INFO
+codeproject_ai_sdk.egg-info/SOURCES.txt
+codeproject_ai_sdk.egg-info/dependency_links.txt
+codeproject_ai_sdk.egg-info/requires.txt
+codeproject_ai_sdk.egg-info/top_level.txt

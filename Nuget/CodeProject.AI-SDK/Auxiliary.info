@@ -1,0 +1,19 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	
+	<!-- Nuget setup -->
+	<PropertyGroup>
+    	<Version>1.0.2</Version>
+		<Title>CodeProject.AI Module SDK</Title>
+		<Authors>CodeProject</Authors>
+		<Copyright>CodeProject 2024</Copyright>
+		<Company>CodeProject Solutions Inc.</Company>
+		<PackageProjectUrl>https://www.codeproject.com/AI</PackageProjectUrl>
+		<RepositoryUrl>https://www.github.com/CodeProject/CodeProject.AI-Server</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageTags>CodeProject.AI; AI; CodeProject;</PackageTags>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+
+		<PackageLicenseFile>license.md</PackageLicenseFile>
+		<PackageReadmeFile>readme.md</PackageReadmeFile>
+	</PropertyGroup>
+</Project>

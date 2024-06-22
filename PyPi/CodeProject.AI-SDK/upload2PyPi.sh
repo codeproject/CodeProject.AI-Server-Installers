@@ -1,3 +1,7 @@
 # This file uploads the package to PyPi
-# you will need the PyPi API token to upload the package
+#
+# You will need the PyPi API token to upload the package. The token can be 
+# found in the company BitWarden account.
+#
+
 python3 -m twine upload dist/*
