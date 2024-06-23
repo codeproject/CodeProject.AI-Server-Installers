@@ -12,8 +12,12 @@
 # Whether or not to create an installer which adds the service to systemd for auto-start
 ADD_TO_STARTUP="true"
 
-# Whether to target CodeProject.AI server 2.x
-TARGET_SERVER_2x="true"
+# We have two forms of the Docker images due to the base folder structure changing in 2.7.0
+if [[ "$MAJOR" -lt 2 ]] || [[ "$MAJOR" -eq 2 && "$MINOR" -lt 7 ]]; then
+    TARGET_SERVER_PRE_2_7=false
+else
+    TARGET_SERVER_PRE_2_7=true
+fi
 
 ### Directory names
 
@@ -33,7 +37,7 @@ SCRIPT_PATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 repo_base="../../CodeProject.AI-Server-Dev"
 
 # Utilities
-if [ "$TARGET_SERVER_2x" = "true" ]; then
+if [ "$TARGET_SERVER_PRE_2_7" = "true" ]; then
     source "${repo_base}/src/SDK/Scripts/utils.sh"
 else
     source "${repo_base}/devops/scripts/utils.sh"
@@ -203,7 +207,7 @@ copyApplicationDirectory() {
     mkdir -p "$APPLICATION_DIRECTORY/SDK"
     cp -r "${repo_base}/src/SDK/Python" "${APPLICATION_DIRECTORY}/SDK/Python/"
 
-    if [ "$TARGET_SERVER_2x" = "true" ]; then
+    if [ "$TARGET_SERVER_PRE_2_7" = "true" ]; then
         mkdir -p "$APPLICATION_DIRECTORY/SDK"
         cp -r "${repo_base}/src/SDK/Scripts" "${APPLICATION_DIRECTORY}/SDK/Scripts/"
     else
