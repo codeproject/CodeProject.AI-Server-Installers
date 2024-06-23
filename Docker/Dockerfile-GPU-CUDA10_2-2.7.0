@@ -1,0 +1,326 @@
+﻿# CodeProject.AI Server
+#
+# Docker file for x86_64 GPU (CUDA 10.2) enabled image
+#
+# docker run --name CodeProject.AI-Server -d \
+#    -p 32168:32168 -p 32168:32168/udp \
+#   --mount type=bind,source=C:\ProgramData\CodeProject\AI\docker/data,target=/etc/codeproject/ai \
+#   --mount type=bind,source=C:\ProgramData\CodeProject\AI\docker/modules,target=/app/modules \
+#   --gpus all codeproject/ai-server:cuda10_2
+#
+# ASSUMPTION: This is being build from the root directory of the solution. This
+# is set in the build_docker script as the last param to the docker buildx command,
+# namely the "../..". This takes us from /Installers/Docker to /. and then this
+# image file proceeds
+#
+# BE AWARE: this cuDNN equipped build may lock up when two YOLO equipped modules
+# are installed on it. Without cuDNN, .NET ONNX runtime for GPU doesn't work.
+
+# INITIAL SETUP ===============================================================
+
+ARG CUDA_VERSION=10.2
+ARG CUDA_MAJOR=11
+ARG UBUNTU_VERSION=18.04
+ARG DOTNET_VERSION=8.0
+ARG CPAI_VERSION
+
+FROM cupy/nvidia-cuda:$CUDA_VERSION-runtime-ubuntu$UBUNTU_VERSION AS base
+
+WORKDIR /app
+
+# Replace the sudo command, which doesn't exist in this image, with a noop so
+# our scripts, which do contain sudo calls, will work
+RUN if ! type sudo 2>/dev/null; then echo "#!/bin/sh\n\${@}" > /usr/sbin/sudo; chmod +x /usr/sbin/sudo; fi
+
+# Environment vars ------------------------------------------------------------
+
+ENV ASPNETCORE_URLS=http://+:32168;http://+:5000
+
+# The simple log format is easier on my brain than json
+ENV LOGGING__CONSOLE__FORMATTERNAME=simple
+
+# Magic that was being done by the Microsoft ASP.NET base image that we aren't using anymore
+ENV DOTNET_RUNNING_IN_CONTAINER=true
+
+# noninteractive frontend means no prompts or questions are asked and whenever a call requires an
+# answer, the default will be used. Installs will be non-interrupted and so won't hang. The Python
+# installs, for instance, require this in this current environment
+ENV DEBIAN_FRONTEND noninteractive
+
+# Let the modules know CUDA support should be enabled
+ENV USE_CUDA=True
+ENV CPAI_MODULE_ENABLE_GPU=True
+
+# Let the (walled) World know which version they are running under
+ARG UBUNTU_VERSION=22.04
+ARG DOTNET_VERSION=8.0
+ARG CPAI_VERSION
+
+ENV CPAI_VERSION=$CPAI_VERSION
+ENV UBUNTU_VERSION=$UBUNTU_VERSION
+ENV DOTNET_VERSION=$DOTNET_VERSION
+
+# Setup the ports -------------------------------------------------------------
+
+EXPOSE 5000
+EXPOSE 32168/tcp
+EXPOSE 32168/udp
+
+# Add some labels to the container --------------------------------------------
+
+ARG VERSION
+ENV VERSION=${VERSION}
+
+LABEL "Application"="CodeProject.AI Server"
+LABEL "Publisher"="CodeProject Solutions Inc"
+LABEL "Version"="${CPAI_VERSION}"
+LABEL "Target"="x64 Ubuntu ${UBUNTU_VERSION} with CUDA ${CUDA_VERSION}"
+LABEL "Description"="CodeProject.AI Server with CUDA ${CUDA_VERSION}."
+
+# Install required libraries --------------------------------------------------
+
+# Install packages. In order:
+#
+# Required for SkiaSharp
+#   libfontconfig1
+# Required for System.Drawing
+#   libgdplus
+#   libjpeg-dev (maybe?)
+#   zlib1g-dev (maybe?)
+# Needed for opencv-python
+#   ffmpeg libsm6 libxext6 libc6-dev
+# So we can query glxinfo for GPU info
+#   mesa-utils
+# So we can install modules
+#   curl jq unzip wget rsync ca-certificates (ca-certificates so we can do --no-check-certificate, jq for json parsing)
+# This stops the "lsmod: not found" error
+#   kmod
+
+RUN apt-get update -y && apt-get install -y --no-install-recommends \
+    libfontconfig1  \
+    libgdiplus      \
+    libjpeg-dev     \
+    zlib1g-dev      \
+                    \
+    ffmpeg          \
+    libc6-dev       \
+    libsm6          \
+    libxext6        \
+                    \
+    mesa-utils      \
+                    \
+    ca-certificates \
+    curl            \
+    jq              \
+    rsync           \
+    unzip           \
+    wget            \
+                    \
+    psmisc          \
+                    \
+    kmod            > /dev/null
+
+    # Not needed. Probably.
+    # apt-utils
+
+
+# .NET ------------------------------------------------------------------------
+
+# Update packages and install NET
+RUN wget "https://packages.microsoft.com/config/ubuntu/$UBUNTU_VERSION/packages-microsoft-prod.deb" \
+         -O packages-microsoft-prod.deb --no-check-certificate                                   && \
+    dpkg -i packages-microsoft-prod.deb                                                          && \
+    rm packages-microsoft-prod.deb                                                               && \
+    apt update && apt install aspnetcore-runtime-$DOTNET_VERSION -y                      > /dev/null
+
+# Setup Python ----------------------------------------------------------------
+
+RUN apt-get install software-properties-common -y && add-apt-repository ppa:deadsnakes/ppa -y
+
+# This (currently) installs python3.8 as a dependency. It could be in the future
+# that a different version of python is installed instead, in which case we may
+# need to pin the installed python version.
+RUN apt-get install python3-pip -y && apt-get install python3-apt -y
+
+# Install Python3.8, distutils and dev tools (so packages can be built if needed)
+# and pip install so we can install python packages
+RUN apt-get install python3.8 -y && \
+    apt-get install python3.8-distutils -y && \
+    apt-get install python3.8-dev -y && \ 
+    python3.8 -m pip install --upgrade setuptools && \
+    python3.8 -m pip install --upgrade pip
+
+# install virtual env tools
+RUN apt install python3-pip python3-setuptools python3.8-venv -y && \
+    python3.8 -m pip install virtualenv virtualenvwrapper
+
+# Install Python3.9, distutils and dev tools (so packages can be built if needed)
+# and pip install so we can install python packages. We don't need this for the
+# built in modules, but we know we have downloadable modules that could use Python3.9
+# so we preempt the need.
+RUN apt-get install python3.9 -y && \
+   apt-get install python3.9-distutils -y && \
+   apt-get install python3.9-dev -y && \ 
+   python3.9 -m pip install --upgrade setuptools && \
+   python3.9 -m pip install --upgrade pip
+
+#RUN apt python3.9-venv -y
+RUN python3.9 -m pip install virtualenv virtualenvwrapper
+
+
+# Build the .NET source in a separate, discarable build container --------------
+
+FROM mcr.microsoft.com/dotnet/sdk:$DOTNET_VERSION AS build
+
+# A new image so we need to re-declare these
+# See https://docs.docker.com/engine/reference/builder/#scope
+ARG UBUNTU_VERSION=22.04
+ARG DOTNET_VERSION=8.0
+ARG CPAI_VERSION
+
+ENV CPAI_VERSION=$CPAI_VERSION
+ENV UBUNTU_VERSION=$UBUNTU_VERSION
+ENV DOTNET_VERSION=$DOTNET_VERSION
+
+# change directory to /src in the build image
+WORKDIR /src
+
+# Copy only the bits we need to for the .NET compilation steps
+COPY src/server/                        src/server/
+COPY src/SDK/                           src/SDK/
+COPY modules/ObjectDetectionYOLOv5Net/  src/modules/ObjectDetectionYOLOv5Net/
+
+# Build and publish Server
+WORKDIR "/src/src/server"
+RUN dotnet publish "Server.csproj" -c Release --no-self-contained --force -o /app/publish/server
+
+# Build and publish .NET modules, copy over docker-specific modulesettings, and 
+# then copy over models
+
+# NOTE: For modules that we're installing directly into the Docker image, we will
+#       use the /preinstalled-modules folder, not the /modules folder. This is
+#       because we are asking users to mount a folder on their host machine mapped
+#       to the /modules folder in this docker image. When they do that, anything
+#       in the /modules folder in this image disappears and is replaced by the 
+#       contents of the folder they mounted.
+#
+#       Two solutions:
+#         1. We install pre-installed modules in a different folder (this is what
+#            we're doing). The modules can still be uninstalled, and if
+#            re-installed, they will be installed in the modules directory as 
+#            "not preinstalled".
+#         2. We work out how to mount a folder in a way that makes the stuff we've
+#            already installed still be visible, while also allowing us to add
+#            installed modules to the folder. This  probably involves volumes
+
+WORKDIR "/src/src/modules/ObjectDetectionYOLOv5Net"
+RUN dotnet publish ObjectDetectionYOLOv5Net.csproj -c Release --no-self-contained /p:DefineConstants=GPU_CUDA \
+           --force -o /app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net/bin &&                       \
+    mv -f /app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net/bin/modulesettings.*                     \
+          /app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net/  &&                                     \
+    mv -f /app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net/modulesettings.docker.build.json         \
+          /app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net/modulesettings.docker.json > /dev/null
+
+
+# BEGIN REVIEW ================================================================
+
+# REVIEW: [Matthew] This section should go in the "FROM base AS final" part, not
+#                   here. We're copying the orig code to the build container and
+#                   then from build to final. Should just copy from code to final.
+
+# TODO: Grab these assets from our S3 bucket. Otherwise we have to ensure we've done a Dev setup on
+#       the local machine first, to ensure these files are present
+COPY [ "/src/modules/ObjectDetectionYOLOv5Net/assets", "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net/assets" ]
+COPY [ "/src/modules/ObjectDetectionYOLOv5Net/custom-models", "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net/custom-models" ]
+
+# And ensure required assets are copied over. 
+COPY [ "/src/modules/ObjectDetectionYOLOv5Net/explore.html", "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net" ]
+
+
+# Move non-compiled code (Python, script) into place --------------------------
+
+WORKDIR /src
+
+# We need some way to tell the server that for modules built into the Docker
+# image, the venv will be in one place, but for modules downloaded at runtime, 
+# the venv for the module will be in a different place.
+#
+# We do this by having a modulesettings.docker.build.json file that has the
+# settings for modules pre-installed into the image. this build.json file is 
+# copied into the image and renamed to just .docker.json at Docker build time,
+# and then when the module loads up, everything works.
+# 
+# If the module were downloaded and installed during runtime, then the usual 
+# modulesettings.linux.json would be used, and then modulesettings.docker.json
+# would then be loaded (if it existed). The modulesettings.docker.build.json 
+# file would be ignored.
+#
+# This enables us to have a modulesettings for inside a docker image, and module
+# settings for modules outside the docker image.
+
+COPY ["src/modules/FaceProcessing/", "/app/publish/preinstalled-modules/FaceProcessing"]
+RUN mv  -f /app/publish/preinstalled-modules/FaceProcessing/modulesettings.docker.build.json \
+           /app/publish/preinstalled-modules/FaceProcessing/modulesettings.docker.json &&    \
+    rm -rf /app/publish/preinstalled-modules/FaceProcessing/intelligencelayer/__pycache__ && \
+    rm -f  /app/publish/preinstalled-modules/FaceProcessing/*.zip                  \
+           /app/publish/preinstalled-modules/FaceProcessing/package.bat            \
+           /app/publish/preinstalled-modules/FaceProcessing/*.pyprog
+
+COPY ["src/modules/ObjectDetectionYOLOv5-3.1/", "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5-3.1"]
+RUN mv -f  /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-3.1/modulesettings.docker.build.jetson.json \
+           /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-3.1/modulesettings.docker.json &&           \
+    rm -rf /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-3.1/__pycache__ &&                          \
+    rm -f  /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-3.1/*.zip       \
+           /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-3.1/package.bat \
+           /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-3.1/*.pyprog
+
+# SDK and install scripts
+COPY ["src/SDK/Python",        "/app/publish/SDK/Python"]
+COPY ["src/server/install.sh", "/app/publish/server/install.sh"]
+COPY ["devops/scripts",        "/app/publish/devops/scripts"]
+COPY ["src/setup.sh",          "/app/publish/setup.sh"]
+
+# Cleanup / setup
+RUN rm -rf /app/publish/SDK/Python/__pycache__
+mkdir /app/publish/runtimes
+
+# END REVIEW ===================================================================
+
+
+# CREATE THE FINAL IMAGE ======================================================
+
+FROM base AS final
+
+# Note: UBUNTU_VERSION, DOTNET_VERSION and all ENV declared in 'base' are still here.
+
+# Move published server and modules into place --------------------------------
+
+WORKDIR /app
+COPY --from=build /app/publish .
+
+# Install required Python packages --------------------------------------------
+
+# See https://towardsdatascience.com/how-to-shrink-numpy-scipy-pandas-and-matplotlib-for-your-data-product-4ec8d7e86ee4
+# for a discussion on reducing PIP install sizes. That article is woefully out of date, with the
+# --compile and --global-option now deprecated, the CLFAGS to nothing, but the --no-cache-dir does help
+RUN python3.8 -m pip --no-cache-dir install \
+    -r /app/SDK/Python/requirements.txt \
+    -r /app/preinstalled-modules/FaceProcessing/requirements.linux.cuda10_2.txt \
+    -r /app/preinstalled-modules/ObjectDetectionYOLOv5-3.1/requirements.linux.cuda10_2.txt
+
+# Add folders for storing persisted user data and modules. This should be mapped
+# to a folder on the host. Typically C:\ProgramData\CodeProject\AI on Windows, 
+# /etc/codeproject/ai on Linux, and /Library/Application Support/CodeProject/AI 
+# on macOS.
+# We also make a .vscode folder so we have some bits in place if we wish to run
+# VSCode inside the container
+RUN mkdir --parents /etc/codeproject/ai                 && \
+    mkdir --parents /app/downloads/modules /app/modules && \
+    mkdir /app/.vscode
+
+COPY [ "/.vscode/launch.docker.json", "/app/.vscode/launch.json" ]
+COPY [ "/.vscode/tasks.docker.json",  "/app/.vscode/tasks.json" ]
+
+# Start the server
+WORKDIR /app/server
+ENTRYPOINT ["./CodeProject.AI.Server"]

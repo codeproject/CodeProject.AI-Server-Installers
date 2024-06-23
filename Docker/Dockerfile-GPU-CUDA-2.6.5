@@ -1,24 +1,32 @@
 ﻿# CodeProject.AI Server
 #
-# Docker file for x86_64 GPU (CUDA, no cuDNN) enabled image
+# Docker file for x86_64 GPU (CUDA and cuDNN) enabled image
+#
+# docker run --name CodeProject.AI-Server -d \
+#    -p 32168:32168 -p 32168:32168/udp \
+#   --mount type=bind,source=C:\ProgramData\CodeProject\AI\docker/data,target=/etc/codeproject/ai \
+#   --mount type=bind,source=C:\ProgramData\CodeProject\AI\docker/modules,target=/app/modules \
+#   --gpus all codeproject/ai-server:cuda11_7
 #
 # ASSUMPTION: This is being build from the root directory of the solution. This
 # is set in the build_docker script as the last param to the docker buildx command,
 # namely the "../..". This takes us from /Installers/Docker to /. and then this
 # image file proceeds
 #
-# WARNING: This image does not have cuDNN. .NET ONNX runtime for GPU doesn't
-# work on this image - it will fallback to CPU.
+# BE AWARE: this cuDNN equipped build may lock up when two YOLO equipped modules
+# are installed on it. Without cuDNN, .NET ONNX runtime for GPU doesn't work.
 
 # INITIAL SETUP ===============================================================
-ARG CUDAVERSION=11.7.1
-ARG CUDAVMAJOR=11
 
-FROM nvidia/cuda:$CUDAVERION-runtime-ubuntu22.04 AS base
-# Any of these will cause YOLO 6.2 to lockup. They don't add any perf gain
-# FROM nvidia/cuda:11.7.1-cudnn8-runtime-ubuntu22.04 AS base
-# FROM nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu22.04 AS base
-# FROM nvidia/cuda:12.0.1-cudnn8-runtime-ubuntu22.04 AS base
+# CUDA_VERSION = 11.7.1-cudnn8, 11.8.0-cudnn8, 12.0.1-cudnn8, 12.2.2-cudnn8
+# or cuDNN free: 11.7.1, 12.3.1
+ARG CUDA_VERSION=11.7.1-cudnn8
+ARG CUDA_MAJOR=11
+ARG UBUNTU_VERSION=22.04
+ARG DOTNET_VERSION=7.0
+ARG CPAI_VERSION
+
+FROM nvidia/cuda:$CUDA_VERSION-runtime-ubuntu$UBUNTU_VERSION AS base
 
 WORKDIR /app
 
@@ -43,6 +51,16 @@ ENV DEBIAN_FRONTEND noninteractive
 
 # Let the modules know CUDA support should be enabled
 ENV USE_CUDA=True
+ENV CPAI_MODULE_ENABLE_GPU=True
+
+# Let the (walled) World know which version they are running under
+ARG UBUNTU_VERSION=22.04
+ARG DOTNET_VERSION=7.0
+ARG CPAI_VERSION
+
+ENV CPAI_VERSION=$CPAI_VERSION
+ENV UBUNTU_VERSION=$UBUNTU_VERSION
+ENV DOTNET_VERSION=$DOTNET_VERSION
 
 # Setup the ports -------------------------------------------------------------
 
@@ -52,14 +70,11 @@ EXPOSE 32168/udp
 
 # Add some labels to the container --------------------------------------------
 
-ARG VERSION
-ENV VERSION=${VERSION}
-
 LABEL "Application"="CodeProject.AI Server"
 LABEL "Publisher"="CodeProject Solutions Inc"
-LABEL "Version"="${VERSION}"
-LABEL "Target"="Generic Linux x86_64 CPU"
-LABEL "Description"="CodeProject.AI Server with CPU-only processing."
+LABEL "Version"="${CPAI_VERSION}"
+LABEL "Target"="x64 Ubuntu ${UBUNTU_VERSION} with CUDA ${CUDA_VERSION}"
+LABEL "Description"="CodeProject.AI Server with CUDA ${CUDA_VERSION}."
 
 # Install required libraries --------------------------------------------------
 
@@ -108,14 +123,15 @@ RUN apt-get update -y && apt-get install -y --no-install-recommends \
     # apt-utils
 
 
-# .NET 7 ----------------------------------------------------------------------
+# .NET ------------------------------------------------------------------------
 
-# Update packages and install NET7
-RUN wget https://packages.microsoft.com/config/ubuntu/22.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb && \
-    dpkg -i packages-microsoft-prod.deb && \
-    rm packages-microsoft-prod.deb && \
-    apt update && \
-    apt install aspnetcore-runtime-7.0 -y
+# Update packages and install NET
+RUN wget "https://packages.microsoft.com/config/ubuntu/${UBUNTU_VERSION}/packages-microsoft-prod.deb" \
+         -O packages-microsoft-prod.deb --no-check-certificate                                   && \
+    dpkg -i packages-microsoft-prod.deb                                                          && \
+    rm packages-microsoft-prod.deb                                                               && \
+    apt update && apt install aspnetcore-runtime-$DOTNET_VERSION -y                      > /dev/null
+
 
 # Setup Python ----------------------------------------------------------------
 
@@ -155,8 +171,19 @@ RUN python3.9 -m pip install virtualenv virtualenvwrapper
 # Build the source ------------------------------------------------------------
 
 # Use a build container
-FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:$DOTNET_VERSION AS build
 
+# A new image so we need to re-declare these
+# See https://docs.docker.com/engine/reference/builder/#scope
+ARG UBUNTU_VERSION=22.04
+ARG DOTNET_VERSION=7.0
+ARG CPAI_VERSION
+
+ENV CPAI_VERSION=$CPAI_VERSION
+ENV UBUNTU_VERSION=$UBUNTU_VERSION
+ENV DOTNET_VERSION=$DOTNET_VERSION
+
+# change directory to /src in the build image
 WORKDIR /src
 
 # This copies everything, or tries to. If you have a file anywhere under /src
@@ -165,11 +192,11 @@ WORKDIR /src
 # COPY . .
 
 # Instead, let's copy over only that which we need.
-RUN mkdir src
-RUN mkdir src/modules
-RUN mkdir src/runtimes
+RUN mkdir src             && \
+    mkdir src/modules     && \
+    mkdir src/runtimes       > /dev/null
 
-#### Just copy the bits we need to comipile with NET 7.0 SDK ####
+#### Just copy the bits we need to compile with NET 7.0 SDK ####
 COPY src/server/                            src/server/
 COPY src/SDK/                               src/SDK/
 COPY src/modules/ObjectDetectionYOLOv5Net/  src/modules/ObjectDetectionYOLOv5Net/
@@ -231,13 +258,6 @@ COPY [ "/src/modules/ObjectDetectionYOLOv5Net/explore.html", "/app/publish/prein
 
 WORKDIR /src
 
-COPY ["src/SDK/Python", "/app/publish/SDK/Python"]
-COPY ["src/server/install.sh", "/app/publish/server/install.sh"]
-RUN rm -rf /app/publish/SDK/Python/__pycache__
-
-COPY ["src/SDK/Scripts", "/app/publish/SDK/Scripts"]
-COPY ["src/setup.sh", "/app/publish/setup.sh"]
-
 # We need some way to tell the server that for modules built into the Docker
 # image, the venv will be in one place, but for modules downloaded at runtime, 
 # the venv for the module will be in a different place.
@@ -265,6 +285,15 @@ RUN mv -f "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2/moduleset
 RUN rm -rf /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2/__pycache__ && \
     rm -f /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2/*.zip /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2/package.bat /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2/*.pyprog
 
+# SDK and install scripts
+COPY ["src/SDK/Python",        "/app/publish/SDK/Python"]
+COPY ["src/server/install.sh", "/app/publish/server/install.sh"]
+RUN rm -rf /app/publish/SDK/Python/__pycache__
+
+COPY ["src/SDK/Scripts", "/app/publish/SDK/Scripts"]
+COPY ["src/setup.sh",    "/app/publish/setup.sh"]
+
+
 # Move assets into place ------------------------------------------------------
 
 # We'll zip up the test images and move the zip to the server wwwroot directory 
@@ -283,6 +312,8 @@ RUN rm -rf /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2/__pycache
 
 FROM base AS final
 
+# Note: UBUNTU_VERSION, DOTNET_VERSION and all ENV declared in 'base' are still here.
+
 # Move published server and modules into place --------------------------------
 
 WORKDIR /app
@@ -295,24 +326,25 @@ COPY --from=build /app/publish .
 # --compile and --global-option now deprecated, the CLFAGS to nothing, but the --no-cache-dir does help
 
 RUN python3.8 -m pip --no-cache-dir install \
-    -r /app/SDK/Python/requirements.txt \
-    -r /app/preinstalled-modules/FaceProcessing/requirements.linux.cuda$CUDAMAJOR.txt \
-    -r /app/preinstalled-modules/ObjectDetectionYOLOv5-6.2/requirements.linux.cuda$CUDAMAJOR.txt
+    -r "/app/SDK/Python/requirements.txt" \
+    -r "/app/preinstalled-modules/FaceProcessing/requirements.linux.cuda${CUDA_MAJOR}.txt" \
+    -r "/app/preinstalled-modules/ObjectDetectionYOLOv5-6.2/requirements.linux.cuda${CUDA_MAJOR}.txt"
 
 RUN python3.9 -m pip --no-cache-dir install \
     -r /app/SDK/Python/requirements.txt 
 
-# Add folder for storing persisted user data. This should be mapped to a folder
-# on the host
-RUN mkdir --parents /etc/codeproject/ai
+# Add folders for storing persisted user data and modules. This should be mapped
+# to a folder on the host. Typically C:\ProgramData\CodeProject\AI on Windows, 
+# /etc/codeproject/ai on Linux, and /Library/Application Support/CodeProject/AI 
+# on macOS.
+# We also make a .vscode folder so we have some bits in place if we wish to run
+# VSCode inside the container
+RUN mkdir --parents "/etc/codeproject/ai"                   && \
+    mkdir --parents "/app/downloads/modules" "/app/modules" && \
+    mkdir "/app/.vscode"
 
-# Add folder for storing installation of additional modules.
-RUN mkdir --parents /app/downloads/modules /app/modules
-
-# For debugging the live container using VS Code
-RUN mkdir /app/.vscode
 COPY [ "/.vscode/launch.docker.json", "/app/.vscode/launch.json" ]
-COPY [ "/.vscode/tasks.docker.json", "/app/.vscode/tasks.json" ]
+COPY [ "/.vscode/tasks.docker.json",  "/app/.vscode/tasks.json" ]
 
 # Start the server
 WORKDIR /app/server

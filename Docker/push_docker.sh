@@ -14,7 +14,7 @@
 #
 
 # The location of the root of the server repo relative to this script
-repo_base="../../CodeProject.AI-Server"
+repo_base="../../CodeProject.AI-Server-Dev"
 
 # Sniff Parameters
 
@@ -61,9 +61,9 @@ echo "Pushing: ${images}"
 
 # Get Version: We're building for the current server version
 
-MAJOR=$(grep -o '"Major"\s*:\s*[^,}]*' "${"${repo_base}/src/server/version.json" | sed 's/.*: \(.*\)/\1/')
-MINOR=$(grep -o '"Minor"\s*:\s*[^,}]*' "${"${repo_base}/src/server/version.json" | sed 's/.*: \(.*\)/\1/')
-PATCH=$(grep -o '"Patch"\s*:\s*[^,}]*' "${"${repo_base}/src/server/version.json" | sed 's/.*: \(.*\)/\1/')
+MAJOR=$(grep -o '"Major"\s*:\s*[^,}]*' "${repo_base}/src/server/version.json" | sed 's/.*: \(.*\)/\1/')
+MINOR=$(grep -o '"Minor"\s*:\s*[^,}]*' "${repo_base}/src/server/version.json" | sed 's/.*: \(.*\)/\1/')
+PATCH=$(grep -o '"Patch"\s*:\s*[^,}]*' "${repo_base}/src/server/version.json" | sed 's/.*: \(.*\)/\1/')
 VERSION="${MAJOR}.${MINOR}.${PATCH}"
 
 
