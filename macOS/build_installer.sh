@@ -245,6 +245,7 @@ copyApplicationDirectory() {
     chmod -R 755 "${APPLICATION_DIRECTORY}"
 }
 
+
 # run the package builder
 function buildPackage() {
     log_info " 1. Application installer package building started."

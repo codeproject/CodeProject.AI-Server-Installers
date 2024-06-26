@@ -9,17 +9,9 @@
 
 # Configuration Variables and Parameters
 
-# Whether or not to create an installer which adds the service to systemd for auto-start
+# Whether or not to create an installer which adds the service to systemd for
+# auto-start (true) or as manual startup (false)
 ADD_TO_STARTUP="true"
-
-# We have two forms of the Docker images due to the base folder structure changing in 2.7.0
-if [[ "$MAJOR" -lt 2 ]] || [[ "$MAJOR" -eq 2 && "$MINOR" -lt 7 ]]; then
-    TARGET_SERVER_PRE_2_7=true
-    DOTNET_VERSION="7.0"
-else
-    TARGET_SERVER_PRE_2_7=false
-    DOTNET_VERSION="8.0"
-fi
 
 ### Directory names
 
@@ -32,18 +24,14 @@ INSTALLER_DIRNAME="installer"
 
 ### Parameters
 
-# This script
-SCRIPT_PATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
-
 # The location of the root of the server repo relative to this script
 repo_base="../../CodeProject.AI-Server-Dev"
+pushd "$repo_base" > /dev/null
+repo_base="$(pwd)"
+popd > /dev/null
 
-# Utilities
-if [ "$TARGET_SERVER_PRE_2_7" = "true" ]; then
-    source "${repo_base}/src/SDK/Scripts/utils.sh"
-else
-    source "${repo_base}/devops/scripts/utils.sh"
-fi
+# This script
+SCRIPT_PATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 
 # The path, relative to the root of the install, used to launch the application
 # eg "myapp" or "server/myserver". A shortcut to /usr/local/bin will be created
@@ -57,6 +45,22 @@ MAJOR=$(grep -o '"Major"\s*:\s*[^,}]*' "${repo_base}/src/server/version.json" | 
 MINOR=$(grep -o '"Minor"\s*:\s*[^,}]*' "${repo_base}/src/server/version.json" | sed 's/.*: \(.*\)/\1/')
 PATCH=$(grep -o '"Patch"\s*:\s*[^,}]*' "${repo_base}/src/server/version.json" | sed 's/.*: \(.*\)/\1/')
 VERSION="${MAJOR}.${MINOR}.${PATCH}"
+
+# We have two forms of the Docker images due to the base folder structure changing in 2.7.0
+if [[ "$MAJOR" -lt 2 ]] || [[ "$MAJOR" -eq 2 && "$MINOR" -lt 7 ]]; then
+    TARGET_SERVER_PRE_2_7=true
+    DOTNET_VERSION="7.0"
+else
+    TARGET_SERVER_PRE_2_7=false
+    DOTNET_VERSION="8.0"
+fi
+
+# Utilities
+if [ "$TARGET_SERVER_PRE_2_7" = "true" ]; then
+    source "${repo_base}/src/SDK/Scripts/utils.sh"
+else
+    source "${repo_base}/devops/scripts/utils.sh"
+fi
 
 # For places where we need no spaces (eg identifiers)
 PRODUCT_ID="${PRODUCT// /-}"
@@ -152,6 +156,7 @@ createBuildDirectory() {
 
 
 
+
 # Copy the templates into the build directory and adjust their values
 copyTemplatesDirectory(){
 
@@ -189,6 +194,10 @@ copyTemplatesDirectory(){
     sed -i -e "s/__PACKAGE_ID__/${PACKAGE_ID}/g"           "${BUILD_DIRECTORY}/DEBIAN/control"
     chmod 755 "${BUILD_DIRECTORY}/DEBIAN/control"
 }
+
+
+
+
 
 # Copy our application into the build directory (under /usr/bin/product in the build dir)
 copyApplicationDirectory() {
