@@ -8,7 +8,7 @@ PRODUCT_HOME="/usr/bin/__PRODUCT_DIRNAME__"
 # Whether to add the app to the startup items
 ADD_TO_STARTUP="__ADD_TO_STARTUP__"
 
-MIN_DOTNET_VERSION=7.0
+MIN_DOTNET_VERSION=__DOTNET_VERSION__
 
 # Utility functions
 

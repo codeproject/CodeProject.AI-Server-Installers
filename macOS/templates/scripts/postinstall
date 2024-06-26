@@ -13,6 +13,7 @@ SERVICE_TYPE="Agent"
 ARCH='x64'
 if [ $(uname -m) == 'arm64' ]; then ARCH='arm64'; fi
 
+DOTNET_VERSION="__DOTNET_VERSION__"
 
 echo "Post installation process started"
 
@@ -35,7 +36,7 @@ chmod a+w "/Library/__PRODUCT__/__VERSION__/setup.sh"
 chmod -R a+w "/Library/__PRODUCT__/__VERSION__/SDK/"
 
 echo "Ensuring .NET installed"
-bash "/Library/__PRODUCT__/__VERSION__/SDK/Scripts/dotnet-install.sh" --channel 7.0 --runtime aspnetcore
+bash "/Library/__PRODUCT__/__VERSION__/SDK/Scripts/dotnet-install.sh" --channel __DOTNET_VERSION__ --runtime aspnetcore
 
 echo "Adding application shortcut to /usr/local/bin"
 [ -d /usr/local/bin ] || mkdir -p /usr/local/bin

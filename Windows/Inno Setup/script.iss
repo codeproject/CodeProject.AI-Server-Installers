@@ -2,7 +2,9 @@
 
 ; Define some constants to make thing easier
 #define AppName "CodeProject.AI Server"
-#define AppVersion "2.6.4"
+#define AppVersion "2.7.0"
+#define DotNetVersion "8.0"
+#define DotNetHostingVersion "8.0.6"
 #define SetupExeName "CodeProject.AI-Server-win-x64"
 
 #define ServerRepoRelPath "..\..\..\CodeProject.AI-Server-Dev"
@@ -15,9 +17,12 @@
 #define DashboardURL      "http://localhost:32168"
 #define ExplorerURL       "http://localhost:32168/explorer.html"
 
-#define HostingBundleDownloadURL  "https://download.visualstudio.microsoft.com/download/pr/d489c5d0-4d0f-4622-ab93-b0f2a3e92eed/101a2fae29a291956d402377b941f401/dotnet-hosting-7.0.10-win.exe"
-#define HostingBundleInstallerExe "dotnet-hosting-7.0.10-win.exe"
+#define HostingBundleInstallerExe "dotnet-hosting-8.0.6-win.exe"
+#define HostingBundleDownloadURL  "https://download.visualstudio.microsoft.com/download/pr/751d3fcd-72db-4da2-b8d0-709c19442225/33cc492bde704bfd6d70a2b9109005a0/{#HostingBundleInstallerExe}"
+*** REVIEW: [Matthew] THIS NEEDS TO BE UPDATED ***
 #define HostingBundleSHA256       "70f69a7f9a2f97bb8769559b74caad14570cd3fe4f16c1633f87ef3f2adb6db6"
+*** REVIEW: [Matthew] Or we can use this SHA512 (which is up to date for version 8.0.6)
+#define HostingBundleSHA512       "01c4d06e0bb10e69581b67fba6618f003fdbdd6043bab4c58c47b7f8ac25e52ab7bd3e39404f733821fe6083e2462dbca20b2ff948a7abe8fbb4fd2f26956584"
 
 #define VCRedistInstallerExe      "vc_redist.x64.exe"
 ;Latest version. Hash will change when version changes
@@ -75,11 +80,19 @@ ArchitecturesInstallIn64BitMode=x64
 PrivilegesRequired=admin
 CloseApplications=no
 
+; To allow Inno to sign the installer (and uninstaller) you need to do this one-off setup:
 ; To sign the installer and uninstaller configure the signing tools in the Inno Setup Compiler
-; use the 'Tools/Configure Sign Tools ...' to create a Sign Tool
-; name    = EvSigning
-; content = signtool.exe sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /sha1 460f1f0bb84891b110aac4fd071b6a3c2931cc2b $f
-; ensure that "C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64" is in the path so SignTool.exe will be found
+; 1. Configure the signing tools in the Inno Setup Compiler using 'Tools/Configure Sign Tools ...'
+;    to create a Sign Tool:
+;       name    = EvSigning
+;       content = signtool.exe sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /sha1 460f1f0bb84891b110aac4fd071b6a3c2931cc2b $f
+; 2. Ensure that "C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64" is in the path so
+;    SignTool.exe will be found
+;
+; We're using a digicert EV Code Signing certificate that's stored on a USB drive. The USB drive's
+; driver makes it look like the certificate is installed in windows. So just specifying the
+; fingerprint is enough info for Windows to know where to get the certificate.
+;
 ; if you don't have the signing token, comment out the following line
 SignTool=EvSigning
 
@@ -90,7 +103,7 @@ Name: "custom";  Description: "Custom installation"; Flags: iscustom
 
 [Files]
 ; main program files
-Source: "{#ServerRepoRelPath}\src\server\bin\Release\net7.0\*"; Excludes:"*.development.json,"; DestDir: "{app}\Server\"; \
+Source: "{#ServerRepoRelPath}\src\server\bin\Release\net{#DotNetVersion}\*"; Excludes:"*.development.json,"; DestDir: "{app}\Server\"; \
 		Flags: ignoreversion recursesubdirs createallsubdirs
 
 Source: "{#ServerRepoRelPath}\src\setup.bat"; DestDir: "{app}"; 
@@ -103,15 +116,15 @@ Source: "{#ServerRepoRelPath}\src\SDK\Python\*"; Excludes:"*.pyc,*.pyproj,*.pypr
 Source: "{#ServerRepoRelPath}\src\SDK\Scripts\*"; Excludes:"*.sh,"; DestDir: "{app}\SDK\Scripts\"; \
 		Flags: ignoreversion recursesubdirs createallsubdirs
 
-Source: "{#ServerRepoRelPath}\src\SDK\Utilities\*"; Excludes:"*.sh,"; DestDir: "{app}\SDK\Utilities\"; \
+Source: "{#ServerRepoRelPath}\utils\*"; Excludes:"*.sh,"; DestDir: "{app}\SDK\Utilities\"; \
 		Flags: ignoreversion
 
-Source: "{#ServerRepoRelPath}\src\SDK\Utilities\ParseJSON\bin\Release\net7.0\*"; Excludes:"*.pdb,"; DestDir: "{app}\SDK\Utilities\ParseJSON\"; \
+Source: "{#ServerRepoRelPath}\utils\ParseJSON\bin\Release\net{#DotNetVersion}\*"; Excludes:"*.pdb,"; DestDir: "{app}\utils\ParseJSON\"; \
 		Flags: ignoreversion
 
 ; No longer including the demo in the Windows installer
 ; demo files
-; Source: "{#ServerRepoRelPath}\demos\clients\dotNet\CodeProject.AI.Explorer\bin\Release\net7.0-windows\*"; Excludes:"*.development.json,"; \
+; Source: "{#ServerRepoRelPath}\demos\clients\dotNet\CodeProject.AI.Explorer\bin\Release\net{#DotNetVersion}-windows\*"; Excludes:"*.development.json,"; \
 		 DestDir: "{app}\Demo\"; Flags: ignoreversion recursesubdirs createallsubdirs; Components: demo
 
 ; No longer including the full test data
@@ -193,7 +206,7 @@ var
   checkDir: string;
 
 begin
-  checkDir := ExpandConstant('{commonpf}\dotnet\host\fxr\7.0.*');
+  checkDir := ExpandConstant('{commonpf}\dotnet\host\fxr\{#DotNetVersion}.*');
   Result := FindFirst(checkDir, findRec);
 
   if Result then

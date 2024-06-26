@@ -14,9 +14,11 @@ ADD_TO_STARTUP="true"
 
 # We have two forms of the Docker images due to the base folder structure changing in 2.7.0
 if [[ "$MAJOR" -lt 2 ]] || [[ "$MAJOR" -eq 2 && "$MINOR" -lt 7 ]]; then
-    TARGET_SERVER_PRE_2_7=false
-else
     TARGET_SERVER_PRE_2_7=true
+    DOTNET_VERSION="7.0"
+else
+    TARGET_SERVER_PRE_2_7=false
+    DOTNET_VERSION="8.0"
 fi
 
 ### Directory names
@@ -165,6 +167,7 @@ copyTemplatesDirectory(){
 
     log_info "Configuring post-install script"
     sed -i -e "s/__VERSION__/${VERSION}/g"                 "${BUILD_DIRECTORY}/DEBIAN/postinst"
+    sed -i -e "s/__DOTNET_VERSION__/${DOTNET_VERSION}/g"   "${BUILD_DIRECTORY}/DEBIAN/postinst"
     sed -i -e "s/__PRODUCT__/${PRODUCT}/g"                 "${BUILD_DIRECTORY}/DEBIAN/postinst"
     sed -i -e "s/__PACKAGE_ID__/${PACKAGE_ID}/g"           "${BUILD_DIRECTORY}/DEBIAN/postinst"
     sed -i -e "s/__PRODUCT_DIRNAME__/${PRODUCT_DIRNAME}/g" "${BUILD_DIRECTORY}/DEBIAN/postinst"
@@ -201,7 +204,7 @@ copyApplicationDirectory() {
     log_info "Copying application into build directory"
 
     mkdir -p "${APPLICATION_DIRECTORY}/server"
-    cp -r "${repo_base}/src/server/bin/Release/net7.0/." "${APPLICATION_DIRECTORY}/server/"
+    cp -r "${repo_base}/src/server/bin/Release/net${DOTNET_VERSION}/." "${APPLICATION_DIRECTORY}/server/"
     cp "${repo_base}/LICENCE.md" "${APPLICATION_DIRECTORY}"
 
     mkdir -p "$APPLICATION_DIRECTORY/SDK"

@@ -18,6 +18,10 @@ copy .\build\bin\Release\CodeProject.AI.Module.SDK.1.0.2.nupkg .
 rmdir /S /Q .\build
 
 echo Signing Nuget
+REM We're using a digicert EV Code Signing certificate that's stored on a USB
+REM drive. The USB drive's driver makes it look like the certificate is installed
+REM in windows. So just specifying the fingerprint is enough info for Windows to
+REM know where to get the certificate.
 dotnet nuget sign CodeProject.AI.Module.SDK.1.0.2.nupkg 
        --certificate-fingerprint 460f1f0bb84891b110aac4fd071b6a3c2931cc2b ^
        --timestamper http://timestamp.digicert.com

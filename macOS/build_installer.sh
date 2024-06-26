@@ -13,13 +13,6 @@
 # auto-start (true) or as a login item (false)
 ADD_TO_STARTUP="false"
 
-# We have two forms of the Docker images due to the base folder structure changing in 2.7.0
-if [[ "$MAJOR" -lt 2 ]] || [[ "$MAJOR" -eq 2 && "$MINOR" -lt 7 ]]; then
-    TARGET_SERVER_PRE_2_7=false
-else
-    TARGET_SERVER_PRE_2_7=true
-fi
-
 ### Directory names
 
 BUILD_DIRNAME="build"
@@ -40,15 +33,6 @@ popd > /dev/null
 # This script
 SCRIPT_PATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 
-
-
-# Utilities
-if [ "$TARGET_SERVER_PRE_2_7" = true ]; then
-    source "${repo_base}/src/SDK/Scripts/utils.sh"
-else
-    source "${repo_base}/devops/scripts/utils.sh"
-fi
-
 # The path, relative to the root of the install, used to launch the application
 # eg "myapp" or "server/myserver". A shortcut to /usr/local/bin will be created
 APPLICATION_FILE_PATH="server/CodeProject.AI.Server.dll"
@@ -61,6 +45,22 @@ MAJOR=$(grep -o '"Major"\s*:\s*[^,}]*' "${repo_base}/src/server/version.json" | 
 MINOR=$(grep -o '"Minor"\s*:\s*[^,}]*' "${repo_base}/src/server/version.json" | sed 's/.*: \(.*\)/\1/')
 PATCH=$(grep -o '"Patch"\s*:\s*[^,}]*' "${repo_base}/src/server/version.json" | sed 's/.*: \(.*\)/\1/')
 VERSION="${MAJOR}.${MINOR}.${PATCH}"
+
+# We have two forms of the Docker images due to the base folder structure changing in 2.7.0
+if [[ "$MAJOR" -lt 2 ]] || [[ "$MAJOR" -eq 2 && "$MINOR" -lt 7 ]]; then
+    TARGET_SERVER_PRE_2_7=true
+    DOTNET_VERSION="7.0"
+else
+    TARGET_SERVER_PRE_2_7=false
+    DOTNET_VERSION="8.0"
+fi
+
+# Utilities
+if [ "$TARGET_SERVER_PRE_2_7" = true ]; then
+    source "${repo_base}/src/SDK/Scripts/utils.sh"
+else
+    source "${repo_base}/devops/scripts/utils.sh"
+fi
 
 # For places where we need no spaces (eg identifiers)
 PRODUCT_ID="${PRODUCT// /-}"
@@ -175,6 +175,7 @@ copyTemplatesDirectory(){
 
     log_info "Configuring postinstall script"
     sed -i '' -e "s/__VERSION__/${VERSION}/g"                 "${BUILD_DIRECTORY}/${TEMPLATES_DEST_DIRNAME}/scripts/postinstall"
+    sed -i '' -e "s/__DOTNET_VERSION__/${DOTNET_VERSION}/g"   "${BUILD_DIRECTORY}/${TEMPLATES_DEST_DIRNAME}/scripts/postinstall"
     sed -i '' -e "s/__PRODUCT__/${PRODUCT}/g"                 "${BUILD_DIRECTORY}/${TEMPLATES_DEST_DIRNAME}/scripts/postinstall"
     sed -i '' -e "s/__PRODUCT_DIRNAME__/${PRODUCT_DIRNAME}/g" "${BUILD_DIRECTORY}/${TEMPLATES_DEST_DIRNAME}/scripts/postinstall"
     sed -i '' -e "s/__SERVICE_ID__/${SERVICE_ID}/g"           "${BUILD_DIRECTORY}/${TEMPLATES_DEST_DIRNAME}/scripts/postinstall"
@@ -212,7 +213,7 @@ copyApplicationDirectory() {
     log_info "Copying application into build directory"
 
     mkdir -p "${APPLICATION_DIRECTORY}/server"
-    cp -r "${repo_base}/src/server/bin/Release/net7.0/." "${APPLICATION_DIRECTORY}/server/"
+    cp -r "${repo_base}/src/server/bin/Release/net${DOTNET_VERSION}/." "${APPLICATION_DIRECTORY}/server/"
     cp "${repo_base}/LICENCE.md" "${APPLICATION_DIRECTORY}"
 
     mkdir -p "$APPLICATION_DIRECTORY/SDK"
