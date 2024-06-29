@@ -21,6 +21,7 @@
 #define HostingBundleDownloadURL  "https://download.visualstudio.microsoft.com/download/pr/751d3fcd-72db-4da2-b8d0-709c19442225/33cc492bde704bfd6d70a2b9109005a0/{#HostingBundleInstallerExe}"
 *** REVIEW: [Matthew] THIS NEEDS TO BE UPDATED ***
 #define HostingBundleSHA256       "70f69a7f9a2f97bb8769559b74caad14570cd3fe4f16c1633f87ef3f2adb6db6"
+define HostingBundleSHA256       "2ac38c2aab8a55e50a2d761fead1320047d2ad5fd22c2f44316aceb094505ec2"
 *** REVIEW: [Matthew] Or we can use this SHA512 (which is up to date for version 8.0.6)
 #define HostingBundleSHA512       "01c4d06e0bb10e69581b67fba6618f003fdbdd6043bab4c58c47b7f8ac25e52ab7bd3e39404f733821fe6083e2462dbca20b2ff948a7abe8fbb4fd2f26956584"
 
