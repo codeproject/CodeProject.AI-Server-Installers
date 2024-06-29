@@ -207,7 +207,7 @@ copyApplicationDirectory() {
 
     # 1. Build server
     log_info "Building Application"
-    dotnet build ${repo_base}/src/server /property:GenerateFullPaths=true /consoleloggerparameters:NoSummary -c Release > /dev/null 2>&1
+    dotnet build ${repo_base}/src/server /property:GenerateFullPaths=true /consoleloggerparameters:NoSummary -c Release > /dev/null
 
     # 2. Move files to the Staging area
     log_info "Copying application into build directory"
