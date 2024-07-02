@@ -71,13 +71,16 @@ UninstallDisplayIcon=.\assets\favicon.ico
 AllowNoIcons=yes
 Compression=lzma2
 SolidCompression=yes
+
 ; "ArchitecturesAllowed=x64" specifies that Setup cannot run on
 ; anything but x64.
 ArchitecturesAllowed=x64
+
 ; "ArchitecturesInstallIn64BitMode=x64" requests that the install be
 ; done in "64-bit mode" on x64, meaning it should use the native
 ; 64-bit Program Files directory and the 64-bit view of the registry.
 ArchitecturesInstallIn64BitMode=x64
+
 PrivilegesRequired=admin
 CloseApplications=no
 
@@ -103,39 +106,35 @@ Name: "compact"; Description: "Compact installation"
 Name: "custom";  Description: "Custom installation"; Flags: iscustom
 
 [Files]
-; main program files
+; The core CodeProject.AI Server application
 Source: "{#ServerRepoRelPath}\src\server\bin\Release\net{#DotNetVersion}\*"; Excludes:"*.development.json,"; DestDir: "{app}\Server\"; \
 		Flags: ignoreversion recursesubdirs createallsubdirs
 
-Source: "{#ServerRepoRelPath}\src\setup.bat"; DestDir: "{app}"; 
+; We have a setup script for the server, but it's not used (and probably won't be)
+;Source: "{#ServerRepoRelPath}\src\server\install.bat"; DestDir: "{app}\server\"
 
+; Python SDK for modules (No longer necessary since new modules use PiPy to get the SDK)
 Source: "{#ServerRepoRelPath}\src\SDK\Python\*"; Excludes:"*.pyc,*.pyproj,*.pyproj.user"; DestDir: "{app}\SDK\Python\"; \
 		Flags: ignoreversion recursesubdirs createallsubdirs
 
-;Source: "{#ServerRepoRelPath}\src\server\install.bat"; DestDir: "{app}\server\"
+; Setup script for modules and SDK
+Source: "{#ServerRepoRelPath}\src\setup.bat"; DestDir: "{app}"; 
 
-Source: "{#ServerRepoRelPath}\src\SDK\Scripts\*"; Excludes:"*.sh,"; DestDir: "{app}\SDK\Scripts\"; \
+; General scripts and utilities to help with setup
+Source: "{#ServerRepoRelPath}\devops\scripts\*"; Excludes:"*.sh,"; DestDir: "{app}\devops\scripts\"; \
 		Flags: ignoreversion recursesubdirs createallsubdirs
 
-Source: "{#ServerRepoRelPath}\utils\*"; Excludes:"*.sh,"; DestDir: "{app}\SDK\Utilities\"; \
-		Flags: ignoreversion
-
+; General utilities used in setup. However: we'll copy only what we need, below
+;Source: "{#ServerRepoRelPath}\utils\*"; Excludes:"*.sh,"; DestDir: "{app}\utils\"; \
+;		Flags: ignoreversion
 Source: "{#ServerRepoRelPath}\utils\ParseJSON\bin\Release\net{#DotNetVersion}\*"; Excludes:"*.pdb,"; DestDir: "{app}\utils\ParseJSON\"; \
 		Flags: ignoreversion
 
-; No longer including the demo in the Windows installer
-; demo files
-; Source: "{#ServerRepoRelPath}\demos\clients\dotNet\CodeProject.AI.Explorer\bin\Release\net{#DotNetVersion}-windows\*"; Excludes:"*.development.json,"; \
-		 DestDir: "{app}\Demo\"; Flags: ignoreversion recursesubdirs createallsubdirs; Components: demo
-
 ; No longer including the full test data
-; test data files
+; Test data files
 ; Source: "{#ServerRepoRelPath}\demos\TestData\*"; DestDir: "{app}\TestData\"; Flags: ignoreversion recursesubdirs createallsubdirs; \
-		 Components: testdata
+;		 Components: testdata
 
-; Modules now have their own test folder which contains a test image.
-; Source: "{#ServerRepoRelPath}\demos\TestData\Objects\office-presentation.jpg"; DestDir: "{app}\TestData\"
-; Source: "{#ServerRepoRelPath}\demos\TestData\License plates\toyota-with-plate.jpg"; DestDir: "{app}\TestData\"
 
 [Icons]
 Name: "{group}\Docs - Overview";                  Filename: "{#AboutURL}"; 
