@@ -3,7 +3,7 @@
 set starttime=%time%
 
 REM The location of the root of the server repo relative to this script
-set repo_base=..\..\..\CodeProject.AI-Server
+set repo_base=..\..\..\CodeProject.AI-Server-Dev
 
 :: make sure that the code is up to date
 echo.
