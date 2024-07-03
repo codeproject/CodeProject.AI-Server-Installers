@@ -12,11 +12,13 @@ echo Rebuilding the solution ...
 echo ---------------------------------------------------------------------------
 
 :: go to ParseJSON utility and build
-pushd %repo_base%\src\SDK\Utilities\ParseJSON
+echo Building ParseJSON utility
+pushd %repo_base%\utils\ParseJSON
 dotnet build -c Release --no-incremental --force
 popd
 
 :: go to the server and build
+
 pushd %repo_base%\src\server
 dotnet build -c Release --no-incremental --force
 popd
