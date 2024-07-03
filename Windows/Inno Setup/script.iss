@@ -101,7 +101,7 @@ CloseApplications=no
 ; where to get the certificate.
 ;
 ; if you don't have the signing token, comment out the following line
-; SignTool=EvSigning
+SignTool=EvSigning
 
 [Types]
 Name: "full";    Description: "Full installation"
