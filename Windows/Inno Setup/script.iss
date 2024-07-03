@@ -72,33 +72,36 @@ AllowNoIcons=yes
 Compression=lzma2
 SolidCompression=yes
 
-; "ArchitecturesAllowed=x64" specifies that Setup cannot run on
-; anything but x64.
-ArchitecturesAllowed=x64
+; "ArchitecturesAllowed=x64" specifies that Setup cannot run on anything but x64.
+ArchitecturesAllowed=x64os
 
-; "ArchitecturesInstallIn64BitMode=x64" requests that the install be
-; done in "64-bit mode" on x64, meaning it should use the native
-; 64-bit Program Files directory and the 64-bit view of the registry.
+; "ArchitecturesInstallIn64BitMode=x64" requests that the install be done in 
+; "64-bit mode" on x64, meaning it should use the native 64-bit Program Files
+; directory and the 64-bit view of the registry.
 ArchitecturesInstallIn64BitMode=x64
 
 PrivilegesRequired=admin
 CloseApplications=no
 
-; To allow Inno to sign the installer (and uninstaller) you need to do this one-off setup:
-; To sign the installer and uninstaller configure the signing tools in the Inno Setup Compiler
-; 1. Configure the signing tools in the Inno Setup Compiler using 'Tools/Configure Sign Tools ...'
-;    to create a Sign Tool:
-;       name    = EvSigning
-;       content = signtool.exe sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /sha1 460f1f0bb84891b110aac4fd071b6a3c2931cc2b $f
-; 2. Ensure that "C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64" is in the path so
-;    SignTool.exe will be found
+; To allow Inno to sign the installer (and uninstaller) you need to do this one-
+; off setup:
 ;
-; We're using a digicert EV Code Signing certificate that's stored on a USB drive. The USB drive's
-; driver makes it look like the certificate is installed in windows. So just specifying the
-; fingerprint is enough info for Windows to know where to get the certificate.
+;  To sign the installer and uninstaller configure the signing tools in the Inno 
+;  Setup Compiler
+;    1. Configure the signing tools in the Inno Setup Compiler using 
+;       'Tools/Configure Sign Tools ...' to create a Sign Tool:
+;         name    = EvSigning
+;         content = signtool.exe sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /sha1 460f1f0bb84891b110aac4fd071b6a3c2931cc2b $f
+;    2. Ensure that "C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64"
+;       is in the path so SignTool.exe will be found
+;
+; We're using a digicert EV Code Signing certificate that's stored on a USB drive.
+; The USB drive's driver makes it look like the certificate is installed in 
+; windows. So just specifying the fingerprint is enough info for Windows to know
+; where to get the certificate.
 ;
 ; if you don't have the signing token, comment out the following line
-SignTool=EvSigning
+; SignTool=EvSigning
 
 [Types]
 Name: "full";    Description: "Full installation"
@@ -301,8 +304,8 @@ begin
   InitModules();
   SelectModulesPage := CreateInputOptionPage(wpSelectTasks, 'Add Modules',
     'Check the Modules you want to add to your new or existing installation. Existing modules will only be removed if you checked the box on the previous page.',
-	'When you have selected all the Modules you want to add, click Next',
-	False, false)
+    'When you have selected all the Modules you want to add, click Next',
+	  False, false)
 
   checkboxList := SelectModulesPage.CheckListBox;
   num_modules := 0;
@@ -315,7 +318,8 @@ begin
     end
     else
     begin
-      checkboxList.AddCheckBox(Modules[i].title, Modules[i].module_id, 1, Modules[i].isChecked, True, False, True, nil);
+      checkboxList.AddCheckBox(Modules[i].title, Modules[i].module_id, 1, Modules[i].isChecked,
+                               True, False, True, nil);
       num_modules := num_modules + 1;
     end;
   end;
@@ -332,7 +336,7 @@ var
 
 begin
   FileName := ExpandConstant('{app}\Server\installmodules.json');
-  FileDir := ExpandConstant('{app}\Server\');
+  FileDir  := ExpandConstant('{app}\Server\');
   Log(FileName);
 
   output := '{' + #13#10;
@@ -348,7 +352,9 @@ begin
     begin
       Log(checkboxList.ItemCaption[i-1]);
       if (not FirstItem) then
-      output  := output + '; ';
+      begin
+        output  := output + '; ';
+      end;
       FirstItem := False;
       output := output + checkboxList.ItemSubItem[i-1];
     end;
@@ -359,15 +365,17 @@ begin
   output := output + '}' + #13#10;
   
   Log(output);
+
   ForceDirectories(FileDir);
   SaveStringToFile(FileName, output, False);
+
   Result := True;
 end;
 
-
 procedure InitializeWizard;
 begin
-  DownloadPage := CreateDownloadPage(SetupMessage(msgWizardPreparing), SetupMessage(msgPreparingDesc), @OnDownloadProgress);
+  DownloadPage := CreateDownloadPage(SetupMessage(msgWizardPreparing), SetupMessage(msgPreparingDesc), 
+                                     @OnDownloadProgress);
   CreateModuleSelectPage();
 end;
 
@@ -385,48 +393,57 @@ begin
 
   if (InstallHostingBundle or InstallVCRedist) then 
   begin
-	hostingBundleInstaller := ExpandConstant('{tmp}\{#HostingBundleInstallerExe}');
-	vcRedistInstaller := ExpandConstant('{tmp}\{#VCRedistInstallerExe}');
+    hostingBundleInstaller := ExpandConstant('{tmp}\{#HostingBundleInstallerExe}');
+    vcRedistInstaller      := ExpandConstant('{tmp}\{#VCRedistInstallerExe}');
 
-	DownloadPage.Clear;
+    DownloadPage.Clear;
 
-	// Use AddEx to specify a username and password
-	if InstallHostingBundle then
-	  DownloadPage.Add('{#HostingBundleDownloadURL}', '{#HostingBundleInstallerExe}', '{#HostingBundleSHA256}');
+    // Use AddEx to specify a username and password
+    if InstallHostingBundle then
+      DownloadPage.Add('{#HostingBundleDownloadURL}', '{#HostingBundleInstallerExe}', '{#HostingBundleSHA256}');
 
-	if InstallVCRedist then
-	  DownloadPage.Add('{#VCRedistDownloadURL}', '{#VCRedistInstallerExe}', '{#VCRedistSHA256}');
+    if InstallVCRedist then
+      DownloadPage.Add('{#VCRedistDownloadURL}', '{#VCRedistInstallerExe}', '{#VCRedistSHA256}');
 
-	DownloadPage.Show;
-	try
-	  try
-      DownloadPage.Download; // This downloads the files to {tmp}
+    DownloadPage.Show;
 
-      if InstallHostingBundle then
-      begin
-        Exec(hostingBundleInstaller, '/install /quiet /norestart', '', SW_HIDE, ewWaitUntilTerminated, iResultCode)
-        DeleteFile(hostingBundleInstaller);
-      end;
-      
-      if InstallVCRedist then
-      begin
-        Exec(vcRedistInstaller, '/install /quiet /norestart', '', SW_HIDE, ewWaitUntilTerminated, iResultCode)
-        DeleteFile(vcRedistInstaller);
-      end;
+    try     // Outer 'try' so we have a 'finally' clause to always hide the windows
 
-      Result := True;
+      try   // Inner 'try' to handle issues (feels hack-ey)
+        DownloadPage.Download; // This downloads the files to {tmp}
+
+        if InstallHostingBundle then
+        begin
+          Exec(hostingBundleInstaller, '/install /quiet /norestart', '', SW_HIDE, ewWaitUntilTerminated, iResultCode)
+          DeleteFile(hostingBundleInstaller);
+        end;
+        
+        if InstallVCRedist then
+        begin
+          Exec(vcRedistInstaller, '/install /quiet /norestart', '', SW_HIDE, ewWaitUntilTerminated, iResultCode)
+          DeleteFile(vcRedistInstaller);
+        end;
+
+        Result := True;
+
       except
-      if DownloadPage.AbortedByUser then
-        Log('Aborted by user.')
-      else
-        SuppressibleMsgBox(AddPeriod(GetExceptionMessage), mbCriticalError, MB_OK, IDOK);
-      Result := False;
-	  end;
+        if DownloadPage.AbortedByUser then
+          Log('Aborted by user.')
+        else
+          SuppressibleMsgBox(AddPeriod(GetExceptionMessage), mbCriticalError, MB_OK, IDOK);
+
+        Result := False;
+      end;
+
     finally
       DownloadPage.Hide;
     end;
-  end else
+
+  end 
+  else
+  begin
 	  Result := True;
+  end;
 end;
 
 function NextButtonClick(CurPageID: Integer): Boolean;
