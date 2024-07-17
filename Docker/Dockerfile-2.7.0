@@ -329,8 +329,8 @@ COPY ["devops/scripts",        "/app/publish/devops/scripts"]
 COPY ["src/setup.sh",          "/app/publish/setup.sh"]
 
 # Cleanup / setup
-RUN rm -rf /app/publish/SDK/Python/__pycache__
-mkdir /app/publish/runtimes
+RUN rm -rf /app/publish/SDK/Python/__pycache__ \
+    mkdir /app/publish/runtimes
 
 # END REVIEW ===================================================================
 
