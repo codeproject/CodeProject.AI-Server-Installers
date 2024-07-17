@@ -14,7 +14,7 @@
 setlocal enabledelayedexpansion
 
 REM The location of the root of the server repo relative to this script
-set repo_base=..\..\CodeProject.AI-Server-Dev
+set repo_base=..\..
 
 REM Sniff Parameters
 
@@ -60,17 +60,17 @@ if /i "!do_all!" == "true" (
 )
 
 REM Get Version: We're building for the current server version
-for /f "usebackq tokens=2 delims=:," %%a in (`findstr /I /R /C:"\"Major\"[^^{]*$" "!repo_base!\src\server\version.json"`) do (
+for /f "usebackq tokens=2 delims=:," %%a in (`findstr /I /R /C:"\"Major\"[^^{]*$" "!repo_base!\CodeProject.AI-Server-Dev\src\server\version.json"`) do (
     set "major=%%a"
     set major=!major:"=!
     set major=!major: =!
 )
-for /f "usebackq tokens=2 delims=:," %%a in (`findstr /I /R /C:"\"Minor\"[^^{]*$" "!repo_base!\src\server\version.json"`) do (
+for /f "usebackq tokens=2 delims=:," %%a in (`findstr /I /R /C:"\"Minor\"[^^{]*$" "!repo_base!\CodeProject.AI-Server-Dev\src\server\version.json"`) do (
     set "minor=%%a"
     set minor=!minor:"=!
     set minor=!minor: =!
 )
-for /f "usebackq tokens=2 delims=:," %%a in (`findstr /I /R /C:"\"Patch\"[^^{]*$" "!repo_base!\src\server\version.json"`) do (
+for /f "usebackq tokens=2 delims=:," %%a in (`findstr /I /R /C:"\"Patch\"[^^{]*$" "!repo_base!\CodeProject.AI-Server-Dev\src\server\version.json"`) do (
     set "patch=%%a"
     set patch=!patch:"=!
     set patch=!patch: =!
