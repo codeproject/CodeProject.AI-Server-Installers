@@ -45,7 +45,7 @@ ENV DOTNET_RUNNING_IN_CONTAINER=true
 # noninteractive frontend means no prompts or questions are asked and whenever a call requires an
 # answer, the default will be used. Installs will be non-interrupted and so won't hang. The Python
 # installs, for instance, require this in this current environment
-ENV DEBIAN_FRONTEND noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
 
 # Let the modules know CUDA support should be enabled
 ENV USE_CUDA=True
@@ -186,10 +186,10 @@ ENV DOTNET_VERSION=$DOTNET_VERSION
 WORKDIR /src
 
 # Copy only the bits we need to for the .NET compilation steps
-COPY src/server/                        src/server/
-COPY src/SDK/                           src/SDK/
-COPY src/scripts/                       src/scripts/
-COPY modules/ObjectDetectionYOLOv5Net/  src/modules/ObjectDetectionYOLOv5Net/
+COPY /CodeProject.AI-Server-Dev/src/server/                        src/server/
+COPY /CodeProject.AI-Server-Dev/src/SDK/                           src/SDK/
+COPY /CodeProject.AI-Server-Dev/src/scripts/                       src/scripts/
+COPY /CodeProject.AI-Server-Dev/modules/ObjectDetectionYOLOv5Net/  modules/ObjectDetectionYOLOv5Net/
 
 # Build and publish Server
 WORKDIR "/src/src/server"
@@ -214,7 +214,7 @@ RUN dotnet publish "Server.csproj" -c Release --no-self-contained --force -o /ap
 #            already installed still be visible, while also allowing us to add
 #            installed modules to the folder. This  probably involves volumes
 
-WORKDIR "/src/src/modules/ObjectDetectionYOLOv5Net"
+WORKDIR "/src/modules/ObjectDetectionYOLOv5Net"
 RUN dotnet publish ObjectDetectionYOLOv5Net.csproj -c Release --no-self-contained /p:DefineConstants=GPU_CUDA \
            --force -o /app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net/bin &&                       \
     mv -f /app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net/bin/modulesettings.*                     \
@@ -231,11 +231,11 @@ RUN dotnet publish ObjectDetectionYOLOv5Net.csproj -c Release --no-self-containe
 
 # TODO: Grab these assets from our S3 bucket. Otherwise we have to ensure we've done a Dev setup on
 #       the local machine first, to ensure these files are present
-COPY [ "/src/modules/ObjectDetectionYOLOv5Net/assets", "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net/assets" ]
-COPY [ "/src/modules/ObjectDetectionYOLOv5Net/custom-models", "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net/custom-models" ]
+COPY [ "/CodeProject.AI-Server-Dev/modules/ObjectDetectionYOLOv5Net/assets",        "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net/assets" ]
+COPY [ "/CodeProject.AI-Server-Dev/modules/ObjectDetectionYOLOv5Net/custom-models", "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net/custom-models" ]
 
 # And ensure required assets are copied over. 
-COPY [ "/src/modules/ObjectDetectionYOLOv5Net/explore.html", "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net" ]
+COPY [ "/CodeProject.AI-Server-Dev/modules/ObjectDetectionYOLOv5Net/explore.html", "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net" ]
 
 
 # Move non-compiled code (Python, script) into place --------------------------
@@ -259,7 +259,7 @@ WORKDIR /src
 # This enables us to have a modulesettings for inside a docker image, and module
 # settings for modules outside the docker image.
 
-COPY ["src/modules/FaceProcessing/", "/app/publish/preinstalled-modules/FaceProcessing"]
+COPY [ "CodeProject.AI-Modules/CodeProject.AI-FaceProcessing/", "/app/publish/preinstalled-modules/FaceProcessing"]
 RUN mv  -f /app/publish/preinstalled-modules/FaceProcessing/modulesettings.docker.build.json \
            /app/publish/preinstalled-modules/FaceProcessing/modulesettings.docker.json &&    \
     rm -rf /app/publish/preinstalled-modules/FaceProcessing/intelligencelayer/__pycache__ && \
@@ -267,7 +267,7 @@ RUN mv  -f /app/publish/preinstalled-modules/FaceProcessing/modulesettings.docke
            /app/publish/preinstalled-modules/FaceProcessing/package.bat            \
            /app/publish/preinstalled-modules/FaceProcessing/*.pyprog
 
-COPY ["src/modules/ObjectDetectionYOLOv5-3.1/", "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5-3.1"]
+COPY ["CodeProject.AI-Server-Dev/modules/ObjectDetectionYOLOv5-6.2/", "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2"]
 RUN mv -f  /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-3.1/modulesettings.docker.build.jetson.json \
            /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-3.1/modulesettings.docker.json &&           \
     rm -rf /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-3.1/__pycache__ &&                          \
@@ -276,10 +276,11 @@ RUN mv -f  /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-3.1/moduleset
            /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-3.1/*.pyprog
 
 # SDK and install scripts
-COPY ["src/SDK/Python",        "/app/publish/SDK/Python"]
-COPY ["src/server/install.sh", "/app/publish/server/install.sh"]
-COPY ["src/scripts",           "/app/publish/src/scripts"]
-COPY ["src/setup.sh",          "/app/publish/setup.sh"]
+COPY ["/CodeProject.AI-Server-Dev/src/SDK/Python",        "/app/publish/SDK/Python"]
+COPY ["/CodeProject.AI-Server-Dev/src/SDK/install.sh",    "/app/publish/SDK/install.sh"]
+COPY ["/CodeProject.AI-Server-Dev/src/server/install.sh", "/app/publish/server/install.sh"]
+COPY ["/CodeProject.AI-Server-Dev/src/scripts",           "/app/publish/scripts"]
+COPY ["/CodeProject.AI-Server-Dev/src/setup.sh",          "/app/publish/setup.sh"]
 
 # Cleanup / setup
 RUN rm -rf /app/publish/SDK/Python/__pycache__
@@ -319,8 +320,8 @@ RUN mkdir --parents /etc/codeproject/ai                 && \
     mkdir --parents /app/downloads/modules /app/modules && \
     mkdir /app/.vscode
 
-COPY [ "/.vscode/launch.docker.json", "/app/.vscode/launch.json" ]
-COPY [ "/.vscode/tasks.docker.json",  "/app/.vscode/tasks.json" ]
+COPY [ "/CodeProject.AI-Server-Dev/.vscode/launch.docker.json", "/app/.vscode/launch.json" ]
+COPY [ "/CodeProject.AI-Server-Dev/.vscode/tasks.docker.json",  "/app/.vscode/tasks.json" ]
 
 # Start the server
 WORKDIR /app/server

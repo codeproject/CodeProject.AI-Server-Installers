@@ -305,7 +305,7 @@ WORKDIR /src
 # This enables us to have a modulesettings for inside a docker image, and module
 # settings for modules outside the docker image.
 
-COPY [ "CodeProject.AI-Modules/CodeProject.AI-FaceProcessing/", "/app/publish/preinstalled-modules/FaceProcessing"]
+COPY [ "/CodeProject.AI-Modules/CodeProject.AI-FaceProcessing/", "/app/publish/preinstalled-modules/FaceProcessing"]
 RUN mv  -f "/app/publish/preinstalled-modules/FaceProcessing/modulesettings.docker.build.json" \
            "/app/publish/preinstalled-modules/FaceProcessing/modulesettings.docker.json"    && \
     rm -rf "/app/publish/preinstalled-modules/FaceProcessing/intelligencelayer/__pycache__" && \
@@ -314,7 +314,7 @@ RUN mv  -f "/app/publish/preinstalled-modules/FaceProcessing/modulesettings.dock
           "/app/publish/preinstalled-modules/FaceProcessing/package.bat"  \
           "/app/publish/preinstalled-modules/FaceProcessing/*.pyprog"     > /dev/null
 
-COPY ["CodeProject.AI-Server-Dev/modules/ObjectDetectionYOLOv5-6.2/", "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2"]
+COPY ["/CodeProject.AI-Server-Dev/modules/ObjectDetectionYOLOv5-6.2/", "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2"]
 RUN mv -f  "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2/modulesettings.docker.build.json" \
            "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2/modulesettings.docker.json" &&    \
     rm -rf "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2/__pycache__"                &&    \
@@ -324,11 +324,11 @@ RUN mv -f  "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2/modulese
            "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2/*.pyprog"    > /dev/null
 
 # SDK and install scripts
-COPY ["CodeProject.AI-Server-Dev/src/SDK/Python",        "/app/publish/SDK/Python"]
-COPY ["CodeProject.AI-Server-Dev/src/SDK/install.sh",    "/app/publish/SDK/install.sh"]
-COPY ["CodeProject.AI-Server-Dev/src/server/install.sh", "/app/publish/server/install.sh"]
-COPY ["CodeProject.AI-Server-Dev/src/scripts",           "/app/publish/scripts"]
-COPY ["CodeProject.AI-Server-Dev/src/setup.sh",          "/app/publish/setup.sh"]
+COPY ["/CodeProject.AI-Server-Dev/src/SDK/Python",        "/app/publish/SDK/Python"]
+COPY ["/CodeProject.AI-Server-Dev/src/SDK/install.sh",    "/app/publish/SDK/install.sh"]
+COPY ["/CodeProject.AI-Server-Dev/src/server/install.sh", "/app/publish/server/install.sh"]
+COPY ["/CodeProject.AI-Server-Dev/src/scripts",           "/app/publish/scripts"]
+COPY ["/CodeProject.AI-Server-Dev/src/setup.sh",          "/app/publish/setup.sh"]
 
 # Cleanup / setup
 RUN rm -rf /app/publish/SDK/Python/__pycache__ \
@@ -386,8 +386,8 @@ RUN mkdir --parents /etc/codeproject/ai                 && \
     mkdir /app/.vscode
 
 # For debugging the live container using VS Code
-COPY [ "CodeProject.AI-Server-Dev/.vscode/launch.docker.json", "/app/.vscode/launch.json" ]
-COPY [ "CodeProject.AI-Server-Dev/.vscode/tasks.docker.json",  "/app/.vscode/tasks.json" ]
+COPY [ "/CodeProject.AI-Server-Dev/.vscode/launch.docker.json", "/app/.vscode/launch.json" ]
+COPY [ "/CodeProject.AI-Server-Dev/.vscode/tasks.docker.json",  "/app/.vscode/tasks.json" ]
 
 # Start the server
 WORKDIR /app/server
