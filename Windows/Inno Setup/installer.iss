@@ -15,10 +15,10 @@
   #define ServerRepoRelPath "..\..\..\CodeProject.AI-Server-Dev"
 #else
   #define AppName "CodeProject.AI Server"
-  #define AppVersion "2.7.0"
+  #define AppVersion "2.8.0"
   #define DotNetVersion "8.0"
   #define DotNetHostingVersion "8.0.6"
-  #define SetupExeName "CodeProject.AI Server-win-arm64"
+  #define SetupExeName "CodeProject.AI Server-win-x64"
   #define ServerRepoRelPath "..\..\..\CodeProject.AI-Server-Dev"
 #endif
  
@@ -56,8 +56,8 @@
   #define HostingBundleSHA256       "2ac38c2aab8a55e50a2d761fead1320047d2ad5fd22c2f44316aceb094505ec2"
  
   ; VC++ redistributable.
-  #define VCRedistInstallerExe      "vc_redist.arm64.exe"
-  #define VCRedistDownloadURL       "https://aka.ms/vs/17/release/vc_redist.arm64.exe"
+  #define VCRedistInstallerExe      "vc_redist.x64.exe"
+  #define VCRedistDownloadURL       "https://aka.ms/vs/17/release/vc_redist.x64.exe"
   #define VCRedistSHA256            ""
 #endif
  
@@ -91,12 +91,12 @@ Compression=lzma2
 SolidCompression=yes
  
 ; "ArchitecturesAllowed=x64" specifies that Setup cannot run on anything but x64.
-ArchitecturesAllowed=arm64
+ArchitecturesAllowed=x64
  
 ; "ArchitecturesInstallIn64BitMode=x64" requests that the install be done in 
 ; "64-bit mode" on x64, meaning it should use the native 64-bit Program Files
 ; directory and the 64-bit view of the registry.
-ArchitecturesInstallIn64BitMode=arm64
+ArchitecturesInstallIn64BitMode=x64
  
 PrivilegesRequired=admin
 CloseApplications=no
