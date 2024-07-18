@@ -209,6 +209,7 @@ WORKDIR /src
 # Copy only the bits we need to for the .NET compilation steps
 COPY src/server/                        src/server/
 COPY src/SDK/                           src/SDK/
+COPY src/scripts/                       src/scripts/
 COPY modules/ObjectDetectionYOLOv5Net/  src/modules/ObjectDetectionYOLOv5Net/
 
 # Build and publish Server
@@ -300,7 +301,7 @@ RUN mv -f "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2/moduleset
 # SDK and install scripts
 COPY ["src/SDK/Python",        "/app/publish/SDK/Python"]
 COPY ["src/server/install.sh", "/app/publish/server/install.sh"]
-COPY ["devops/scripts",        "/app/publish/devops/scripts"]
+COPY ["src/scripts",           "/app/publish/src/scripts"]
 COPY ["src/setup.sh",          "/app/publish/setup.sh"]
 
 # Cleanup / setup
