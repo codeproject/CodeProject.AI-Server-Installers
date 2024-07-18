@@ -23,7 +23,7 @@ ARG CPAI_VERSION
 # It's important to pull the correct base for the target architecture, otherwise
 # building this image on, say, an Arm64 machine will result in the base image
 # being Arm64, not x86_64 as assumed.
-FROM amd64/ubuntu:$UBUNTU_VERSION as base
+FROM amd64/ubuntu:$UBUNTU_VERSION AS base
 
 WORKDIR /app
 
@@ -44,7 +44,7 @@ ENV DOTNET_RUNNING_IN_CONTAINER=true
 # noninteractive frontend means no prompts or questions are asked and whenever a call requires an
 # answer, the default will be used. Installs will be non-interrupted and so won't hang. The Python
 # installs, for instance, require this in this current environment
-ENV DEBIAN_FRONTEND noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
 
 # Let the (walled) World know which version they are running under
 ARG UBUNTU_VERSION=22.04
@@ -56,10 +56,10 @@ ENV UBUNTU_VERSION=$UBUNTU_VERSION
 ENV DOTNET_VERSION=$DOTNET_VERSION
 
 # This is so perl doesn't get upset
-ENV LANGUAGE C
-ENV LC_ALL C
-ENV LANG C
-ENV LC_CTYPE C
+ENV LANGUAGE=C
+ENV LC_ALL=C
+ENV LANG=C
+ENV LC_CTYPE=C
 
 # Setup the ports -------------------------------------------------------------
 
@@ -325,8 +325,9 @@ RUN mv -f  "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2/modulese
 
 # SDK and install scripts
 COPY ["CodeProject.AI-Server-Dev/src/SDK/Python",        "/app/publish/SDK/Python"]
+COPY ["CodeProject.AI-Server-Dev/src/SDK/install.sh",    "/app/publish/SDK/install.sh"]
 COPY ["CodeProject.AI-Server-Dev/src/server/install.sh", "/app/publish/server/install.sh"]
-COPY ["CodeProject.AI-Server-Dev/src/scripts",           "/app/publish/src/scripts"]
+COPY ["CodeProject.AI-Server-Dev/src/scripts",           "/app/publish/scripts"]
 COPY ["CodeProject.AI-Server-Dev/src/setup.sh",          "/app/publish/setup.sh"]
 
 # Cleanup / setup
