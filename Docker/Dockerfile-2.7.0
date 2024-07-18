@@ -235,6 +235,7 @@ WORKDIR /src
 # Copy only the bits we need to for the .NET compilation steps
 COPY /CodeProject.AI-Server-Dev/src/server/                        src/server/
 COPY /CodeProject.AI-Server-Dev/src/SDK/                           src/SDK/
+COPY /CodeProject.AI-Server-Dev/src/scripts/                       src/scripts/
 COPY /CodeProject.AI-Server-Dev/modules/ObjectDetectionYOLOv5Net/  modules/ObjectDetectionYOLOv5Net/
 
 # Build and publish Server
@@ -325,7 +326,7 @@ RUN mv -f  "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2/modulese
 # SDK and install scripts
 COPY ["CodeProject.AI-Server-Dev/src/SDK/Python",        "/app/publish/SDK/Python"]
 COPY ["CodeProject.AI-Server-Dev/src/server/install.sh", "/app/publish/server/install.sh"]
-COPY ["CodeProject.AI-Server-Dev/devops/scripts",        "/app/publish/devops/scripts"]
+COPY ["CodeProject.AI-Server-Dev/src/scripts",           "/app/publish/src/scripts"]
 COPY ["CodeProject.AI-Server-Dev/src/setup.sh",          "/app/publish/setup.sh"]
 
 # Cleanup / setup

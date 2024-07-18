@@ -204,6 +204,7 @@ WORKDIR /src
 # Copy only the bits we need to for the .NET compilation steps
 COPY src/server/                        src/server/
 COPY src/SDK/                           src/SDK/
+COPY src/scripts/                       src/scripts/
 COPY modules/ObjectDetectionYOLOv5Net/  src/modules/ObjectDetectionYOLOv5Net/
 
 # Build and publish Server
@@ -305,7 +306,7 @@ COPY ["src/SDK/Python",        "/app/publish/SDK/Python"]
 COPY ["src/server/install.sh", "/app/publish/server/install.sh"]
 RUN rm -rf /app/publish/SDK/Python/__pycache__
 
-COPY ["src/SDK/Scripts", "/app/publish/SDK/Scripts"]
+COPY ["src/src/scripts", "/app/publish/src/scripts"]
 COPY ["src/setup.sh",    "/app/publish/setup.sh"]
 
 # END REVIEW ===================================================================
