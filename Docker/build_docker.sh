@@ -14,7 +14,8 @@
 #
 
 # The location of the root of the server repo relative to this script
-repo_base="../../CodeProject.AI-Server-Dev"
+repo_base="../.."
+repo_name="CodeProject.AI-Server-Dev"
 
 # Sniff Parameters
 
@@ -62,9 +63,9 @@ fi
 
 # Get Version: We're building for the current server version
 
-MAJOR=$(grep -o '"Major"\s*:\s*[^,}]*' "${repo_base}/src/server/version.json" | sed 's/.*: \(.*\)/\1/')
-MINOR=$(grep -o '"Minor"\s*:\s*[^,}]*' "${repo_base}/src/server/version.json" | sed 's/.*: \(.*\)/\1/')
-PATCH=$(grep -o '"Patch"\s*:\s*[^,}]*' "${repo_base}/src/server/version.json" | sed 's/.*: \(.*\)/\1/')
+MAJOR=$(grep -o '"Major"\s*:\s*[^,}]*' "${repo_base}/${repo_name}/src/server/version.json" | sed 's/.*: \(.*\)/\1/')
+MINOR=$(grep -o '"Minor"\s*:\s*[^,}]*' "${repo_base}/${repo_name}/src/server/version.json" | sed 's/.*: \(.*\)/\1/')
+PATCH=$(grep -o '"Patch"\s*:\s*[^,}]*' "${repo_base}/${repo_name}/src/server/version.json" | sed 's/.*: \(.*\)/\1/')
 VERSION="${MAJOR}.${MINOR}.${PATCH}"
 
 # We have two forms of the Docker images due to the base folder structure changing in 2.7.0
@@ -90,7 +91,7 @@ docker pull mcr.microsoft.com/dotnet/sdk:$dotnet_version
 
 if [ "$do_cpu" = true ]; then
     docker pull docker.io/amd64/ubuntu:22.04
-    docker buildx build --platform linux/amd64 --build-arg CPIA_VERSION=$VERSION --build-arg DOTNET_VERSION=$dotnet_version --tag codeproject/ai-server -f Dockerfile$file_suffix "${repo_base}"
+    docker buildx build --no-cache --platform linux/amd64 --build-arg CPIA_VERSION=$VERSION --build-arg DOTNET_VERSION=$dotnet_version --tag codeproject/ai-server -f Dockerfile$file_suffix "${repo_base}"
 fi
 
 if [ "$do_gpu" = true ]; then
@@ -98,24 +99,24 @@ if [ "$do_gpu" = true ]; then
     docker pull nvidia/cuda:11.7.1-cudnn8-runtime-ubuntu22.04
     docker pull nvidia/cuda:12.2.0-runtime-ubuntu22.04
 
-    # docker buildx build --platform linux/amd64 --build-arg CPIA_VERSION=$VERSION --build-arg DOTNET_VERSION=$dotnet_version --build-arg CUDA_VERSION=10.2          --build-arg CUDA_MAJOR=10 --tag codeproject/ai-server:cuda10_2 -f Dockerfile-GPU-CUDA10_2$file_suffix "${repo_base}"
-    docker buildx build   --platform linux/amd64 --build-arg CPIA_VERSION=$VERSION --build-arg DOTNET_VERSION=$dotnet_version --build-arg CUDA_VERSION=11.7.1-cudnn8 --build-arg CUDA_MAJOR=11 --tag codeproject/ai-server:cuda11_7 -f Dockerfile-GPU-CUDA$file_suffix "${repo_base}"
-    docker buildx build   --platform linux/amd64 --build-arg CPIA_VERSION=$VERSION --build-arg DOTNET_VERSION=$dotnet_version --build-arg CUDA_VERSION=12.2.0        --build-arg CUDA_MAJOR=12 --tag codeproject/ai-server:cuda12_2 -f Dockerfile-GPU-CUDA$file_suffix "${repo_base}"
+    # docker buildx build --no-cache --platform linux/amd64 --build-arg REPO_NAME=$repo_name --build-arg CPIA_VERSION=$VERSION --build-arg DOTNET_VERSION=$dotnet_version --build-arg CUDA_VERSION=10.2          --build-arg CUDA_MAJOR=10 --tag codeproject/ai-server:cuda10_2 -f Dockerfile-GPU-CUDA10_2$file_suffix "${repo_base}"
+    docker buildx build --no-cache   --platform linux/amd64 --build-arg REPO_NAME=$repo_name --build-arg CPIA_VERSION=$VERSION --build-arg DOTNET_VERSION=$dotnet_version --build-arg CUDA_VERSION=11.7.1-cudnn8 --build-arg CUDA_MAJOR=11 --tag codeproject/ai-server:cuda11_7 -f Dockerfile-GPU-CUDA$file_suffix "${repo_base}"
+    docker buildx build --no-cache   --platform linux/amd64 --build-arg REPO_NAME=$repo_name --build-arg CPIA_VERSION=$VERSION --build-arg DOTNET_VERSION=$dotnet_version --build-arg CUDA_VERSION=12.2.0        --build-arg CUDA_MAJOR=12 --tag codeproject/ai-server:cuda12_2 -f Dockerfile-GPU-CUDA$file_suffix "${repo_base}"
 fi
 
 if [ "$do_arm" = true ]; then
     docker pull arm64v8/ubuntu:22.04
-    docker buildx build --platform linux/arm64 --build-arg CPIA_VERSION=$VERSION --build-arg DOTNET_VERSION=$dotnet_version --no-cache --tag codeproject/ai-server:arm64 -f Dockerfile-Arm64$file_suffix "${repo_base}"
+    docker buildx build --no-cache --platform linux/arm64 --build-arg REPO_NAME=$repo_name --build-arg CPIA_VERSION=$VERSION --build-arg DOTNET_VERSION=$dotnet_version --tag codeproject/ai-server:arm64 -f Dockerfile-Arm64$file_suffix "${repo_base}"
 fi
 
 if [ "$do_jetson" = true ]; then
     docker pull gpuci/cuda-l4t:10.2-runtime-ubuntu18.04
-    docker buildx build --platform linux/arm64 --build-arg CPIA_VERSION=$VERSION --build-arg DOTNET_VERSION=$dotnet_version --no-cache --tag codeproject/ai-server:jetson -f Dockerfile-Jetson$file_suffix "${repo_base}"
+    docker buildx build --no-cache --platform linux/arm64 --build-arg REPO_NAME=$repo_name --build-arg CPIA_VERSION=$VERSION --build-arg DOTNET_VERSION=$dotnet_version --tag codeproject/ai-server:jetson -f Dockerfile-Jetson$file_suffix "${repo_base}"
 fi
 
 if [ "$do_rpi" = true ]; then
     docker pull arm64v8/ubuntu:22.04
-    docker buildx build --platform linux/arm64 --build-arg CPIA_VERSION=$VERSION --build-arg DOTNET_VERSION=$dotnet_version --no-cache --tag codeproject/ai-server:rpi64 -f Dockerfile-RPi64$file_suffix "${repo_base}"
+    docker buildx build --no-cache --platform linux/arm64 --build-arg REPO_NAME=$repo_name --build-arg CPIA_VERSION=$VERSION --build-arg DOTNET_VERSION=$dotnet_version --tag codeproject/ai-server:rpi64 -f Dockerfile-RPi64$file_suffix "${repo_base}"
 fi
 
 

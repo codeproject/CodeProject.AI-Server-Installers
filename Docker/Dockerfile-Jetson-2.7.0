@@ -20,6 +20,9 @@
 
 # INITIAL SETUP ===============================================================
 
+# Note: we're before the first 'FROM' statment so these values are not available
+# inside the build stages. If you wish to use these inside a stage, re-grab them 
+# inside that stage
 ARG CUDA_VERSION=10.2
 ARG CUDA_MAJOR=11
 ARG UBUNTU_VERSION=18.04
@@ -79,7 +82,7 @@ ENV DOTNET_RUNNING_IN_CONTAINER=true
 # installs, for instance, require this in this current environment
 ENV DEBIAN_FRONTEND noninteractive
 
-# Let the (walled) World know which version they are running under
+# Grab the values passed in via command line here so we can use inside this stage
 ARG UBUNTU_VERSION=22.04
 ARG DOTNET_VERSION=8.0
 ARG CPAI_VERSION
@@ -212,18 +215,22 @@ FROM mcr.microsoft.com/dotnet/sdk:$DOTNET_VERSION AS build
 ARG UBUNTU_VERSION=22.04
 ARG DOTNET_VERSION=8.0
 ARG CPAI_VERSION
+ARG REPO_NAME
+ARG MODULES_REPO_NAME=CodeProject.AI-Modules
 
 ENV CPAI_VERSION=$CPAI_VERSION
 ENV UBUNTU_VERSION=$UBUNTU_VERSION
 ENV DOTNET_VERSION=$DOTNET_VERSION
+ENV REPO_NAME=$REPO_NAME
+ENV MODULES_REPO_NAME=$MODULES_REPO_NAME
 
 # change directory to /src in the build image
 WORKDIR /src
 
 # Copy only the bits we need to for the .NET compilation steps
-COPY src/server/                        src/server/
-COPY src/SDK/                           src/SDK/
-COPY src/scripts/                       src/scripts/
+COPY /${REPO_NAME}/src/server/                        src/server/
+COPY /${REPO_NAME}/src/SDK/                           src/SDK/
+COPY /${REPO_NAME}/src/scripts/                       src/scripts/
 
 # Build and publish Server
 WORKDIR "/src/src/server"
@@ -262,7 +269,7 @@ WORKDIR /src
 # This enables us to have a modulesettings for inside a docker image, and module
 # settings for modules outside the docker image.
 
-COPY ["src/modules/FaceProcessing/", "/app/publish/preinstalled-modules/FaceProcessing"]
+COPY ["${MODULES_REPO_NAME}/CodeProject.AI-FaceProcessing/", "/app/publish/preinstalled-modules/FaceProcessing"]
 RUN mv -f  /app/publish/preinstalled-modules/FaceProcessing/modulesettings.docker.build.json \
            /app/publish/preinstalled-modules/FaceProcessing/modulesettings.docker.json &&    \
     rm -rf /app/publish/preinstalled-modules/FaceProcessing/intelligencelayer/__pycache__ && \
@@ -270,7 +277,7 @@ RUN mv -f  /app/publish/preinstalled-modules/FaceProcessing/modulesettings.docke
           /app/publish/preinstalled-modules/FaceProcessing/package.bat             \
           /app/publish/preinstalled-modules/FaceProcessing/*.pyprog
 
-COPY ["src/modules/ObjectDetectionYOLOv5-3.1/", "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5-3.1"]
+COPY ["${MODULES_REPO_NAME}/CodeProject.AI-ObjectDetectionYOLOv5-3.1/", "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5-3.1"]
 RUN mv -f /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-3.1/modulesettings.docker.build.jetson.json \
           /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-3.1/modulesettings.docker.json &&           \
     rm -rf /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-3.1/__pycache__ &&                         \
@@ -278,7 +285,7 @@ RUN mv -f /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-3.1/modulesett
           /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-3.1/package.bat  \
           /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-3.1/*.pyprog
 
-COPY ["src/modules/ObjectDetectionCoral/", "/app/publish/preinstalled-modules/ObjectDetectionCoral"]
+COPY ["${MODULES_REPO_NAME}/CodeProject.AI-bjectDetectionCoral/", "/app/publish/preinstalled-modules/ObjectDetectionCoral"]
 RUN mv -f /app/publish/preinstalled-modules/ObjectDetectionCoral/modulesettings.docker.build.jetson.json \
           /app/publish/preinstalled-modules/ObjectDetectionCoral/modulesettings.docker.json &&           \
     rm -rf /app/publish/preinstalled-modules/ObjectDetectionCoral/__pycache__ &&                         \
@@ -288,10 +295,11 @@ RUN mv -f /app/publish/preinstalled-modules/ObjectDetectionCoral/modulesettings.
 
 
 # SDK and install scripts
-COPY ["src/SDK/Python",        "/app/publish/SDK/Python"]
-COPY ["src/server/install.sh", "/app/publish/server/install.sh"]
-COPY ["src/scripts",           "/app/publish/src/scripts"]
-COPY ["src/setup.sh",          "/app/publish/setup.sh"]
+COPY ["/${REPO_NAME}/src/SDK/Python",        "/app/publish/SDK/Python"]
+COPY ["/${REPO_NAME}/src/SDK/install.sh",    "/app/publish/SDK/install.sh"]
+COPY ["/${REPO_NAME}/src/server/install.sh", "/app/publish/server/install.sh"]
+COPY ["/${REPO_NAME}/src/scripts",           "/app/publish/scripts"]
+COPY ["/${REPO_NAME}/src/setup.sh",          "/app/publish/setup.sh"]
 
 # Cleanup / setup
 RUN rm -rf /app/publish/SDK/Python/__pycache__
@@ -305,6 +313,9 @@ mkdir /app/publish/runtimes
 FROM base AS final
 
 # Note: UBUNTU_VERSION, DOTNET_VERSION and all ENV declared in 'base' are still here.
+
+ARG REPO_NAME
+ENV REPO_NAME=$REPO_NAME
 
 # Move published server and modules into place --------------------------------
 
@@ -335,8 +346,8 @@ RUN mkdir --parents /etc/codeproject/ai                 && \
     mkdir --parents /app/downloads/modules /app/modules && \
     mkdir /app/.vscode
 
-COPY [ "/.vscode/launch.docker.json", "/app/.vscode/launch.json" ]
-COPY [ "/.vscode/tasks.docker.json", "/app/.vscode/tasks.json" ]
+COPY [ "/${REPO_NAME}/.vscode/launch.docker.json", "/app/.vscode/launch.json" ]
+COPY [ "/${REPO_NAME}/.vscode/tasks.docker.json",  "/app/.vscode/tasks.json" ]
 
 WORKDIR /app/server
 # ENTRYPOINT ["dotnet CodeProject.AI.Server.dll"]
