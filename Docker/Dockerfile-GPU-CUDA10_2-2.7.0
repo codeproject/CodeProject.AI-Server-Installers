@@ -18,6 +18,9 @@
 
 # INITIAL SETUP ===============================================================
 
+# Note: we're before the first 'FROM' statment so these values are not available
+# inside the build stages. If you wish to use these inside a stage, re-grab them 
+# inside that stage
 ARG CUDA_VERSION=10.2
 ARG CUDA_MAJOR=11
 ARG UBUNTU_VERSION=18.04
@@ -51,7 +54,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV USE_CUDA=True
 ENV CPAI_MODULE_ENABLE_GPU=True
 
-# Let the (walled) World know which version they are running under
+# Grab the values passed in via command line here so we can use inside this stage
 ARG UBUNTU_VERSION=22.04
 ARG DOTNET_VERSION=8.0
 ARG CPAI_VERSION
@@ -177,19 +180,23 @@ FROM mcr.microsoft.com/dotnet/sdk:$DOTNET_VERSION AS build
 ARG UBUNTU_VERSION=22.04
 ARG DOTNET_VERSION=8.0
 ARG CPAI_VERSION
+ARG REPO_NAME
+ARG MODULES_REPO_NAME=CodeProject.AI-Modules
 
 ENV CPAI_VERSION=$CPAI_VERSION
 ENV UBUNTU_VERSION=$UBUNTU_VERSION
 ENV DOTNET_VERSION=$DOTNET_VERSION
+ENV REPO_NAME=$REPO_NAME
+ENV MODULES_REPO_NAME=$MODULES_REPO_NAME
 
 # change directory to /src in the build image
 WORKDIR /src
 
 # Copy only the bits we need to for the .NET compilation steps
-COPY /CodeProject.AI-Server-Dev/src/server/                        src/server/
-COPY /CodeProject.AI-Server-Dev/src/SDK/                           src/SDK/
-COPY /CodeProject.AI-Server-Dev/src/scripts/                       src/scripts/
-COPY /CodeProject.AI-Server-Dev/modules/ObjectDetectionYOLOv5Net/  modules/ObjectDetectionYOLOv5Net/
+COPY /${REPO_NAME}/src/server/                        src/server/
+COPY /${REPO_NAME}/src/SDK/                           src/SDK/
+COPY /${REPO_NAME}/src/scripts/                       src/scripts/
+COPY /${REPO_NAME}/modules/ObjectDetectionYOLOv5Net/  modules/ObjectDetectionYOLOv5Net/
 
 # Build and publish Server
 WORKDIR "/src/src/server"
@@ -231,11 +238,11 @@ RUN dotnet publish ObjectDetectionYOLOv5Net.csproj -c Release --no-self-containe
 
 # TODO: Grab these assets from our S3 bucket. Otherwise we have to ensure we've done a Dev setup on
 #       the local machine first, to ensure these files are present
-COPY [ "/CodeProject.AI-Server-Dev/modules/ObjectDetectionYOLOv5Net/assets",        "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net/assets" ]
-COPY [ "/CodeProject.AI-Server-Dev/modules/ObjectDetectionYOLOv5Net/custom-models", "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net/custom-models" ]
+COPY [ "/${REPO_NAME}/modules/ObjectDetectionYOLOv5Net/assets",        "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net/assets" ]
+COPY [ "/${REPO_NAME}/modules/ObjectDetectionYOLOv5Net/custom-models", "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net/custom-models" ]
 
 # And ensure required assets are copied over. 
-COPY [ "/CodeProject.AI-Server-Dev/modules/ObjectDetectionYOLOv5Net/explore.html", "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net" ]
+COPY [ "/${REPO_NAME}/modules/ObjectDetectionYOLOv5Net/explore.html", "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net" ]
 
 
 # Move non-compiled code (Python, script) into place --------------------------
@@ -259,7 +266,7 @@ WORKDIR /src
 # This enables us to have a modulesettings for inside a docker image, and module
 # settings for modules outside the docker image.
 
-COPY [ "CodeProject.AI-Modules/CodeProject.AI-FaceProcessing/", "/app/publish/preinstalled-modules/FaceProcessing"]
+COPY [ "${MODULES_REPO_NAME}/CodeProject.AI-FaceProcessing/", "/app/publish/preinstalled-modules/FaceProcessing"]
 RUN mv  -f /app/publish/preinstalled-modules/FaceProcessing/modulesettings.docker.build.json \
            /app/publish/preinstalled-modules/FaceProcessing/modulesettings.docker.json &&    \
     rm -rf /app/publish/preinstalled-modules/FaceProcessing/intelligencelayer/__pycache__ && \
@@ -267,7 +274,7 @@ RUN mv  -f /app/publish/preinstalled-modules/FaceProcessing/modulesettings.docke
            /app/publish/preinstalled-modules/FaceProcessing/package.bat            \
            /app/publish/preinstalled-modules/FaceProcessing/*.pyprog
 
-COPY ["CodeProject.AI-Server-Dev/modules/ObjectDetectionYOLOv5-6.2/", "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2"]
+COPY ["${REPO_NAME}/modules/ObjectDetectionYOLOv5-6.2/", "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2"]
 RUN mv -f  /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-3.1/modulesettings.docker.build.jetson.json \
            /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-3.1/modulesettings.docker.json &&           \
     rm -rf /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-3.1/__pycache__ &&                          \
@@ -276,15 +283,15 @@ RUN mv -f  /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-3.1/moduleset
            /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-3.1/*.pyprog
 
 # SDK and install scripts
-COPY ["/CodeProject.AI-Server-Dev/src/SDK/Python",        "/app/publish/SDK/Python"]
-COPY ["/CodeProject.AI-Server-Dev/src/SDK/install.sh",    "/app/publish/SDK/install.sh"]
-COPY ["/CodeProject.AI-Server-Dev/src/server/install.sh", "/app/publish/server/install.sh"]
-COPY ["/CodeProject.AI-Server-Dev/src/scripts",           "/app/publish/scripts"]
-COPY ["/CodeProject.AI-Server-Dev/src/setup.sh",          "/app/publish/setup.sh"]
+COPY ["/${REPO_NAME}/src/SDK/Python",        "/app/publish/SDK/Python"]
+COPY ["/${REPO_NAME}/src/SDK/install.sh",    "/app/publish/SDK/install.sh"]
+COPY ["/${REPO_NAME}/src/server/install.sh", "/app/publish/server/install.sh"]
+COPY ["/${REPO_NAME}/src/scripts",           "/app/publish/scripts"]
+COPY ["/${REPO_NAME}/src/setup.sh",          "/app/publish/setup.sh"]
 
 # Cleanup / setup
-RUN rm -rf /app/publish/SDK/Python/__pycache__
-mkdir /app/publish/runtimes
+RUN rm -rf /app/publish/SDK/Python/__pycache__ \
+    mkdir /app/publish/runtimes
 
 # END REVIEW ===================================================================
 
@@ -294,6 +301,9 @@ mkdir /app/publish/runtimes
 FROM base AS final
 
 # Note: UBUNTU_VERSION, DOTNET_VERSION and all ENV declared in 'base' are still here.
+
+ARG REPO_NAME
+ENV REPO_NAME=$REPO_NAME
 
 # Move published server and modules into place --------------------------------
 
@@ -320,8 +330,8 @@ RUN mkdir --parents /etc/codeproject/ai                 && \
     mkdir --parents /app/downloads/modules /app/modules && \
     mkdir /app/.vscode
 
-COPY [ "/CodeProject.AI-Server-Dev/.vscode/launch.docker.json", "/app/.vscode/launch.json" ]
-COPY [ "/CodeProject.AI-Server-Dev/.vscode/tasks.docker.json",  "/app/.vscode/tasks.json" ]
+COPY [ "/${REPO_NAME}/.vscode/launch.docker.json", "/app/.vscode/launch.json" ]
+COPY [ "/${REPO_NAME}/.vscode/tasks.docker.json",  "/app/.vscode/tasks.json" ]
 
 # Start the server
 WORKDIR /app/server
