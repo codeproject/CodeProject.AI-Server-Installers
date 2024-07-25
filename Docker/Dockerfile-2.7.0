@@ -16,7 +16,7 @@
 
 # INITIAL SETUP ===============================================================
 
-# Note: we're before the first 'FROM' statment so these values are not available
+# Note: we're before the first 'FROM' statement so these values are not available
 # inside the build stages. If you wish to use these inside a stage, re-grab them 
 # inside that stage
 ARG UBUNTU_VERSION=22.04
@@ -195,7 +195,7 @@ RUN apt-get install -y --no-install-recommends            \
     python3.9 -m pip install virtualenv virtualenvwrapper > /dev/null
 
 
-# Build the .NET source in a separate, discarable build container --------------
+# Build the .NET source in a separate, discardable build container --------------
 
 FROM mcr.microsoft.com/dotnet/sdk:$DOTNET_VERSION AS build
 
@@ -361,11 +361,12 @@ COPY --from=build /app/publish .
 # Install required Python packages --------------------------------------------
 
 # *** TODO: *** all of this is in /app/SDK/Scripts/utils.sh under 
-# "installRequiredPythonPackages". We should use that method rather than having the same
-# commands copy and pasted here. NOTE that installRequiredPythonPackages installs some 
-# apts that, combined with the apts installed by setupPython, provide coverage 
-# for *almost* all the apts installed in this docker file. When switching to 
-# using our scripts we need to ensure we cover all installs and test.
+# "installRequiredPythonPackages". We should use that method rather than having
+# the same commands copy and pasted here. NOTE that installRequiredPythonPackages
+# installs some packages that, combined with the packages installed by setupPython,
+# provide coverage for *almost* all the packages installed in this docker file. 
+# When switching to using our scripts we need to ensure we cover all installs and
+# test.
 
 # *** WARNING ON ABOVE NOTE *** To save space in the Docker containers we don't
 # create venv's for pre-installed/hardcoded modules. We install these modules
