@@ -144,7 +144,7 @@ Source: "{#ServerRepoRelPath}\src\SDK\Python\*"; Excludes:"*.pyc,*.pyproj,*.pypr
 Source: "{#ServerRepoRelPath}\src\setup.bat"; DestDir: "{app}"; 
  
 ; General scripts and utilities to help with setup
-Source: "{#ServerRepoRelPath}\devops\scripts\*"; Excludes:"*.sh,"; DestDir: "{app}\devops\scripts\"; \
+Source: "{#ServerRepoRelPath}\src\scripts\*"; Excludes:"*.sh,"; DestDir: "{app}\scripts\"; \
 		Flags: ignoreversion recursesubdirs createallsubdirs
  
 ; General utilities used in setup. However: we'll copy only what we need, below
