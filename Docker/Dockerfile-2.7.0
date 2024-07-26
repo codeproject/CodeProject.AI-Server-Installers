@@ -194,6 +194,19 @@ RUN apt-get install -y --no-install-recommends            \
     python3.9 -m pip install --upgrade pip        &&      \
     python3.9 -m pip install virtualenv virtualenvwrapper > /dev/null
 
+# Install Python3.11, distutils and dev tools (so packages can be built if needed)
+# and pip install so we can install python packages. We don't need this for the
+# built in modules, but we know we have downloadable modules that could use Python3.9
+# so we preempt the need.
+RUN apt-get install python3.11 -y && \
+   apt-get install python3.11-distutils -y && \
+   apt-get install python3.11-dev -y && \ 
+   python3.11 -m pip install --upgrade setuptools && \
+   python3.11 -m pip install --upgrade pip
+
+#RUN apt python3.11-venv -y
+RUN apt install python3.11-venv -y && \
+    python3.11 -m pip install virtualenv virtualenvwrapper
 
 # Build the .NET source in a separate, discardable build container --------------
 
