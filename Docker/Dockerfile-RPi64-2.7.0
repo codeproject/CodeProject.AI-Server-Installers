@@ -187,7 +187,7 @@ RUN apt install python3.9-venv -y
 RUN python3.9 -m pip install virtualenv virtualenvwrapper
 
 
-# Build the .NET source in a separate, discarable build container --------------
+# Build the .NET source in a separate, discardable build container --------------
 
 FROM mcr.microsoft.com/dotnet/sdk:$DOTNET_VERSION AS build
 

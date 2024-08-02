@@ -33,6 +33,7 @@
         "Skia",
         "venv",
         "virtualenv",
+        "virtualenvwrapper",
         "WORKDIR"
     ]
 }
