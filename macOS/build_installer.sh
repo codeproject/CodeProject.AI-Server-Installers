@@ -223,7 +223,9 @@ copyApplicationDirectory() {
         mkdir -p "$APPLICATION_DIRECTORY/SDK"
         cp -r "${repo_base}/src/SDK/Scripts" "${APPLICATION_DIRECTORY}/SDK/Scripts/"
     else
-        cp -r "${repo_base}/src/scripts"     "${APPLICATION_DIRECTORY}/scripts/"
+        mkdir -p "$APPLICATION_DIRECTORY/devops/utils"
+        cp ${repo_base}/devops/utils/*.sh "${APPLICATION_DIRECTORY}/devops/utils"
+        cp -r "${repo_base}/src/scripts"    "${APPLICATION_DIRECTORY}/scripts/"
     fi
 
     cp "${repo_base}/src/server/install.sh" "${APPLICATION_DIRECTORY}/server/"
@@ -364,7 +366,8 @@ function moveInstallPackage(){
 }
 
 function cleanDirectories(){
-    rm -rf "${BUILD_DIRECTORY}"
+    # rm -rf "${BUILD_DIRECTORY}"
+    echo
 }
 
 
