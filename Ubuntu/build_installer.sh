@@ -59,7 +59,7 @@ fi
 if [ "$TARGET_SERVER_PRE_2_7" = "true" ]; then
     source "${repo_base}/src/SDK/Scripts/utils.sh"
 else
-    source "${repo_base}/devops/scripts/utils.sh"
+    source "${repo_base}/src/scripts/utils.sh"
 fi
 
 # For places where we need no spaces (eg identifiers)
@@ -223,8 +223,7 @@ copyApplicationDirectory() {
         mkdir -p "$APPLICATION_DIRECTORY/SDK"
         cp -r "${repo_base}/src/SDK/Scripts" "${APPLICATION_DIRECTORY}/SDK/Scripts/"
     else
-        mkdir -p "$APPLICATION_DIRECTORY/devops"
-        cp -r "${repo_base}/devops/scripts"     "${APPLICATION_DIRECTORY}/devops/scripts/"
+        cp -r "${repo_base}/src/scripts"     "${APPLICATION_DIRECTORY}/scripts/"
     fi
 
     cp "${repo_base}/src/SDK/install.sh" "${APPLICATION_DIRECTORY}/SDK/"
