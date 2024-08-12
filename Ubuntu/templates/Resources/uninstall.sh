@@ -8,7 +8,14 @@ if (( $EUID != 0 )); then
     exit
 fi
 
-echo "Welcome to Application Uninstaller"
+# Need to replace these with install preparation script
+VERSION=__VERSION__
+PRODUCT="__PRODUCT__"
+PRODUCT_ID="${PRODUCT// /-}"
+PACKAGE_ID="${PRODUCT_ID}"
+PRODUCT_DIRNAME="__PRODUCT_DIRNAME__"
+
+echo "Welcome to the ${PRODUCT} Uninstaller"
 echo "The following packages will be REMOVED:"
 echo "  __PRODUCT__-__VERSION__"
 while true; do
@@ -19,14 +26,7 @@ while true; do
 done
 
 
-#Need to replace these with install preparation script
-VERSION=__VERSION__
-PRODUCT="__PRODUCT__"
-PRODUCT_ID="${PRODUCT// /-}"
-PACKAGE_ID="${PRODUCT_ID}"
-PRODUCT_DIRNAME="__PRODUCT_DIRNAME__"
-
-echo "Application uninstalling process started"
+echo "Uninstall process started"
 
 systemctl stop ${PACKAGE_ID}             2>/dev/null
 systemctl disable ${PACKAGE_ID}          2>/dev/null
