@@ -3,7 +3,7 @@
 ; Define this if you wish to use the script in standalone (not script generated)
 ; mode. This will use hardcoded values and only work for x64, not arm64
 #define STANDALONE False
-#define DO_SIGNING False
+#define DO_SIGNING True
 
 ; Define some constants to make thing easier
 #if STANDALONE == True
