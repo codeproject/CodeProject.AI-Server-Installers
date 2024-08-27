@@ -3,7 +3,7 @@
 # Docker file for arm64 CPU enabled image (eg Apple Silicon)
 #
 # docker run --name CodeProject.AI-Server -d
-#    -p 32168:32168 \
+#    -p 32168:32168 -p 32168:32168/udp \
 #   --mount type=bind,source=/Library/Application Support/CodeProject/AI/docker/data,target=/etc/codeproject/ai \
 #   --mount type=bind,source=/Library/Application Support/CodeProject/AI/docker/modules,target=/app/modules \
 #   codeproject/ai-server:arm64
