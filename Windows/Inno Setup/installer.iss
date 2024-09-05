@@ -3,7 +3,7 @@
 ; Define this if you wish to use the script in standalone (not script generated)
 ; mode. This will use hardcoded values and only work for x64, not arm64
 #define STANDALONE False
-#define DO_SIGNING False
+#define DO_SIGNING True
  
 ; Define some constants to make thing easier
 #if STANDALONE == True
@@ -15,7 +15,7 @@
   #define ServerRepoRelPath "..\..\..\CodeProject.AI-Server-Dev"
 #else
   #define AppName "CodeProject.AI Server"
-  #define AppVersion "2.8.0"
+  #define AppVersion "2.8.1"
   #define DotNetVersion "8.0"
   #define DotNetHostingVersion "8.0.6"
   #define SetupExeName "CodeProject.AI Server-win-x64"
