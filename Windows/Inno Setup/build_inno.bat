@@ -11,7 +11,7 @@ set "AppName=CodeProject.AI Server"
 :: set "AppVersion=2.7.0" - we get this from the server's version file
 
 REM The location of the root of the server repo relative to this script
-set repo_base=..\..\..\CodeProject.AI-Server-Dev
+set repo_base=..\..\..\CodeProject.AI-Server
 
 REM System info
 set os=win
@@ -111,7 +111,14 @@ for /f "tokens=* delims=" %%a in ('findstr /n "^" "%SetupScriptTemplate%"') do (
 
 :: Run the Inno Setup compiler
 echo Compiling the installer script...
-"C:\Program Files (x86)\Inno Setup 6\ISCC.exe" %SetupScriptOutput%
+if not exist "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" (
+    echo.
+    echo *** INNO Setup missing ***
+    echo Please download and install INNO Setup from https://jrsoftware.org/isdl.php
+    echo.
+) else (
+    "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" %SetupScriptOutput%
+)
 
 echo ---------------------------------------------------------------------------
 echo DONE! Don't forget to sign the exe and create a zip before pushing to AWS

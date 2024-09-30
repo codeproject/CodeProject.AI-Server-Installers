@@ -5,7 +5,7 @@ rd /s /q build
 
 :: robocopy is doing something strange
 
-robocopy /e ..\..\..\CodeProject.AI-Server-Dev\src\SDK\Python\src\codeproject_ai_sdk\ .\build\lib\codeproject_ai_sdk 
+robocopy /e ..\..\..\CodeProject.AI-Server\src\SDK\Python\src\codeproject_ai_sdk\ .\build\lib\codeproject_ai_sdk 
 ::rd /s /q build\lib\utils
 
 python -m build --wheel

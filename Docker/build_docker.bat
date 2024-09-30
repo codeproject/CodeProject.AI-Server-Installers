@@ -16,7 +16,7 @@ setlocal enabledelayedexpansion
 REM The location of the root of the server repo relative to this script, and the
 REM folder name containing the repo itself
 set repo_base=..\..
-set repo_name=CodeProject.AI-Server-Dev
+set repo_name=CodeProject.AI-Server
 
 REM Sniff Parameters
 

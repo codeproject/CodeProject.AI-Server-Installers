@@ -7,7 +7,7 @@
 #define DotNetHostingVersion "8.0.6"
 #define SetupExeName "CodeProject.AI-Server-win-x64"
 
-#define ServerRepoRelPath "..\..\..\CodeProject.AI-Server-Dev"
+#define ServerRepoRelPath "..\..\..\CodeProject.AI-Server"
 
 #define AppExe            "Server\CodeProject.AI.Server.exe"
 #define GettingStartedURL "https://www.codeproject.com/Articles/5322557/CodeProject-AI-Server-AI-the-easy-way"
@@ -30,7 +30,7 @@
 #define VCRedistSHA256            ""
 
 ;Use a specific version URL and hash if you want to ensure file integrity, but it is a MS download site.
-;I use the Microsoft DevToys Checksum tool to caclulate the file SHA256 but other tools are available.
+;I use the Microsoft DevToys Checksum tool to calculate the file SHA256 but other tools are available.
 
 ;Version 1.7.8.
 ;#define VCRedistDownloadURL       "https://download.visualstudio.microsoft.com/download/pr/a061be25-c14a-489a-8c7c-bb72adfb3cab/4DFE83C91124CD542F4222FE2C396CABEAC617BB6F59BDCBDF89FD6F0DF0A32F/VC_redist.x64.exe"
@@ -87,10 +87,18 @@ CloseApplications=no
 ;  Setup Compiler
 ;    1. Configure the signing tools in the Inno Setup Compiler using 
 ;       'Tools/Configure Sign Tools ...' to create a Sign Tool:
+;
 ;         name    = EvSigning
 ;         content = signtool.exe sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /sha1 460f1f0bb84891b110aac4fd071b6a3c2931cc2b $f
-;    2. Ensure that "C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64"
-;       is in the path so SignTool.exe will be found
+;
+;    2. Adjust the /sha1 value to be the fingerprint of your certificate. To find
+;       this (in Windows) open certmgr, go to Certificates -> Personal -> Certificates
+;       and select the relevant Code Signing cert (CodeProject, latest expiry
+;       date). Double click the choose 'Details' and scroll down to 'thumbprint'.
+;
+;    3. Ensure that "C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64"
+;       is in the path so SignTool.exe will be found. NOTE: "10.0.26100.0" will
+;       change depending on the version of the Windows SDK you have installed.
 ;
 ; We're using a digicert EV Code Signing certificate that's stored on a USB drive.
 ; The USB drive's driver makes it look like the certificate is installed in 

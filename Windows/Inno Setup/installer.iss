@@ -12,14 +12,14 @@
   #define DotNetVersion "8.0"
   #define DotNetHostingVersion "8.0.6"
   #define SetupExeName "CodeProject.AI-Server-win-x64"
-  #define ServerRepoRelPath "..\..\..\CodeProject.AI-Server-Dev"
+  #define ServerRepoRelPath "..\..\..\CodeProject.AI-Server"
 #else
   #define AppName "CodeProject.AI Server"
   #define AppVersion "2.8.1"
   #define DotNetVersion "8.0"
   #define DotNetHostingVersion "8.0.6"
   #define SetupExeName "CodeProject.AI Server-win-x64"
-  #define ServerRepoRelPath "..\..\..\CodeProject.AI-Server-Dev"
+  #define ServerRepoRelPath "..\..\..\CodeProject.AI-Server"
 #endif
  
  
