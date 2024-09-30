@@ -1,7 +1,7 @@
 
 [project]
 name = "codeproject-ai-sdk"
-version = "0.0.20"
+version = "0.0.21"
 description = "Python SDK for writing Modules for CodeProject AI Server"
 authors = [
     {name = "Chris Maunder"},
