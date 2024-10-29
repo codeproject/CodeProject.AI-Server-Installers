@@ -37,10 +37,13 @@ SCRIPT_PATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 # eg "myapp" or "server/myserver". A shortcut to /usr/local/bin will be created
 APPLICATION_FILE_PATH="server/CodeProject.AI.Server.dll"
 
-# Product and version (version passed in)
+# Product name
 PRODUCT="CodeProject.AI Server"
 
-# We're building for the current server version
+# Shortcut name to product executable
+PRODUCT_SHORTCUT="CodeProject.AI.Server"
+
+# Version (We're always building for the current server version)
 MAJOR=$(grep -o '"Major"\s*:\s*[^,}]*' "${repo_base}/src/server/version.json" | sed 's/.*: \(.*\)/\1/')
 MINOR=$(grep -o '"Minor"\s*:\s*[^,}]*' "${repo_base}/src/server/version.json" | sed 's/.*: \(.*\)/\1/')
 PATCH=$(grep -o '"Patch"\s*:\s*[^,}]*' "${repo_base}/src/server/version.json" | sed 's/.*: \(.*\)/\1/')
@@ -167,21 +170,22 @@ copyTemplatesDirectory(){
     chmod 755 "${BUILD_DIRECTORY}/${TEMPLATES_DEST_DIRNAME}/Distribution"
 
     # handle slashes in paths
-    exe_path="${APPLICATION_FILE_PATH//\//\/}"
+    exe_path="${APPLICATION_FILE_PATH//\//\\\/}"
     exe_path="${exe_path//\./\\.}"
 
-    # echo "$APPLICATION_FILE_PATH"
-    # echo "$exe_path"
+    echo "$APPLICATION_FILE_PATH"
+    echo "$exe_path"
 
     log_info "Configuring postinstall script"
-    sed -i '' -e "s/__VERSION__/${VERSION}/g"                 "${BUILD_DIRECTORY}/${TEMPLATES_DEST_DIRNAME}/scripts/postinstall"
-    sed -i '' -e "s/__DOTNET_VERSION__/${DOTNET_VERSION}/g"   "${BUILD_DIRECTORY}/${TEMPLATES_DEST_DIRNAME}/scripts/postinstall"
-    sed -i '' -e "s/__PRODUCT__/${PRODUCT}/g"                 "${BUILD_DIRECTORY}/${TEMPLATES_DEST_DIRNAME}/scripts/postinstall"
-    sed -i '' -e "s/__PRODUCT_DIRNAME__/${PRODUCT_DIRNAME}/g" "${BUILD_DIRECTORY}/${TEMPLATES_DEST_DIRNAME}/scripts/postinstall"
-    sed -i '' -e "s/__SERVICE_ID__/${SERVICE_ID}/g"           "${BUILD_DIRECTORY}/${TEMPLATES_DEST_DIRNAME}/scripts/postinstall"
-    sed -i '' -e "s/__PACKAGE_ID__/${PACKAGE_ID}/g"           "${BUILD_DIRECTORY}/${TEMPLATES_DEST_DIRNAME}/scripts/postinstall"
-    sed -i '' -e "s/__APPLICATION_FILE_PATH__/${exe_path}/g"  "${BUILD_DIRECTORY}/${TEMPLATES_DEST_DIRNAME}/scripts/postinstall"
-    sed -i '' -e "s/__ADD_TO_STARTUP__/${ADD_TO_STARTUP}/g"   "${BUILD_DIRECTORY}/${TEMPLATES_DEST_DIRNAME}/scripts/postinstall"
+    sed -i '' -e "s/__VERSION__/${VERSION}/g"                   "${BUILD_DIRECTORY}/${TEMPLATES_DEST_DIRNAME}/scripts/postinstall"
+    sed -i '' -e "s/__DOTNET_VERSION__/${DOTNET_VERSION}/g"     "${BUILD_DIRECTORY}/${TEMPLATES_DEST_DIRNAME}/scripts/postinstall"
+    sed -i '' -e "s/__PRODUCT__/${PRODUCT}/g"                   "${BUILD_DIRECTORY}/${TEMPLATES_DEST_DIRNAME}/scripts/postinstall"
+    sed -i '' -e "s/__PRODUCT_DIRNAME__/${PRODUCT_DIRNAME}/g"   "${BUILD_DIRECTORY}/${TEMPLATES_DEST_DIRNAME}/scripts/postinstall"
+    sed -i '' -e "s/__PRODUCT_SHORTCUT__/${PRODUCT_SHORTCUT}/g" "${BUILD_DIRECTORY}/${TEMPLATES_DEST_DIRNAME}/scripts/postinstall"
+    sed -i '' -e "s/__SERVICE_ID__/${SERVICE_ID}/g"             "${BUILD_DIRECTORY}/${TEMPLATES_DEST_DIRNAME}/scripts/postinstall"
+    sed -i '' -e "s/__PACKAGE_ID__/${PACKAGE_ID}/g"             "${BUILD_DIRECTORY}/${TEMPLATES_DEST_DIRNAME}/scripts/postinstall"
+    sed -i '' -e "s/__APPLICATION_FILE_PATH__/${exe_path}/g"    "${BUILD_DIRECTORY}/${TEMPLATES_DEST_DIRNAME}/scripts/postinstall"
+    sed -i '' -e "s/__ADD_TO_STARTUP__/${ADD_TO_STARTUP}/g"     "${BUILD_DIRECTORY}/${TEMPLATES_DEST_DIRNAME}/scripts/postinstall"
     chmod -R 755 "${BUILD_DIRECTORY}/${TEMPLATES_DEST_DIRNAME}/scripts/postinstall"
 
     log_info "Configuring Distribution"
@@ -366,8 +370,7 @@ function moveInstallPackage(){
 }
 
 function cleanDirectories(){
-    # rm -rf "${BUILD_DIRECTORY}"
-    echo
+    rm -rf "${BUILD_DIRECTORY}"
 }
 
 
