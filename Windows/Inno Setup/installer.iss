@@ -1,106 +1,116 @@
 ; Setup for CodeProject.AI Server
- 
-; Define this if you wish to use the script in standalone (not script generated)
-; mode. This will use hardcoded values and only work for x64, not arm64
-#define STANDALONE False
+
 #define DO_SIGNING True
- 
+
 ; Define some constants to make thing easier
-#if STANDALONE == True
-  #define AppName "CodeProject.AI Server"
-  #define AppVersion "2.7.0"
-  #define DotNetVersion "8.0"
-  #define DotNetHostingVersion "8.0.6"
-  #define SetupExeName "CodeProject.AI-Server-win-x64"
-  #define ServerRepoRelPath "..\..\..\CodeProject.AI-Server"
-#else
-  #define AppName "CodeProject.AI Server"
-  #define AppVersion "2.8.1"
-  #define DotNetVersion "8.0"
-  #define DotNetHostingVersion "8.0.6"
-  #define SetupExeName "CodeProject.AI Server-win-x64"
-  #define ServerRepoRelPath "..\..\..\CodeProject.AI-Server"
-#endif
- 
- 
-#define AppExe            "server\CodeProject.AI.Server.exe"
-#define GettingStartedURL "https://www.codeproject.com/Articles/5322557/CodeProject-AI-Server-AI-the-easy-way"
-#define DocumentationURL  "https://www.codeproject.com/AI/docs/"
-#define APIDocsURL        "https://www.codeproject.com/AI/docs/api/api_reference.html"
-#define DiscussionsURL    "https://www.codeproject.com/Feature/CodeProjectAI-Discussions.aspx"
-#define AboutURL          "https://www.codeproject.com/ai/"
-#define DashboardURL      "http://localhost:32168"
-#define ExplorerURL       "http://localhost:32168/explorer.html"
- 
- 
+#define AppName              "CodeProject.AI Server"
+#define SetupExeBaseName     "CodeProject.AI-Server"
+#define Architecture         "x64"
+#define AppVersion           "2.9.0"
+#define InstalledAppPath     "server\CodeProject.AI.Server.exe"
+#define ServerRepoRelPath    "..\..\..\CodeProject.AI-Server"
+
+#define DotNetVersion        "8.0"
+
+; For links in installer pages
+#define GettingStartedURL    "https://codeproject.github.io/codeproject.ai/"
+#define DocumentationURL     "https://codeproject.github.io/codeproject.ai/"
+#define APIDocsURL           "https://codeproject.github.io/codeproject.ai/api/api_reference.html"
+#define DiscussionsURL       "https://github.com/codeproject/CodeProject.AI-Server/discussions"
+#define AboutURL             "https://codeproject.github.io/codeproject.ai/"
+#define DashboardURL         "http://localhost:32168"
+#define ExplorerURL          "http://localhost:32168/explorer.html"
+
 ; File downloads: Use a specific version URL and hash if you want to ensure file
-; integrity, but it is a MS download site, so we can trust it. You can use the 
-; Microsoft DevToys Checksum tool to caclulate the file SHA256 but other tools 
-; are available.
-; NOTE: An empty SHA256 string disables the hash check
- 
-#if STANDALONE == True
-  ; .NET Hosting Bundle
-  #define HostingBundleInstallerExe "dotnet-hosting-8.0.6-win.exe"
-  #define HostingBundleDownloadURL  "https://download.visualstudio.microsoft.com/download/pr/751d3fcd-72db-4da2-b8d0-709c19442225/33cc492bde704bfd6d70a2b9109005a0/dotnet-hosting-8.0.6-win.exe"
-  #define HostingBundleSHA256       "2ac38c2aab8a55e50a2d761fead1320047d2ad5fd22c2f44316aceb094505ec2"
- 
-  ; VC++ redistributable. 14.40.33810.0
-  #define VCRedistInstallerExe      "vc_redist.x64.exe"
-  #define VCRedistDownloadURL       "https://aka.ms/vs/17/release/vc_redist.x64.exe"
-  #define VCRedistSHA256            ""
-#else
-  ; .NET Hosting Bundle
-  #define HostingBundleInstallerExe "dotnet-hosting-8.0.6-win.exe"
-  #define HostingBundleDownloadURL  "https://download.visualstudio.microsoft.com/download/pr/751d3fcd-72db-4da2-b8d0-709c19442225/33cc492bde704bfd6d70a2b9109005a0/dotnet-hosting-8.0.6-win.exe"
-  #define HostingBundleSHA256       "2ac38c2aab8a55e50a2d761fead1320047d2ad5fd22c2f44316aceb094505ec2"
- 
-  ; VC++ redistributable.
-  #define VCRedistInstallerExe      "vc_redist.x64.exe"
-  #define VCRedistDownloadURL       "https://aka.ms/vs/17/release/vc_redist.x64.exe"
-  #define VCRedistSHA256            ""
+; integrity, but it is a MS download site, so we can probably trust it. You can
+; use the Microsoft DevToys Checksum tool to caclulate the file SHA256 but other
+; tools are available. NOTE: An empty SHA256 string disables the hash check
+
+; .NET Hosting Bundle
+#define HostingBundleInstallerExe "dotnet-hosting-8.0.6-win.exe"
+#define HostingBundleDownloadURL  "https://download.visualstudio.microsoft.com/download/pr/751d3fcd-72db-4da2-b8d0-709c19442225/33cc492bde704bfd6d70a2b9109005a0/{#HostingBundleInstallerExe}"
+#define HostingBundleSHA256       "2ac38c2aab8a55e50a2d761fead1320047d2ad5fd22c2f44316aceb094505ec2"
+
+; VC++ redistributable.
+#define VCRedistInstallerExe      "vc_redist.{#Architecture}.exe"
+#define VCRedistDownloadURL       "https://aka.ms/vs/17/release/vc_redist.{#Architecture}.exe"
+#define VCRedistSHA256            ""
+
+#define SigningType               "EvSigning"
+
+; Allow some overrides
+#ifdef basepath
+  #define ServerRepoRelPath basepath
 #endif
- 
+#ifdef arch
+  #define Architecture arch
+#endif
+#ifdef version
+  #define AppVersion version
+#endif
+#ifdef dotnet
+  #define DotNetVersion dotnet
+#endif
+#ifdef dotnethostingExe
+  #define HostingBundleInstallerExe dotnethostingExe
+  #define HostingBundleDownloadURL  ""
+  #define HostingBundleSHA256       ""
+#endif
+#ifdef dotnethostingUrl
+  #define HostingBundleDownloadURL dotnethostingUrl
+#endif
+#ifdef dotnethostingSHA
+  #define HostingBundleSHA256 dotnethostingSHA
+#endif
+#ifdef sign
+  #define SigningType sign
+#endif
+
+#if (HostingBundleDownloadURL = "") || (dotnethostingSHA = "")
+    #expr RaiseException("Error: Both HostingBundleDownloadURL and HostingBundleSHA256 need to be provided")
+#endif
+
+
 [Setup]
 AppId={{403D27BC-6BBD-4935-A991-21890C1A9007}
 AppName={#AppName}
 AppPublisher=CodeProject
 AppPublisherURL=https://www.codeproject.com/AI
-AppSupportURL=https://www.codeproject.com/Feature/CodeProjectAI-Discussions.aspx
-AppUpdatesURL=https://www.codeproject.com/ai/latest.aspx
+AppSupportURL=https://github.com/codeproject/CodeProject.AI-Server/discussions
+AppUpdatesURL=https://codeproject.github.io/codeproject.ai/latest.html
 AppVersion={#AppVersion}
 AppVerName={#AppName} {#AppVersion}
- 
+
 WizardImageFile=.\assets\CodeProjectAI-install-LHS.bmp
 WizardSmallImageFile=.\assets\logo.bmp
 ;WizardImageStretch=no
 DisableWelcomePage=no
- 
+
 OutputDir=Output
-OutputBaseFilename={#SetupExeName}-{#AppVersion}
+OutputBaseFilename={#SetupExeBaseName}_{#AppVersion}_win_{#Architecture}
 SetupIconFile=.\assets\favicon.ico
- 
+
 ;DefaultDialogFontName=Consolas
 WizardStyle=modern
 DefaultDirName={autopf}\CodeProject\AI
-DefaultGroupName=CodeProject.AI Server
+DefaultGroupName={#AppName}
 LicenseFile=.\assets\license.rtf
 UninstallDisplayIcon=.\assets\favicon.ico
 AllowNoIcons=yes
 Compression=lzma2
 SolidCompression=yes
- 
+
 ; "ArchitecturesAllowed=x64" specifies that Setup cannot run on anything but x64.
-ArchitecturesAllowed=x64
- 
+ArchitecturesAllowed={#Architecture}
+
 ; "ArchitecturesInstallIn64BitMode=x64" requests that the install be done in 
 ; "64-bit mode" on x64, meaning it should use the native 64-bit Program Files
 ; directory and the 64-bit view of the registry.
-ArchitecturesInstallIn64BitMode=x64
- 
+ArchitecturesInstallIn64BitMode={#Architecture}
+
 PrivilegesRequired=admin
 CloseApplications=no
- 
+
 ; To allow Inno to sign the installer (and uninstaller) you need to do this one-
 ; off setup:
 ;
@@ -119,86 +129,84 @@ CloseApplications=no
 ; where to get the certificate.
 ;
 ; if you don't have the signing token, comment out the following line
-#if DO_SIGNING == True
-SignTool=EvSigning
-#endif
- 
+SignTool={#SigningType}
+
 [Types]
 Name: "full";    Description: "Full installation"
 Name: "compact"; Description: "Compact installation"
 Name: "custom";  Description: "Custom installation"; Flags: iscustom
- 
+
 [Files]
 ; The core CodeProject.AI Server application
 Source: "{#ServerRepoRelPath}\src\server\bin\Release\net{#DotNetVersion}\*"; Excludes:"*.development.json,"; DestDir: "{app}\Server\"; \
 		Flags: ignoreversion recursesubdirs createallsubdirs
- 
+
 ; We have a setup script for the server, but it's not used (and probably won't be)
 ;Source: "{#ServerRepoRelPath}\src\server\install.bat"; DestDir: "{app}\server\"
- 
+
 ; Python SDK for modules (No longer necessary since new modules use PiPy to get the SDK)
 Source: "{#ServerRepoRelPath}\src\SDK\Python\*"; Excludes:"*.pyc,*.pyproj,*.pyproj.user"; DestDir: "{app}\SDK\Python\"; \
 		Flags: ignoreversion recursesubdirs createallsubdirs
- 
+
 ; Setup script for modules and SDK
 Source: "{#ServerRepoRelPath}\src\setup.bat"; DestDir: "{app}"; 
- 
+
 ; General scripts and utilities to help with setup
 Source: "{#ServerRepoRelPath}\src\scripts\*"; Excludes:"*.sh,"; DestDir: "{app}\scripts\"; \
 		Flags: ignoreversion recursesubdirs createallsubdirs
- 
+
 ; General utilities used in setup. However: we'll copy only what we need, below
 ;Source: "{#ServerRepoRelPath}\utils\*"; Excludes:"*.sh,"; DestDir: "{app}\utils\"; \
 ;		Flags: ignoreversion
 Source: "{#ServerRepoRelPath}\utils\ParseJSON\bin\Release\net{#DotNetVersion}\*"; Excludes:"*.pdb,"; DestDir: "{app}\utils\ParseJSON\"; \
 		Flags: ignoreversion
- 
+
 ; No longer including the full test data
 ; Test data files
 ; Source: "{#ServerRepoRelPath}\demos\TestData\*"; DestDir: "{app}\TestData\"; Flags: ignoreversion recursesubdirs createallsubdirs; \
 ;		 Components: testdata
- 
- 
+
+
 [Icons]
 Name: "{group}\Docs - Overview";                  Filename: "{#AboutURL}"; 
 Name: "{group}\Docs - Getting Started";           Filename: "{#GettingStartedURL}"; 
 Name: "{group}\Docs - API Docs";                  Filename: "{#APIDocsURL}";  
 Name: "{group}\Docs - Server Docs";               Filename: "{#DocumentationURL}";  
- 
+
 Name: "{group}\{#AppName} Dashboard";             Filename: "{#DashboardURL}"; 
 Name: "{group}\{#AppName} Explorer";              Filename: "{#ExplorerURL}"; 
 Name: "{group}\{#AppName} Support";               Filename: "{#DiscussionsURL}"; 
- 
-Name: "{group}\Start {#AppName} Windows Service"; Filename: "{app}\{#AppExe}"; Parameters: "/start"
-Name: "{group}\Stop {#AppName} Windows Service";  Filename: "{app}\{#AppExe}"; Parameters: "/stop"
- 
+
+Name: "{group}\Start {#AppName} Windows Service"; Filename: "{app}\{#InstalledAppPath}"; Parameters: "/start"
+Name: "{group}\Stop {#AppName} Windows Service";  Filename: "{app}\{#InstalledAppPath}"; Parameters: "/stop"
+
 Name: "{group}\Uninstall";                        Filename: "{uninstallexe}"
- 
+
 [Components]
 ;Name: "demo";     Description: "Install demo application"; Types: full custom; 
 ;Name: "testdata"; Description: "Install test images";      Types: full custom;
- 
+
 [Tasks]
 Name: "clean";    Description: "Remove Previously installed Modules and Data. "; 
- 
+
 [RUN]
-Filename: "{app}\{#AppExe}"; Description: "Remove previously installed Modules and Data"; Parameters: "/clean"; \
+Filename: "{app}\{#InstalledAppPath}"; Description: "Remove previously installed Modules and Data"; Parameters: "/clean"; \
 		  StatusMsg: "Removing previously installed Modules and Data"; Flags: runhidden; Tasks: clean
- 
-Filename: "{app}\{#AppExe}"; Description: "Installing {#AppName} as a Windows Service"; Parameters: "/install"; \
+
+Filename: "{app}\{#InstalledAppPath}"; Description: "Installing {#AppName} as a Windows Service"; Parameters: "/install"; \
 		  StatusMsg: "Installing as a Windows Service"; Flags: runhidden 
- 
+
 ;Filename: "{#AboutURL}";     Description: "Open the ReadMe page";          Flags: postinstall nowait shellexec unchecked
 Filename: "{#DashboardURL}"; Description: "Open the {#AppName} Dashboard"; Flags: postinstall nowait shellexec
 ;Filename: "{#ExplorerURL}";  Description: "Open the {#AppName} Explorer";  Flags: postinstall nowait shellexec
- 
+
 [UninstallRUN]
-Filename: "{app}\{#AppExe}"; Parameters: "/uninstall"; RunOnceId: "CPAIService"; Flags: runhidden
- 
+Filename: "{app}\{#InstalledAppPath}"; Parameters: "/uninstall"; RunOnceId: "CPAIService"; Flags: runhidden
+
 [Code]
 const
   max_modules = 128;
- 
+
 type
   ModuleInfo = record
 	module_id: string;
@@ -206,15 +214,15 @@ type
 	isGroup:   Boolean;
 	isChecked: Boolean;
   end;
- 
+
 var
   num_modules: Integer;
   num_menuItems : Integer;
   Modules: array[1..max_modules] of ModuleInfo;
- 
+
   DownloadPage: TDownloadWizardPage;
   SelectModulesPage: TInputOptionWizardPage;
- 
+
 procedure DisplayCustomMessage(Msg: string);
 begin
   // Display your custom message using the WizardForm
@@ -222,42 +230,42 @@ begin
   WizardForm.StatusLabel.Visible := True;
   WizardForm.StatusLabel.Refresh;
 end;
- 
+
 function IsHostingBundleInstalled: Boolean;
 var
   findRec: TFindRec;
   checkDir: string;
- 
+
 begin
   checkDir := ExpandConstant('{commonpf}\dotnet\host\fxr\{#DotNetVersion}.*');
   Result := FindFirst(checkDir, findRec);
- 
+
   if Result then
   begin
 	  FindClose(findRec);
   end;
 end;
- 
+
 function IsVCRedistInstalled: Boolean;
 var
   regKey: string;
 begin
   regKey := 'SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\X64';
- 
+
   // Check if the registry key exists
   Result := RegKeyExists(HKLM, regKey) or RegKeyExists(HKCU, regKey);
 end;
- 
+
 function OnDownloadProgress(const Url, Filename: string; const Progress, ProgressMax: Int64): Boolean;
 begin
   if ProgressMax <> 0 then
 	  Log(Format('%s %d of %d bytes done.', [FileName, Progress, ProgressMax]))
   else
 	  Log(Format('%s %d bytes done.', [FileName, Progress]));
- 
+
   Result := True;
 end;
- 
+
 procedure AddModuleListItem(module_id: string; title: string; isGroup: Boolean; isChecked: Boolean);
 begin
   num_menuItems := num_menuItems + 1;
@@ -266,23 +274,23 @@ begin
   Modules[num_menuItems].isGroup   := isGroup;
   Modules[num_menuItems].isChecked := isChecked;
 end;
- 
+
 procedure AddModule(module_id: string; title: string; isChecked: Boolean);
 begin
   AddModuleListItem(module_id, title, False, isChecked);
 end;
- 
+
 procedure AddGroup(title: string);
 begin
   AddModuleListItem('', title, True, False);
 end;
- 
+
 procedure InitModules;
 begin
   num_menuitems := 0;
   AddGroup('Computer Audition');
   AddModule('SoundClassifierTF', 'Sound Classifier', False);
- 
+
   AddGroup('Computer Vision');
   AddModule('ALPR', 'License Plate Reader', False);
   AddModule('ObjectDetectionCoral', 'Object Detection (Coral)', False);
@@ -292,41 +300,41 @@ begin
   AddModule('ObjectDetectionYOLOv8', 'Object Detection (YOLOv8)', False);
   AddModule('OCR', 'Optical Character Recognition', False);
   AddModule('SceneClassifier', 'Scene Classification', False);
- 
+
   AddGroup('Face Recognition');
   AddModule('FaceProcessing','Face Processing', True);
- 
+
   AddGroup('Generative AI');
   AddModule('Text2Image', 'Text to Image', False);
   AddModule('LlamaChat', 'LLM Chat', False);
- 
+
   AddGroup('Image Processing');
   AddModule('BackgroundRemover', 'Background Remover', False);
   AddModule('Cartooniser', 'Cartooniser', False);
   AddModule('PortraitFilter', 'Portrait Filter', False);
   AddModule('SuperResolution', 'Super Resolution', False);
- 
+
   AddGroup('Natural Language');
   AddModule('SentimentAnalysis', 'Sentiment Analysis', False);
   AddModule('TextSummary', 'Text Summary', False);
- 
+
   AddGroup('Training');
   AddModule('TrainingObjectDetectionYOLOv5', 'Training for YOLOv5 6.2', False);
 end;
- 
+
 procedure CreateModuleSelectPage;
 var
   i: Byte;
   itemIndex: Integer;
   checkboxList: TNewCheckListBox;
- 
+
 begin
   InitModules();
   SelectModulesPage := CreateInputOptionPage(wpSelectTasks, 'Add Modules',
     'Check the Modules you want to add to your new or existing installation. Existing modules will only be removed if you checked the box on the previous page.',
     'When you have selected all the Modules you want to add, click Next',
 	  False, false)
- 
+
   checkboxList := SelectModulesPage.CheckListBox;
   num_modules := 0;
   for i := 1 to num_menuitems do
@@ -344,7 +352,7 @@ begin
     end;
   end;
 end;
- 
+
 function DoModuleSelectPage(): Boolean;
 var
   i: Byte;
@@ -353,18 +361,18 @@ var
   FileName: string;
   FileDir: string;
   FirstItem:Boolean;
- 
+
 begin
   FileName := ExpandConstant('{app}\Server\installmodules.json');
   FileDir  := ExpandConstant('{app}\Server\');
   Log(FileName);
- 
+
   output := '{' + #13#10;
   output := output + '  "ModuleOptions": {' + #13#10;
   output := output + '    "InitialModules": "';
- 
+
   checkboxList := SelectModulesPage.CheckListBox;
- 
+
   FirstItem := True;
   for i := 1 to num_menuitems do
   begin
@@ -379,26 +387,26 @@ begin
       output := output + checkboxList.ItemSubItem[i-1];
     end;
   end;
- 
+
   output := output+ '"' + #13#10;
   output := output + '  }' + #13#10;
   output := output + '}' + #13#10;
- 
+
   Log(output);
- 
+
   ForceDirectories(FileDir);
   SaveStringToFile(FileName, output, False);
- 
+
   Result := True;
 end;
- 
+
 procedure InitializeWizard;
 begin
   DownloadPage := CreateDownloadPage(SetupMessage(msgWizardPreparing), SetupMessage(msgPreparingDesc), 
                                      @OnDownloadProgress);
   CreateModuleSelectPage();
 end;
- 
+
 function DoDownloadPage() : Boolean;
 var
   iResultCode: Integer;
@@ -406,66 +414,66 @@ var
   vcRedistInstaller: string;
   InstallHostingBundle: Boolean;
   InstallVCRedist: Boolean;
- 
+
 begin
   InstallHostingBundle := not IsHostingBundleInstalled();
   InstallVCRedist      := not IsVCRedistInstalled();
- 
+
   if (InstallHostingBundle or InstallVCRedist) then 
   begin
     hostingBundleInstaller := ExpandConstant('{tmp}\{#HostingBundleInstallerExe}');
     vcRedistInstaller      := ExpandConstant('{tmp}\{#VCRedistInstallerExe}');
- 
+
     DownloadPage.Clear;
- 
+
     // Use AddEx to specify a username and password
     if InstallHostingBundle then
       DownloadPage.Add('{#HostingBundleDownloadURL}', '{#HostingBundleInstallerExe}', '{#HostingBundleSHA256}');
- 
+
     if InstallVCRedist then
       DownloadPage.Add('{#VCRedistDownloadURL}', '{#VCRedistInstallerExe}', '{#VCRedistSHA256}');
- 
+
     DownloadPage.Show;
- 
+
     try     // Outer 'try' so we have a 'finally' clause to always hide the windows
- 
+
       try   // Inner 'try' to handle issues (feels hack-ey)
         DownloadPage.Download; // This downloads the files to {tmp}
- 
+
         if InstallHostingBundle then
         begin
           Exec(hostingBundleInstaller, '/install /quiet /norestart', '', SW_HIDE, ewWaitUntilTerminated, iResultCode)
           DeleteFile(hostingBundleInstaller);
         end;
- 
+
         if InstallVCRedist then
         begin
           Exec(vcRedistInstaller, '/install /quiet /norestart', '', SW_HIDE, ewWaitUntilTerminated, iResultCode)
           DeleteFile(vcRedistInstaller);
         end;
- 
+
         Result := True;
- 
+
       except
         if DownloadPage.AbortedByUser then
           Log('Aborted by user.')
         else
           SuppressibleMsgBox(AddPeriod(GetExceptionMessage), mbCriticalError, MB_OK, IDOK);
- 
+
         Result := False;
       end;
- 
+
     finally
       DownloadPage.Hide;
     end;
- 
+
   end 
   else
   begin
 	  Result := True;
   end;
 end;
- 
+
 function NextButtonClick(CurPageID: Integer): Boolean;
 begin
   if (CurPageID = wpReady) then 
@@ -476,44 +484,44 @@ begin
   else
 	  Result := True;
 end;
- 
+
 function GetUninstallString(): String;
 var
   sUnInstPath: String;
   sUnInstallString: String;
   keyExists: Boolean;
- 
+
 begin
   sUnInstPath := ExpandConstant('Software\Microsoft\Windows\CurrentVersion\Uninstall\{#emit SetupSetting("AppId")}');
   if RegValueExists(HKLM, sUnInstPath,'UninstallString') then
 	  keyExists := True;
- 
+
   sUnInstallString := '';
   if not RegQueryStringValue(HKLM, sUnInstPath, 'UninstallString', sUnInstallString) then
 	  RegQueryStringValue(HKCU, sUnInstPath, 'UninstallString', sUnInstallString);
- 
+
   Result := sUnInstallString;
 end;
- 
+
 function IsUpgrade(): Boolean;
 begin
   Result := (GetUninstallString() <> '');
 end;
- 
+
 function UnInstallOldVersion(): Integer;
 var
   sUnInstallString: String;
   iResultCode: Integer;
- 
+
 begin
   { Return Values: }
   { 1 - uninstall string is empty }
   { 2 - error executing the UnInstallString }
   { 3 - successfully executed the UnInstallString }
- 
+
   { default return value }
   Result := 0;
- 
+
   { get the uninstall string of the old app }
   sUnInstallString := GetUninstallString();
   if sUnInstallString <> '' then
@@ -522,7 +530,7 @@ begin
 	  sUnInstallString := RemoveQuotes(sUnInstallString);
 	  StringChangeEx(sUnInstallString, '/I', '/X', True);
 	  sUnInstallString := ExpandConstant('{sys}\') + sUninstallString;
- 
+
 	  if Exec('>', sUnInstallString + ' /quiet', '', SW_HIDE, ewWaitUntilTerminated, iResultCode) then
 		  Result := 3
 	  else
@@ -531,25 +539,25 @@ begin
   else
 	  Result := 1;
 end;
- 
+
 procedure StopWindowsService();
 var
   commandPath: String;
   iResultCode: Integer;
- 
+
 begin
   DisplayCustomMessage('Stopping the Windows Service and all the Modules ...');
-  commandPath := ExpandConstant('{app}\{#AppExe}');
+  commandPath := ExpandConstant('{app}\{#InstalledAppPath}');
   Exec(commandPath, '/stop','',  SW_HIDE, ewWaitUntilTerminated, iResultCode);
 end;
- 
+
 procedure CurStepChanged(CurStep: TSetupStep);
 begin
   if (CurStep = ssInstall) then
 	begin
 	  { stop the Windows Service }
 	  StopWindowsService();
- 
+
 	  if (IsUpgrade()) then
 		begin
 		  UnInstallOldVersion();
