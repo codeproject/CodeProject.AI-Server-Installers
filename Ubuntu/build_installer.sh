@@ -25,7 +25,7 @@ INSTALLER_DIRNAME="installer"
 ### Parameters
 
 # The location of the root of the server repo relative to this script
-repo_base="../../CodeProject.AI-Server-Dev"
+repo_base="../../CodeProject.AI-Server"
 pushd "$repo_base" > /dev/null
 repo_base="$(pwd)"
 popd > /dev/null

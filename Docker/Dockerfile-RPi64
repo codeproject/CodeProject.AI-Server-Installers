@@ -1,15 +1,14 @@
 # CodeProject.AI Server
 #
 # DOCKER Image build file for Raspberry Pi. This includes a TF-Lite module that
-# can take advantage of the Coral.AI USB TPU. To use, add the 
+# can take advantage of the Coral.AI USB TPU. To use:
 #
- 
 # docker run --name CodeProject.AI-Server -d \
 #  -p 32168:32168 -p 32168:32168/udp \
 # --mount type=bind,source=/etc/codeproject/ai,target=/etc/codeproject/ai \
 # --mount type=bind,source=/opt/codeproject/ai,target=/app/modules \
 # --privileged -v /dev/bus/usb:/dev/bus/usb \
-#   codeproject/ai-server
+#   codeproject/ai-server:rpi
 #
 # NOTE: Evidently Macs with Apple Silicon do not support USB passthrough.
 #
@@ -74,8 +73,9 @@ EXPOSE 32168/udp
 LABEL "Application"="CodeProject.AI Server"
 LABEL "Publisher"="CodeProject Solutions Inc"
 LABEL "Version"="${CPAI_VERSION}"
-LABEL "Target"="RaspberryPi (arm64) specific ${UBUNTU_VERSION} with CUDA ${CUDA_VERSION}"
-LABEL "Description"="CodeProject.AI Server for RaspberryPi (arm64) on ${UBUNTU_VERSION} with CUDA ${CUDA_VERSION}."
+LABEL "Target"="RaspberryPi (arm64) specific ${UBUNTU_VERSION}"
+LABEL "Description"="CodeProject.AI Server for RaspberryPi (arm64) on ${UBUNTU_VERSION}. \
+Suitable for Orange Pi, Radxa ROCK and Raspberry Pi."
 
 # Install required libraries --------------------------------------------------
 
@@ -126,13 +126,17 @@ RUN apt-get update -y && \
         kmod            > /dev/null
 
 
-# .NET 7 ----------------------------------------------------------------------
+# .NET -------------------------------------------------------------------------
+
+# Update packages and install .NET
 
 # See https://learn.microsoft.com/en-us/dotnet/core/install/linux-scripted-manual#scripted-install
 RUN wget https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh
 RUN chmod +x ./dotnet-install.sh
+
 # Install .NET. For just the runtime use "--channel $DOTNET_VERSION --runtime aspnetcore"
 RUN ./dotnet-install.sh --channel $DOTNET_VERSION --runtime aspnetcore
+
 # The install script is for CI/CD and doesn't actually register .NET. So add 
 # link and env variable
 RUN ln -fs $HOME/.dotnet/dotnet /usr/local/bin/dotnet
@@ -153,45 +157,58 @@ RUN apt-get update && apt-get install libedgetpu1-std
 
 # Setup Python ----------------------------------------------------------------
 
-# Allow us to get older, deceased Python packages from dead snakes
-RUN apt-get install software-properties-common -y && \
-    add-apt-repository ppa:deadsnakes/ppa -y
+# Combining all these together into a single layer
+# 1. Add deadsnakes repo
+# 2. Install pip for python3,  python3-apt and python3-setuptools
+#    Note that this (currently) installs python3.8 as a dependency. It could be
+#    in the future that a different version of python is installed instead, in
+#    which case we may need to pin the installed python version.
+# 3. Install Python 3.8 as well as dev and distutils so packages can be built
+#    if needed, and venv for creating virtual environments
+# 4. Using the now installed Python 3.8, upgrade the python setuptools and dev
+#    packages to the latest
+# 5. Install virtualenv virtualenvwrapper for python 3.8
 
-# This (currently) installs python3.8 as a dependency. It could be in the future
-# that a different version of python is installed instead, in which case we may
-# need to pin the installed python version.
-RUN apt-get install python3-pip python3-apt python3-setuptools -y
+RUN apt-get install software-properties-common -y &&      \
+    add-apt-repository ppa:deadsnakes/ppa -y      &&      \
+    apt-get install -y --no-install-recommends            \
+        python3-pip                                       \
+        python3-apt                                       \
+        python3-setuptools                        &&      \
+    apt-get install -y --no-install-recommends            \
+        python3.8                                 &&      \
+    apt-get install -y --no-install-recommends            \
+        python3.8-distutils                               \
+        python3.8-dev                                     \ 
+        python3.8-venv                            &&      \
+    python3.8 -m pip install --upgrade setuptools &&      \
+    python3.8 -m pip install --upgrade pip        &&      \
+    python3.8 -m pip install virtualenv virtualenvwrapper > /dev/null
 
-# Install Python3.8, distutils and dev tools (so packages can be built if needed)
-# and pip install so we can install python packages
-RUN apt-get install python3.8 -y && \
-    apt-get install python3.8-distutils -y && \
-    apt-get install python3.8-dev -y && \ 
-    python3.8 -m pip install --upgrade setuptools && \
-    python3.8 -m pip install --upgrade pip
+# Python 3.9: Combining all these together into a single layer, but leveraging
+# the work done in Python 3.8:
+# 1. Install Python 3.9 as well as dev and distutils so packages can be built
+#    if needed, and venv for creating virtual environments
+# 4. Using the now installed Python 3.8, upgrade the python setuptools and dev
+#    packages to the latest
+# 5. Install virtualenv virtualenvwrapper for python 3.8
 
-# install virtual env tools
-RUN apt install python3.8-venv -y && \
-    python3.8 -m pip install virtualenv virtualenvwrapper
-
-# Install Python3.9, distutils and dev tools (so packages can be built if needed)
-# and pip install so we can install python packages
-RUN apt-get install python3.9 -y && \
-    apt-get install python3.9-distutils -y && \
-    apt-get install python3.9-dev -y && \ 
-    python3.9 -m pip install --upgrade setuptools && \
-    python3.9 -m pip install --upgrade pip
-
-# install virtual env tools
-RUN apt install python3.9-venv -y
-RUN python3.9 -m pip install virtualenv virtualenvwrapper
+RUN apt-get install -y --no-install-recommends            \
+        python3.9                                 &&      \
+    apt-get install -y --no-install-recommends            \
+        python3.9-distutils                               \
+        python3.9-dev                                     \ 
+        python3.9-venv                            &&      \
+    python3.9 -m pip install --upgrade setuptools &&      \
+    python3.9 -m pip install --upgrade pip        &&      \
+    python3.9 -m pip install virtualenv virtualenvwrapper > /dev/null
 
 
 # Build the .NET source in a separate, discardable build container --------------
 
 FROM mcr.microsoft.com/dotnet/sdk:$DOTNET_VERSION AS build
 
-# A new image so we need to re-declare these
+# Grab the values passed in via command line here so we can use inside this stage
 # See https://docs.docker.com/engine/reference/builder/#scope
 ARG UBUNTU_VERSION=22.04
 ARG DOTNET_VERSION=9.0
@@ -237,7 +254,7 @@ RUN dotnet publish "Server.csproj" -c Release --no-self-contained --force -o /ap
 #            already installed still be visible, while also allowing us to add
 #            installed modules to the folder. This  probably involves volumes
 
-WORKDIR "/src/src/modules/ObjectDetectionYOLOv5Net"
+WORKDIR "/src/modules/ObjectDetectionYOLOv5Net"
 RUN dotnet publish ObjectDetectionYOLOv5Net.csproj -c Release --no-self-contained /p:DefineConstants=GPU_NONE \
                    --force -o /app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net/bin &&               \
     mv -f /app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net/bin/modulesettings.*                     \
@@ -352,9 +369,12 @@ RUN python3.8 -m pip --no-cache-dir install \
     -r /app/preinstalled-modules/ObjectDetectionYOLOv5-3.1/requirements.raspberrypi.txt \
     -r /app/SDK/Python/requirements.txt
 
-# --no-cache-dir is here to reduce the size of the image
+## Not including Coral yet
+# RUN python3.9 -m pip --no-cache-dir install \
+#    -r /app/preinstalled-modules/ObjectDetectionCoral/requirements.linux.arm64.txt \
+#    -r /app/SDK/Python/requirements.txt
+
 RUN python3.9 -m pip --no-cache-dir install \
-    -r /app/preinstalled-modules/ObjectDetectionCoral/requirements.linux.arm64.txt \
     -r /app/SDK/Python/requirements.txt
 
 # Add folders for storing persisted user data and modules. This should be mapped

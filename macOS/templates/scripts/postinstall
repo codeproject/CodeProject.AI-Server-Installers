@@ -1,10 +1,13 @@
 #!/bin/bash
 
-# Parameters
-APPLICATION_FILE_PATH=__APPLICATION_FILE_PATH__
-
-# Whether to add the app to the startup items
-ADD_TO_STARTUP="__ADD_TO_STARTUP__"
+# These will be replaced by the install script builder
+APPLICATION_FILE_PATH=__APPLICATION_FILE_PATH__  # Relative path to the server exe 
+PRODUCT="__PRODUCT__"                            # Product name
+VERSION="__VERSION__"                            # Product version
+SERVICE_ID="__SERVICE_ID__"                      # ID of the service we create
+PRODUCT_SHORTCUT="__PRODUCT_SHORTCUT__"          # Shortcut name to the application
+DOTNET_VERSION="__DOTNET_VERSION__"              # Version of .NET being targeted
+ADD_TO_STARTUP=__ADD_TO_STARTUP__                # Whether to add the app to the startup items
 
 # Daemon = goes in LaunchDaemons, and launches at boot. 
 # Agent  = goes in LaunchAgents and starts up at login. Add to "Allow in the background" list
@@ -13,8 +16,6 @@ SERVICE_TYPE="Agent"
 ARCH='x64'
 if [ $(uname -m) == 'arm64' ]; then ARCH='arm64'; fi
 
-DOTNET_VERSION="__DOTNET_VERSION__"
-
 echo "Post installation process started"
 
 echo "Creating settings folder"
@@ -22,64 +23,64 @@ mkdir -p "/Library/Application Support/CodeProject/AI"
 chmod -R a+w "/Library/Application Support/CodeProject/"
 
 echo "Setting execute permissions"
-pushd "/Library/__PRODUCT__/__VERSION__/server"
+pushd "/Library/$PRODUCT/$VERSION/server"
 sudo chmod -R 755 .
 popd
 
 echo "Settings application folder permissions"
-chmod -R a+w "/Library/__PRODUCT__/__VERSION__/runtimes/"
-chmod -R a+w "/Library/__PRODUCT__/__VERSION__/modules/"
-chmod -R a+w "/Library/__PRODUCT__/__VERSION__/downloads/"
+chmod -R a+w "/Library/$PRODUCT/$VERSION/runtimes/"
+chmod -R a+w "/Library/$PRODUCT/$VERSION/modules/"
+chmod -R a+w "/Library/$PRODUCT/$VERSION/downloads/"
 
 echo "Setting file permissions"
-chmod a+w "/Library/__PRODUCT__/__VERSION__/setup.sh"
-chmod -R a+w "/Library/__PRODUCT__/__VERSION__/SDK/"
+chmod a+w "/Library/$PRODUCT/$VERSION/setup.sh"
+chmod -R a+w "/Library/$PRODUCT/$VERSION/SDK/"
 
 echo "Ensuring .NET installed"
-bash "/Library/__PRODUCT__/__VERSION__/SDK/Scripts/dotnet-install.sh" --channel __DOTNET_VERSION__ --runtime aspnetcore
+bash "/Library/$PRODUCT/$VERSION/SDK/Scripts/dotnet-install.sh" --channel $DOTNET_VERSION --runtime aspnetcore
 
 echo "Adding application shortcut to /usr/local/bin"
 [ -d /usr/local/bin ] || mkdir -p /usr/local/bin
-[ -e "/usr/local/bin/__PRODUCT_SHORTCUT__" ] && rm -f "/usr/local/bin/__PRODUCT_SHORTCUT__"
-ln -s "/Library/__PRODUCT__/__VERSION__/__APPLICATION_FILE_PATH__" "/usr/local/bin/__PRODUCT_SHORTCUT__"
+[ -e "/usr/local/bin/$PRODUCT_SHORTCUT" ] && rm -f "/usr/local/bin/$PRODUCT_SHORTCUT"
+ln -s "/Library/$PRODUCT/$VERSION/$APPLICATION_FILE_PATH" "/usr/local/bin/$PRODUCT_SHORTCUT"
 
-if [ "${ADD_TO_STARTUP}" == "true" ]; then
+if [ "${ADD_TO_STARTUP}" == true ]; then
     # Add as a launchd item
     if [ "${SERVICE_TYPE}" == "Daemon" ]; then
         echo "Adding CodeProject.AI Server to Daemon list"
-        cp "/Library/__PRODUCT__/__VERSION__/__SERVICE_ID__.plist" /Library/LaunchDaemons/  
+        cp "/Library/$PRODUCT/$VERSION/$SERVICE_ID.plist" /Library/LaunchDaemons/  
         # To resolve "plist file Path had bad ownership/permissions" error
-        chown root:wheel /Library/LaunchDaemons/__SERVICE_ID__.plist
+        chown root:wheel /Library/LaunchDaemons/$SERVICE_ID.plist
         # This is required for security purposes
-        chmod o-w /Library/LaunchDaemons/__SERVICE_ID__.plist    
+        chmod o-w /Library/LaunchDaemons/$SERVICE_ID.plist    
         # Register
-        launchctl load /Library/LaunchDaemons/__SERVICE_ID__.plist
+        launchctl load /Library/LaunchDaemons/$SERVICE_ID.plist
     else
         echo "Adding CodeProject.AI Server to login items list"
-        cp "/Library/__PRODUCT__/__VERSION__/__SERVICE_ID__.plist" /Library/LaunchAgents/
+        cp "/Library/$PRODUCT/$VERSION/$SERVICE_ID.plist" /Library/LaunchAgents/
         # To resolve "plist file Path had bad ownership/permissions" error
-        chown root:wheel /Library/LaunchAgents/__SERVICE_ID__.plist
+        chown root:wheel /Library/LaunchAgents/$SERVICE_ID.plist
         # This is required for security purposes
-        chmod o-w /Library/LaunchAgents/__SERVICE_ID__.plist
+        chmod o-w /Library/LaunchAgents/$SERVICE_ID.plist
         # Register   
-        launchctl load /Library/LaunchAgents/__SERVICE_ID__.plist
+        launchctl load /Library/LaunchAgents/$SERVICE_ID.plist
     fi
 fi
 
 # Not appropriate - it's not a .app
-# cp "/Library/__PRODUCT__/__VERSION__/__PRODUCT__.command" /Applications
+# cp "/Library/$PRODUCT/$VERSION/$PRODUCT.command" /Applications
 
 # Create an AppleScript to add the command to Login Items
 echo "Adding Login item"
 osascript <<EOD
 tell application "System Events"
-    make new login item at end with properties {name:"__PRODUCT__", path:"/Library/__PRODUCT__/__VERSION__/__PRODUCT__.command", hidden:false}
+    make new login item at end with properties {name:"$PRODUCT", path:"/Library/$PRODUCT/$VERSION/$PRODUCT.command", hidden:false}
 end tell
 EOD
 
 # This just isn't working...
 # echo "Launching server"
-# open -a "/Library/__PRODUCT__/__VERSION__/__PRODUCT__.command"
+# open -a "/Library/$PRODUCT/$VERSION/$PRODUCT.command"
 
 echo "Post installation process finished"
 
