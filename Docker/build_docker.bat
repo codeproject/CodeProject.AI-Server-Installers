@@ -16,7 +16,9 @@ setlocal enabledelayedexpansion
 REM The location of the root of the server repo relative to this script, and the
 REM folder name containing the repo itself
 set repo_base=..\..
-set repo_name=CodeProject.AI-Server-Dev
+set repo_name=CodeProject.AI-Server
+
+set dotnet_version="9.0"
 
 REM Sniff Parameters
 
@@ -79,19 +81,6 @@ for /f "usebackq tokens=2 delims=:," %%a in (`findstr /I /R /C:"\"Patch\"[^^{]*$
 )
 set version=!major!.!minor!.!patch!
 
-REM We have two forms of the Docker images due to the base folder structure changing in 2.7.0
-if !major! lss 2 (
-    set dotnet_version="7.0"
-    set file_suffix="-2.6.5"
-) else if !major! equ 2 if !minor! lss 7 (
-    set dotnet_version="7.0"
-    set file_suffix="-2.6.5"
-) else (
-    set dotnet_version="8.0"
-    set file_suffix="-2.7.0"
-)
-
-
 REM Let the user know
 echo Building: !images! for version !version!
 
@@ -100,7 +89,7 @@ REM Build Images and tag with generic "latest" version for each platform
 REM (add --progress=plain --no-cache to param list to see stdout output)
 
 if /i "!do_cpu!" == "true" (
-    docker buildx build --platform linux/amd64 --no-cache --build-arg REPO_NAME=!repo_name! --build-arg CPAI_VERSION=!version! --build-arg DOTNET_VERSION=!dotnet_version! --tag codeproject/ai-server -f Dockerfile!file_suffix! "!repo_base!"
+    docker buildx build --platform linux/amd64 --no-cache --build-arg REPO_NAME=!repo_name! --build-arg CPAI_VERSION=!version! --build-arg DOTNET_VERSION=!dotnet_version! --tag codeproject/ai-server -f Dockerfile "!repo_base!"
 )
 
 if /i "!do_gpu!" == "true" (
@@ -108,21 +97,21 @@ REM docker pull cupy/nvidia-cuda:10.2-runtime-ubuntu18.04
 REM docker pull nvidia/cuda:11.7.1-cudnn8-runtime-ubuntu22.04 
 REM docker pull nvidia/cuda:12.2.2-cudnn8-runtime-ubuntu22.04
     
-REM docker buildx build --platform linux/amd64 --no-cache --build-arg REPO_NAME=!repo_name! --build-arg CPAI_VERSION=!version! --build-arg DOTNET_VERSION=!dotnet_version! --build-arg CUDA_VERSION=10.2          --build-arg CUDA_MAJOR=10 --tag codeproject/ai-server:cuda10_2 -f Dockerfile-GPU-CUDA10_2!file_suffix! "!repo_base!"
-    docker buildx build --platform linux/amd64 --no-cache --build-arg REPO_NAME=!repo_name! --build-arg CPAI_VERSION=!version! --build-arg DOTNET_VERSION=!dotnet_version! --build-arg CUDA_VERSION=11.7.1-cudnn8 --build-arg CUDA_MAJOR=11 --tag codeproject/ai-server:cuda11_7 -f Dockerfile-GPU-CUDA!file_suffix! "!repo_base!"
-    docker buildx build --platform linux/amd64 --no-cache --build-arg REPO_NAME=!repo_name! --build-arg CPAI_VERSION=!version! --build-arg DOTNET_VERSION=!dotnet_version! --build-arg CUDA_VERSION=12.2.2-cudnn8 --build-arg CUDA_MAJOR=12 --tag codeproject/ai-server:cuda12_2 -f Dockerfile-GPU-CUDA!file_suffix! "!repo_base!"
+REM docker buildx build --platform linux/amd64 --no-cache --build-arg REPO_NAME=!repo_name! --build-arg CPAI_VERSION=!version! --build-arg DOTNET_VERSION=!dotnet_version! --build-arg CUDA_VERSION=10.2          --build-arg CUDA_MAJOR=10 --tag codeproject/ai-server:cuda10_2 -f Dockerfile-GPU-CUDA10_2 "!repo_base!"
+    docker buildx build --platform linux/amd64 --no-cache --build-arg REPO_NAME=!repo_name! --build-arg CPAI_VERSION=!version! --build-arg DOTNET_VERSION=!dotnet_version! --build-arg CUDA_VERSION=11.7.1-cudnn8 --build-arg CUDA_MAJOR=11 --tag codeproject/ai-server:cuda11_7 -f Dockerfile-GPU-CUDA "!repo_base!"
+    docker buildx build --platform linux/amd64 --no-cache --build-arg REPO_NAME=!repo_name! --build-arg CPAI_VERSION=!version! --build-arg DOTNET_VERSION=!dotnet_version! --build-arg CUDA_VERSION=12.2.2-cudnn8 --build-arg CUDA_MAJOR=12 --tag codeproject/ai-server:cuda12_2 -f Dockerfile-GPU-CUDA "!repo_base!"
 )
 
 if /i "!do_arm!" == "true" (
-    docker buildx build --platform linux/arm64 --no-cache --build-arg REPO_NAME=!repo_name! --build-arg CPAI_VERSION=!version! --build-arg DOTNET_VERSION=!dotnet_version! --tag codeproject/ai-server:arm64 -f Dockerfile-Arm64!file_suffix! "!repo_base!"
+    docker buildx build --platform linux/arm64 --no-cache --build-arg REPO_NAME=!repo_name! --build-arg CPAI_VERSION=!version! --build-arg DOTNET_VERSION=!dotnet_version! --tag codeproject/ai-server:arm64 -f Dockerfile-Arm64 "!repo_base!"
 )
 
 if /i "!do_jetson!" == "true" (
-   docker buildx build --platform linux/arm64 --no-cache --build-arg REPO_NAME=!repo_name! --build-arg CPAI_VERSION=!version! --build-arg DOTNET_VERSION=!dotnet_version! --tag codeproject/ai-server:jetson -f Dockerfile-Jetson!file_suffix! "!repo_base!"
+   docker buildx build --platform linux/arm64 --no-cache --build-arg REPO_NAME=!repo_name! --build-arg CPAI_VERSION=!version! --build-arg DOTNET_VERSION=!dotnet_version! --tag codeproject/ai-server:jetson -f Dockerfile-Jetson "!repo_base!"
 )
 
 if /i "!do_rpi!" == "true" (
-    docker buildx build --platform linux/arm64 --no-cache --build-arg REPO_NAME=!repo_name! --build-arg CPAI_VERSION=!version! --build-arg DOTNET_VERSION=!dotnet_version! --tag codeproject/ai-server:rpi64 -f Dockerfile-RPi64!file_suffix! "!repo_base!"
+    docker buildx build --platform linux/arm64 --no-cache --build-arg REPO_NAME=!repo_name! --build-arg CPAI_VERSION=!version! --build-arg DOTNET_VERSION=!dotnet_version! --tag codeproject/ai-server:rpi64 -f Dockerfile-RPi64 "!repo_base!"
 )
 
 

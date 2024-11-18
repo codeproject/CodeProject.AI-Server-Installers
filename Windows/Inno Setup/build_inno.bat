@@ -23,8 +23,8 @@ if /i "!architecture!" == "arm64" (
 )
 
 REM Libraries and tools
-set "DotNetVersion=8.0"
-set "DotNetHostingVersion=8.0.6"
+set "DotNetVersion=9.0"
+set "DotNetHostingVersion=9.0.0"
 
 REM File names
 set "SetupScriptTemplate=installer-template.iss"
@@ -33,8 +33,9 @@ set "SetupExeName=!AppName!-!os!-!architecture!"
 
 REM Note the hosting bundle is architecture agnostic. (arm64, x64 same file)
 set "HostingBundleInstallerExe=dotnet-hosting-!DotNetHostingVersion!-win.exe"
-set "HostingBundleDownloadURL=https://download.visualstudio.microsoft.com/download/pr/751d3fcd-72db-4da2-b8d0-709c19442225/33cc492bde704bfd6d70a2b9109005a0/!HostingBundleInstallerExe!"
-set "HostingBundleSHA256=2ac38c2aab8a55e50a2d761fead1320047d2ad5fd22c2f44316aceb094505ec2"
+set "HostingBundleDownloadURL=https://download.visualstudio.microsoft.com/download/pr/e1ae9d41-3faf-4755-ac27-b24e84eef3d1/5e3a24eb8c1a12272ea1fe126d17dfca/!HostingBundleInstallerExe!"
+REM Use https://emn178.github.io/online-tools/sha256_checksum.html to calculate this:
+set "HostingBundleSHA256=342681a5e594163ca18167160fc7dd969171184584dfaed4f2745b462ade7b0b"
 
 set "VCRedistInstallerExe=vc_redist.x64.exe"
 set "VCRedistDownloadURL=https://aka.ms/vs/17/release/vc_redist.!architecture!.exe"

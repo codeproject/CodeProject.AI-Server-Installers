@@ -8,11 +8,11 @@
 ; Define some constants to make thing easier
 #if STANDALONE == True
   #define AppName "CodeProject.AI Server"
-  #define AppVersion "2.7.0"
-  #define DotNetVersion "8.0"
-  #define DotNetHostingVersion "8.0.6"
+  #define AppVersion "2.9.1"
+  #define DotNetVersion "9.0"
+  #define DotNetHostingVersion "9.0.0"
   #define SetupExeName "CodeProject.AI-Server-win-x64"
-  #define ServerRepoRelPath "..\..\..\CodeProject.AI-Server-Dev"
+  #define ServerRepoRelPath "..\..\..\CodeProject.AI-Server"
 #else
   #define AppName "__PRODUCT__"
   #define AppVersion "__VERSION__"
@@ -41,9 +41,10 @@
 
 #if STANDALONE == True
   ; .NET Hosting Bundle
-  #define HostingBundleInstallerExe "dotnet-hosting-8.0.6-win.exe"
-  #define HostingBundleDownloadURL  "https://download.visualstudio.microsoft.com/download/pr/751d3fcd-72db-4da2-b8d0-709c19442225/33cc492bde704bfd6d70a2b9109005a0/dotnet-hosting-8.0.6-win.exe"
-  #define HostingBundleSHA256       "2ac38c2aab8a55e50a2d761fead1320047d2ad5fd22c2f44316aceb094505ec2"
+  #define HostingBundleInstallerExe "dotnet-hosting-9.0.0-win.exe"
+  #define HostingBundleDownloadURL  "https://download.visualstudio.microsoft.com/download/pr/e1ae9d41-3faf-4755-ac27-b24e84eef3d1/5e3a24eb8c1a12272ea1fe126d17dfca/dotnet-hosting-9.0.0-win.exe"
+  ; Use https://emn178.github.io/online-tools/sha256_checksum.html to calculate this:
+  #define HostingBundleSHA256       "342681a5e594163ca18167160fc7dd969171184584dfaed4f2745b462ade7b0b"
 
   ; VC++ redistributable. 14.40.33810.0
   #define VCRedistInstallerExe      "vc_redist.x64.exe"
@@ -53,6 +54,7 @@
   ; .NET Hosting Bundle
   #define HostingBundleInstallerExe "dotnet-hosting-__DOTNET_HOSTING_VERSION__-win.exe"
   #define HostingBundleDownloadURL  "__HOSTING_BUNDLE_URL__"
+  ; Use https://emn178.github.io/online-tools/sha256_checksum.html to calculate this:
   #define HostingBundleSHA256       "__HOSTING_BUNDLE_SHA256__"
 
   ; VC++ redistributable.

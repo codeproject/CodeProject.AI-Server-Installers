@@ -21,8 +21,11 @@
 
 # INITIAL SETUP ===============================================================
 
+# Note: we're before the first 'FROM' statment so these values are not available
+# inside the build stages. If you wish to use these inside a stage, re-grab them 
+# inside that stage
 ARG UBUNTU_VERSION=22.04
-ARG DOTNET_VERSION=7.0
+ARG DOTNET_VERSION=9.0
 ARG CPAI_VERSION
 
 # It's important to pull the correct base for the target architecture, otherwise
@@ -51,9 +54,9 @@ ENV DOTNET_RUNNING_IN_CONTAINER=true
 # installs, for instance, require this in this current environment
 ENV DEBIAN_FRONTEND noninteractive
 
-# Let the (walled) World know which version they are running under
+# Grab the values passed in via command line here so we can use inside this stage
 ARG UBUNTU_VERSION=22.04
-ARG DOTNET_VERSION=7.0
+ARG DOTNET_VERSION=9.0
 ARG CPAI_VERSION
 
 ENV CPAI_VERSION=$CPAI_VERSION
@@ -184,47 +187,32 @@ RUN apt install python3.9-venv -y
 RUN python3.9 -m pip install virtualenv virtualenvwrapper
 
 
-# Build the source ------------------------------------------------------------
+# Build the .NET source in a separate, discardable build container --------------
 
-# use a build container
 FROM mcr.microsoft.com/dotnet/sdk:$DOTNET_VERSION AS build
 
 # A new image so we need to re-declare these
 # See https://docs.docker.com/engine/reference/builder/#scope
 ARG UBUNTU_VERSION=22.04
-ARG DOTNET_VERSION=7.0
+ARG DOTNET_VERSION=9.0
 ARG CPAI_VERSION
+ARG REPO_NAME
+ARG MODULES_REPO_NAME=CodeProject.AI-Modules
 
 ENV CPAI_VERSION=$CPAI_VERSION
 ENV UBUNTU_VERSION=$UBUNTU_VERSION
 ENV DOTNET_VERSION=$DOTNET_VERSION
+ENV REPO_NAME=$REPO_NAME
+ENV MODULES_REPO_NAME=$MODULES_REPO_NAME
 
 # change directory to /src in the build image
 WORKDIR /src
 
-# This copies everything, or tries to. If you have a file anywhere under /src
-# that's locked or not readable or huge, this wholesale copying will be blocked
-# and your image build will fail.
-# COPY . .
-
-# Instead, let's copy over only that which we need.
-RUN mkdir src             && \
-    mkdir src/modules     && \
-    mkdir src/runtimes       > /dev/null
-
-#### Just copy the bits we need to compile with NET 7.0 SDK ####
-COPY src/server/                            src/server/
-COPY src/SDK/                               src/SDK/
-COPY src/modules/ObjectDetectionYOLOv5Net/  src/modules/ObjectDetectionYOLOv5Net/
-
-#### These are copied later so not required here ####
-# COPY src/modules/FaceProcessing/            src/modules/FaceProcessing/
-# COPY src/modules/ObjectDetectionCoral       src/modules/ObjectDetectionCoral/
-# COPY src/modules/ObjectDetectionYOLOv5-6.2/ src/modules/ObjectDetectionYOLOv5-6.2/
-# COPY src/server/install.sh                  src/server/.
-# COPY src/setup.sh                           src/
-# RUN ls -la /src/*
-
+# Copy only the bits we need to for the .NET compilation steps
+COPY /${REPO_NAME}/src/server/                        src/server/
+COPY /${REPO_NAME}/src/SDK/                           src/SDK/
+COPY /${REPO_NAME}/src/scripts/                       src/scripts/
+COPY /${REPO_NAME}/modules/ObjectDetectionYOLOv5Net/  modules/ObjectDetectionYOLOv5Net/
 
 # Build and publish Server
 WORKDIR "/src/src/server"
@@ -257,13 +245,20 @@ RUN dotnet publish ObjectDetectionYOLOv5Net.csproj -c Release --no-self-containe
     mv -f /app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net/modulesettings.docker.build.rpi64.json   \
           /app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net/modulesettings.docker.json > /dev/null
 
+
+# BEGIN REVIEW ================================================================
+
+# REVIEW: [Matthew] This section should go in the "FROM base AS final" part, not
+#                   here. We're copying the orig code to the build container and
+#                   then from build to final. Should just copy from code to final.
+
 # TODO: Grab these assets from our S3 bucket. Otherwise we have to ensure we've done a Dev setup on
 #       the local machine first, to ensure these files are present
-COPY [ "/src/modules/ObjectDetectionYOLOv5Net/assets", "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net/assets" ]
-COPY [ "/src/modules/ObjectDetectionYOLOv5Net/custom-models", "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net/custom-models" ]
+COPY [ "/${REPO_NAME}/modules/ObjectDetectionYOLOv5Net/assets",        "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net/assets" ]
+COPY [ "/${REPO_NAME}/modules/ObjectDetectionYOLOv5Net/custom-models", "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net/custom-models" ]
 
 # And ensure required assets are copied over. 
-COPY [ "/src/modules/ObjectDetectionYOLOv5Net/explore.html", "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net" ]
+COPY [ "/${REPO_NAME}/modules/ObjectDetectionYOLOv5Net/explore.html", "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net" ]
 
 
 # Move non-compiled code (Python, script) into place --------------------------
@@ -288,7 +283,7 @@ WORKDIR /src
 # settings for modules outside the docker image.
 
 #### The FaceProcessing module is not currently being used, so we're not copying it over ####
-# COPY ["src/modules/FaceProcessing/", "/app/publish/preinstalled-modules/FaceProcessing"]
+# COPY ["${MODULES_REPO_NAME}/CodeProject.AI-FaceProcessing/", "/app/publish/preinstalled-modules/FaceProcessing"]
 # RUN mv -f  /app/publish/preinstalled-modules/FaceProcessing/modulesettings.docker.build.json \
 #            /app/publish/preinstalled-modules/FaceProcessing/modulesettings.docker.json &&    \
 #     rm -rf /app/publish/preinstalled-modules/FaceProcessing/intelligencelayer/__pycache__ && \
@@ -296,42 +291,35 @@ WORKDIR /src
 #           /app/publish/preinstalled-modules/FaceProcessing/package.bat                       \
 #           /app/publish/preinstalled-modules/FaceProcessing/*.pyprog
 
-COPY ["src/modules/ObjectDetectionYOLOv5-3.1/", "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5-3.1"]
+COPY ["${MODULES_REPO_NAME}/CodeProject.AI-ObjectDetectionYOLOv5-3.1/", "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5-3.1"]
 RUN mv -f /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-3.1/modulesettings.docker.build.rpi64.json \
           /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-3.1/modulesettings.docker.json &&          \
     rm -rf /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-3.1/__pycache__ &&                        \
-    rm -f /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-3.1/*.zip                                  \
-          /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-3.1/package.bat                            \
+    rm -f /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-3.1/*.zip       \
+          /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-3.1/package.bat \
           /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-3.1/*.pyprog
 
-COPY ["src/modules/ObjectDetectionCoral/", "/app/publish/preinstalled-modules/ObjectDetectionCoral"]
-RUN mv -f /app/publish/preinstalled-modules/ObjectDetectionCoral/modulesettings.docker.build.rpi64.json \
-          /app/publish/preinstalled-modules/ObjectDetectionCoral/modulesettings.docker.json  &&         \
-    rm -rf /app/publish/preinstalled-modules/ObjectDetectionCoral/__pycache__ &&                        \
-    rm -f /app/publish/preinstalled-modules/ObjectDetectionCoral/*.zip                                  \
-          /app/publish/preinstalled-modules/ObjectDetectionCoral/package.bat                            \
-          /app/publish/preinstalled-modules/ObjectDetectionCoral/*.pyprog
+## Not including Coral yet
+# COPY [${MODULES_REPO_NAME}/CodeProject.AI-ObjectDetectionCoral/", "/app/publish/preinstalled-modules/ObjectDetectionCoral"]
+# RUN mv -f /app/publish/preinstalled-modules/ObjectDetectionCoral/modulesettings.docker.build.rpi64.json \
+#           /app/publish/preinstalled-modules/ObjectDetectionCoral/modulesettings.docker.json  &&         \
+#     rm -rf /app/publish/preinstalled-modules/ObjectDetectionCoral/__pycache__ &&                        \
+#     rm -f /app/publish/preinstalled-modules/ObjectDetectionCoral/*.zip          \
+#           /app/publish/preinstalled-modules/ObjectDetectionCoral/package.bat    \
+#           /app/publish/preinstalled-modules/ObjectDetectionCoral/*.pyprog
 
 # SDK and install scripts
-COPY ["src/SDK/Python",        "/app/publish/SDK/Python"]
-COPY ["src/server/install.sh", "/app/publish/server/install.sh"]
-RUN rm -rf /app/publish/SDK/Python/__pycache__
+COPY ["/${REPO_NAME}/src/SDK/Python",        "/app/publish/SDK/Python"]
+COPY ["/${REPO_NAME}/src/SDK/install.sh",    "/app/publish/SDK/install.sh"]
+COPY ["/${REPO_NAME}/src/server/install.sh", "/app/publish/server/install.sh"]
+COPY ["/${REPO_NAME}/src/scripts",           "/app/publish/scripts"]
+COPY ["/${REPO_NAME}/src/setup.sh",          "/app/publish/setup.sh"]
 
-COPY ["src/SDK/Scripts", "/app/publish/SDK/Scripts"]
-COPY ["src/setup.sh",    "/app/publish/setup.sh"]
+# Cleanup / setup
+RUN rm -rf /app/publish/SDK/Python/__pycache__ \
+    mkdir /app/publish/runtimes
 
-# Move assets into place ------------------------------------------------------
-
-# We'll zip up the test images and move the zip to the server wwwroot directory 
-# so it can be downloaded from the API server at runtime
-
-# These are embedded in the Docker image, and accessible via an HTTP call. If you
-# know the right address... (diabled for now)
-
-# COPY ["demos/TestData", "/app/publish/demos/TestData"]
-# WORKDIR "/src/demos/TestData"
-# RUN apt-get update -y && apt-get upgrade -y &&  apt-get install -y zip
-# RUN zip -r testdata.zip . && mv testdata.zip /app/publish/server/wwwroot
+# END REVIEW ===================================================================
 
 
 # CREATE THE FINAL IMAGE ======================================================
@@ -339,6 +327,9 @@ COPY ["src/setup.sh",    "/app/publish/setup.sh"]
 FROM base AS final
 
 # Note: UBUNTU_VERSION, DOTNET_VERSION and all ENV declared in 'base' are still here.
+
+ARG REPO_NAME
+ENV REPO_NAME=$REPO_NAME
 
 # Move published server and modules into place --------------------------------
 
@@ -372,12 +363,12 @@ RUN python3.9 -m pip --no-cache-dir install \
 # on macOS.
 # We also make a .vscode folder so we have some bits in place if we wish to run
 # VSCode inside the container
-RUN mkdir --parents "/etc/codeproject/ai"                   && \
-    mkdir --parents "/app/downloads/modules" "/app/modules" && \
-    mkdir "/app/.vscode"
+RUN mkdir --parents /etc/codeproject/ai                 && \
+    mkdir --parents /app/downloads/modules /app/modules && \
+    mkdir /app/.vscode
 
-COPY [ "/.vscode/launch.docker.json", "/app/.vscode/launch.json" ]
-COPY [ "/.vscode/tasks.docker.json", "/app/.vscode/tasks.json" ]
+COPY [ "/${REPO_NAME}/.vscode/launch.docker.json", "/app/.vscode/launch.json" ]
+COPY [ "/${REPO_NAME}/.vscode/tasks.docker.json",  "/app/.vscode/tasks.json" ]
 
 # Start the server
 RUN set DOTNET_ROOT=~/.dotnet

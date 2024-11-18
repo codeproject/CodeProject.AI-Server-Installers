@@ -1,17 +1,12 @@
-# CodeProject.AI Server
+# CodeProject.AI Server 3.0+
 #
-# DOCKER Image build file for Raspberry Pi. This includes a TF-Lite module that
-# can take advantage of the Coral.AI USB TPU. To use, add the 
+# Docker file for arm64 CPU enabled image (eg Apple Silicon)
 #
- 
-# docker run --name CodeProject.AI-Server -d \
-#  -p 32168:32168 -p 32168:32168/udp \
-# --mount type=bind,source=/etc/codeproject/ai,target=/etc/codeproject/ai \
-# --mount type=bind,source=/opt/codeproject/ai,target=/app/modules \
-# --privileged -v /dev/bus/usb:/dev/bus/usb \
-#   codeproject/ai-server
-#
-# NOTE: Evidently Macs with Apple Silicon do not support USB passthrough.
+# docker run --name CodeProject.AI-Server -d
+#    -p 32168:32168 \
+#   --mount type=bind,source=/Library/Application Support/CodeProject/AI/docker/data,target=/etc/codeproject/ai \
+#   --mount type=bind,source=/Library/Application Support/CodeProject/AI/docker/modules,target=/app/modules \
+#   codeproject/ai-server:arm64
 #
 # ASSUMPTION: This is being build from the root directory of the solution. This
 # is set in the build_docker script as the last param to the docker buildx command,
@@ -21,11 +16,11 @@
 
 # INITIAL SETUP ===============================================================
 
-# Note: we're before the first 'FROM' statment so these values are not available
+# Note: we're before the first 'FROM' statement so these values are not available
 # inside the build stages. If you wish to use these inside a stage, re-grab them 
 # inside that stage
 ARG UBUNTU_VERSION=22.04
-ARG DOTNET_VERSION=8.0
+ARG DOTNET_VERSION=9.0
 ARG CPAI_VERSION
 
 # It's important to pull the correct base for the target architecture, otherwise
@@ -56,7 +51,7 @@ ENV DEBIAN_FRONTEND noninteractive
 
 # Grab the values passed in via command line here so we can use inside this stage
 ARG UBUNTU_VERSION=22.04
-ARG DOTNET_VERSION=8.0
+ARG DOTNET_VERSION=9.0
 ARG CPAI_VERSION
 
 ENV CPAI_VERSION=$CPAI_VERSION
@@ -74,13 +69,15 @@ EXPOSE 32168/udp
 LABEL "Application"="CodeProject.AI Server"
 LABEL "Publisher"="CodeProject Solutions Inc"
 LABEL "Version"="${CPAI_VERSION}"
-LABEL "Target"="RaspberryPi (arm64) specific ${UBUNTU_VERSION} with CUDA ${CUDA_VERSION}"
-LABEL "Description"="CodeProject.AI Server for RaspberryPi (arm64) on ${UBUNTU_VERSION} with CUDA ${CUDA_VERSION}."
+LABEL "Target"="arm64 Ubuntu ${UBUNTU_VERSION}"
+LABEL "Description"="CodeProject.AI Server for Arm64 on ${UBUNTU_VERSION}. \
+Suitable for Apple Silicon macs, Orange Pi, Radxa ROCK and Raspberry Pi."
 
 # Install required libraries --------------------------------------------------
 
 # Install packages. In order:
-#
+# Required to allow packages to build
+#   apt-utils
 # Required for SkiaSharp
 #   libfontconfig1
 # Required for System.Drawing
@@ -89,16 +86,17 @@ LABEL "Description"="CodeProject.AI Server for RaspberryPi (arm64) on ${UBUNTU_V
 #   zlib1g-dev (maybe?)
 # Needed for opencv-python
 #   ffmpeg libsm6 libxext6 libc6-dev
-# For curl https://packages.cloud.google.com/apt/doc/apt-key.gpg
-#   gnupg
 # So we can query glxinfo for GPU info
 #   mesa-utils
+# So we can build psutils (and other wheels)
+#   gcc python3-dev
 # So we can install modules
 #   curl jq unzip wget rsync ca-certificates (ca-certificates so we can do --no-check-certificate, jq for json parsing)
 # This stops the "lsmod: not found" error
 #   kmod
 
-RUN apt-get update -y && \
+RUN apt-get update  -y && \
+    apt-get upgrade -y --no-install-recommends apt-utils && \
     apt-get install -y --no-install-recommends \
         libfontconfig1  \
         libgdiplus      \
@@ -110,9 +108,10 @@ RUN apt-get update -y && \
         libsm6          \
         libxext6        \
                         \
-        gnupg           \
-                        \
         mesa-utils      \
+                        \
+        gcc             \
+        python3-dev     \
                         \
         ca-certificates \
         curl            \
@@ -126,13 +125,17 @@ RUN apt-get update -y && \
         kmod            > /dev/null
 
 
-# .NET 7 ----------------------------------------------------------------------
+# .NET -------------------------------------------------------------------------
+
+# Update packages and install .NET
 
 # See https://learn.microsoft.com/en-us/dotnet/core/install/linux-scripted-manual#scripted-install
 RUN wget https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh
 RUN chmod +x ./dotnet-install.sh
+
 # Install .NET. For just the runtime use "--channel $DOTNET_VERSION --runtime aspnetcore"
 RUN ./dotnet-install.sh --channel $DOTNET_VERSION --runtime aspnetcore
+
 # The install script is for CI/CD and doesn't actually register .NET. So add 
 # link and env variable
 RUN ln -fs $HOME/.dotnet/dotnet /usr/local/bin/dotnet
@@ -140,61 +143,63 @@ RUN echo 'export DOTNET_ROOT=~/.dotnet' >> $HOME/.bashrc
 RUN echo 'export PATH=$PATH:$DOTNET_ROOT' >> $HOME/.bashrc
 
 
-# Coral Edge TPU runtime ------------------------------------------------------
-
-RUN echo "deb https://packages.cloud.google.com/apt coral-edgetpu-stable main" | sudo tee /etc/apt/sources.list.d/coral-edgetpu.list
-RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
-RUN apt-get update && apt-get install libedgetpu1-std
-# RUN apt-get update && apt-get install libedgetpu1-max - for those who like burning holes in desks
-
-# PyCoral library - not needed
-# RUN apt-get install python3-pycoral
-
-
 # Setup Python ----------------------------------------------------------------
 
-# Allow us to get older, deceased Python packages from dead snakes
-RUN apt-get install software-properties-common -y && \
-    add-apt-repository ppa:deadsnakes/ppa -y
+# Combining all these together into a single layer
+# 1. Add deadsnakes repo
+# 2. Install pip for python3,  python3-apt and python3-setuptools
+#    Note that this (currently) installs python3.8 as a dependency. It could be
+#    in the future that a different version of python is installed instead, in
+#    which case we may need to pin the installed python version.
+# 3. Install Python 3.8 as well as dev and distutils so packages can be built
+#    if needed, and venv for creating virtual environments
+# 4. Using the now installed Python 3.8, upgrade the python setuptools and dev
+#    packages to the latest
+# 5. Install virtualenv virtualenvwrapper for python 3.8
 
-# This (currently) installs python3.8 as a dependency. It could be in the future
-# that a different version of python is installed instead, in which case we may
-# need to pin the installed python version.
-RUN apt-get install python3-pip python3-apt python3-setuptools -y
+RUN apt-get install software-properties-common -y &&      \
+    add-apt-repository ppa:deadsnakes/ppa -y      &&      \
+    apt-get install -y --no-install-recommends            \
+        python3-pip                                       \
+        python3-apt                                       \
+        python3-setuptools                        &&      \
+    apt-get install -y --no-install-recommends            \
+        python3.8                                 &&      \
+    apt-get install -y --no-install-recommends            \
+        python3.8-distutils                               \
+        python3.8-dev                                     \ 
+        python3.8-venv                            &&      \
+    python3.8 -m pip install --upgrade setuptools &&      \
+    python3.8 -m pip install --upgrade pip        &&      \
+    python3.8 -m pip install virtualenv virtualenvwrapper > /dev/null
 
-# Install Python3.8, distutils and dev tools (so packages can be built if needed)
-# and pip install so we can install python packages
-RUN apt-get install python3.8 -y && \
-    apt-get install python3.8-distutils -y && \
-    apt-get install python3.8-dev -y && \ 
-    python3.8 -m pip install --upgrade setuptools && \
-    python3.8 -m pip install --upgrade pip
+# Python 3.9: Combining all these together into a single layer, but leveraging
+# the work done in Python 3.8:
+# 1. Install Python 3.9 as well as dev and distutils so packages can be built
+#    if needed, and venv for creating virtual environments
+# 4. Using the now installed Python 3.8, upgrade the python setuptools and dev
+#    packages to the latest
+# 5. Install virtualenv virtualenvwrapper for python 3.8
 
-# install virtual env tools
-RUN apt install python3.8-venv -y && \
-    python3.8 -m pip install virtualenv virtualenvwrapper
-
-# Install Python3.9, distutils and dev tools (so packages can be built if needed)
-# and pip install so we can install python packages
-RUN apt-get install python3.9 -y && \
-    apt-get install python3.9-distutils -y && \
-    apt-get install python3.9-dev -y && \ 
-    python3.9 -m pip install --upgrade setuptools && \
-    python3.9 -m pip install --upgrade pip
-
-# install virtual env tools
-RUN apt install python3.9-venv -y
-RUN python3.9 -m pip install virtualenv virtualenvwrapper
+RUN apt-get install -y --no-install-recommends            \
+        python3.9                                 &&      \
+    apt-get install -y --no-install-recommends            \
+        python3.9-distutils                               \
+        python3.9-dev                                     \ 
+        python3.9-venv                            &&      \
+    python3.9 -m pip install --upgrade setuptools &&      \
+    python3.9 -m pip install --upgrade pip        &&      \
+    python3.9 -m pip install virtualenv virtualenvwrapper > /dev/null
 
 
 # Build the .NET source in a separate, discardable build container --------------
 
 FROM mcr.microsoft.com/dotnet/sdk:$DOTNET_VERSION AS build
 
-# A new image so we need to re-declare these
+# Grab the values passed in via command line here so we can use inside this stage
 # See https://docs.docker.com/engine/reference/builder/#scope
 ARG UBUNTU_VERSION=22.04
-ARG DOTNET_VERSION=8.0
+ARG DOTNET_VERSION=9.0
 ARG CPAI_VERSION
 ARG REPO_NAME
 ARG MODULES_REPO_NAME=CodeProject.AI-Modules
@@ -237,14 +242,13 @@ RUN dotnet publish "Server.csproj" -c Release --no-self-contained --force -o /ap
 #            already installed still be visible, while also allowing us to add
 #            installed modules to the folder. This  probably involves volumes
 
-WORKDIR "/src/src/modules/ObjectDetectionYOLOv5Net"
+WORKDIR /src/modules/ObjectDetectionYOLOv5Net
 RUN dotnet publish ObjectDetectionYOLOv5Net.csproj -c Release --no-self-contained /p:DefineConstants=GPU_NONE \
                    --force -o /app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net/bin &&               \
     mv -f /app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net/bin/modulesettings.*                     \
           /app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net/  &&                                     \
-    mv -f /app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net/modulesettings.docker.build.rpi64.json   \
+    mv -f /app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net/modulesettings.docker.build.json         \
           /app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net/modulesettings.docker.json > /dev/null
-
 
 # BEGIN REVIEW ================================================================
 
@@ -265,8 +269,8 @@ COPY [ "/${REPO_NAME}/modules/ObjectDetectionYOLOv5Net/explore.html", "/app/publ
 
 WORKDIR /src
 
-# We need some way to tell the server that for modules built into the Docker 
-# image, the venv will be in one place, but for modules downloaded at runtime,
+# We need some way to tell the server that for modules built into the Docker
+# image, the venv will be in one place, but for modules downloaded at runtime, 
 # the venv for the module will be in a different place.
 #
 # We do this by having a modulesettings.docker.build.json file that has the
@@ -276,37 +280,30 @@ WORKDIR /src
 # 
 # If the module were downloaded and installed during runtime, then the usual 
 # modulesettings.linux.json would be used, and then modulesettings.docker.json
-# would then be loaded (if it existed). The modulesettings.docker.build.json
+# would then be loaded (if it existed). The modulesettings.docker.build.json 
 # file would be ignored.
 #
 # This enables us to have a modulesettings for inside a docker image, and module
 # settings for modules outside the docker image.
 
-#### The FaceProcessing module is not currently being used, so we're not copying it over ####
-# COPY ["${MODULES_REPO_NAME}/CodeProject.AI-FaceProcessing/", "/app/publish/preinstalled-modules/FaceProcessing"]
-# RUN mv -f  /app/publish/preinstalled-modules/FaceProcessing/modulesettings.docker.build.json \
-#            /app/publish/preinstalled-modules/FaceProcessing/modulesettings.docker.json &&    \
-#     rm -rf /app/publish/preinstalled-modules/FaceProcessing/intelligencelayer/__pycache__ && \
-#     rm -f /app/publish/preinstalled-modules/FaceProcessing/*.zip                             \
-#           /app/publish/preinstalled-modules/FaceProcessing/package.bat                       \
-#           /app/publish/preinstalled-modules/FaceProcessing/*.pyprog
 
-COPY ["${MODULES_REPO_NAME}/CodeProject.AI-ObjectDetectionYOLOv5-3.1/", "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5-3.1"]
-RUN mv -f /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-3.1/modulesettings.docker.build.rpi64.json \
-          /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-3.1/modulesettings.docker.json &&          \
-    rm -rf /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-3.1/__pycache__ &&                        \
-    rm -f /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-3.1/*.zip       \
-          /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-3.1/package.bat \
-          /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-3.1/*.pyprog
+COPY [ "/${MODULES_REPO_NAME}/CodeProject.AI-FaceProcessing/", "/app/publish/preinstalled-modules/FaceProcessing"]
+RUN mv  -f "/app/publish/preinstalled-modules/FaceProcessing/modulesettings.docker.build.json" \
+           "/app/publish/preinstalled-modules/FaceProcessing/modulesettings.docker.json"    && \
+    rm -rf /app/publish/preinstalled-modules/FaceProcessing/intelligencelayer/__pycache__   && \
+    rm -rf /app/publish/preinstalled-modules/FaceProcessing/bin                             && \
+    rm -f /app/publish/preinstalled-modules/FaceProcessing/*.zip        \
+          /app/publish/preinstalled-modules/FaceProcessing/package.bat  \
+          /app/publish/preinstalled-modules/FaceProcessing/*.pyprog     > /dev/null
 
-## Not including Coral yet
-# COPY [${MODULES_REPO_NAME}/CodeProject.AI-ObjectDetectionCoral/", "/app/publish/preinstalled-modules/ObjectDetectionCoral"]
-# RUN mv -f /app/publish/preinstalled-modules/ObjectDetectionCoral/modulesettings.docker.build.rpi64.json \
-#           /app/publish/preinstalled-modules/ObjectDetectionCoral/modulesettings.docker.json  &&         \
-#     rm -rf /app/publish/preinstalled-modules/ObjectDetectionCoral/__pycache__ &&                        \
-#     rm -f /app/publish/preinstalled-modules/ObjectDetectionCoral/*.zip          \
-#           /app/publish/preinstalled-modules/ObjectDetectionCoral/package.bat    \
-#           /app/publish/preinstalled-modules/ObjectDetectionCoral/*.pyprog
+COPY ["/${REPO_NAME}/modules/ObjectDetectionYOLOv5-6.2/", "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2"]
+RUN mv -f "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2/modulesettings.docker.build.arm64.json" \
+          "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2/modulesettings.docker.json" && \
+    rm -rf /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2/__pycache__                 && \
+    rm -rf /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2/bin                         && \
+    rm -f /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2/*.zip       \
+          /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2/package.bat \
+          /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2/*.pyprog    > /dev/null
 
 # SDK and install scripts
 COPY ["/${REPO_NAME}/src/SDK/Python",        "/app/publish/SDK/Python"]
@@ -342,19 +339,12 @@ COPY --from=build /app/publish .
 # for a discussion on reducing PIP install sizes. That article is woefully out of date, with the
 # --compile and --global-option now deprecated, the CLFAGS to nothing, but the --no-cache-dir does help
 
-#### The FaceProcessing module is not currently being used, so we're not installing it ####
-# RUN python3.8 -m pip --no-cache-dir install \
-#     -r /app/preinstalled-modules/ObjectDetectionYOLOv5-3.1/requirements.raspberrypi.txt \
-#     -r /app/preinstalled-modules/FaceProcessing/requirements.raspberrypi.txt \
-#     -r /app/SDK/Python/requirements.txt
-
 RUN python3.8 -m pip --no-cache-dir install \
-    -r /app/preinstalled-modules/ObjectDetectionYOLOv5-3.1/requirements.raspberrypi.txt \
+    -r /app/preinstalled-modules/ObjectDetectionYOLOv5-6.2/requirements.linux.arm64.txt \
+    -r /app/preinstalled-modules/FaceProcessing/requirements.linux.arm64.txt \
     -r /app/SDK/Python/requirements.txt
 
-# --no-cache-dir is here to reduce the size of the image
 RUN python3.9 -m pip --no-cache-dir install \
-    -r /app/preinstalled-modules/ObjectDetectionCoral/requirements.linux.arm64.txt \
     -r /app/SDK/Python/requirements.txt
 
 # Add folders for storing persisted user data and modules. This should be mapped
@@ -367,6 +357,7 @@ RUN mkdir --parents /etc/codeproject/ai                 && \
     mkdir --parents /app/downloads/modules /app/modules && \
     mkdir /app/.vscode
 
+# For debugging the live container using VS Code
 COPY [ "/${REPO_NAME}/.vscode/launch.docker.json", "/app/.vscode/launch.json" ]
 COPY [ "/${REPO_NAME}/.vscode/tasks.docker.json",  "/app/.vscode/tasks.json" ]
 

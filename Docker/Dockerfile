@@ -1,12 +1,12 @@
 # CodeProject.AI Server 3.0+
 #
-# Docker file for arm64 CPU enabled image (eg Apple Silicon)
+# Docker file for x86_64 CPU enabled image
 #
-# docker run --name CodeProject.AI-Server -d
-#    -p 32168:32168 \
-#   --mount type=bind,source=/Library/Application Support/CodeProject/AI/docker/data,target=/etc/codeproject/ai \
-#   --mount type=bind,source=/Library/Application Support/CodeProject/AI/docker/modules,target=/app/modules \
-#   codeproject/ai-server:arm64
+# docker run --name CodeProject.AI-Server -d \
+#    -p 32168:32168 -p 32168:32168/udp \
+#   --mount type=bind,source=C:\ProgramData\CodeProject\AI\docker/data,target=/etc/codeproject/ai \
+#   --mount type=bind,source=C:\ProgramData\CodeProject\AI\docker/modules,target=/app/modules \
+#   codeproject/ai-server
 #
 # ASSUMPTION: This is being build from the root directory of the solution. This
 # is set in the build_docker script as the last param to the docker buildx command,
@@ -16,23 +16,23 @@
 
 # INITIAL SETUP ===============================================================
 
-# Note: we're before the first 'FROM' statment so these values are not available
+# Note: we're before the first 'FROM' statement so these values are not available
 # inside the build stages. If you wish to use these inside a stage, re-grab them 
 # inside that stage
 ARG UBUNTU_VERSION=22.04
-ARG DOTNET_VERSION=8.0
+ARG DOTNET_VERSION=9.0
 ARG CPAI_VERSION
 
 # It's important to pull the correct base for the target architecture, otherwise
-# building this image on, say, an x64 machine will result in the base image
-# being x64, not arm64 as assumed.
-FROM arm64v8/ubuntu:$UBUNTU_VERSION AS base
+# building this image on, say, an Arm64 machine will result in the base image
+# being Arm64, not x86_64 as assumed.
+FROM amd64/ubuntu:$UBUNTU_VERSION AS base
 
 WORKDIR /app
 
 # Replace the sudo command, which doesn't exist in this image, with a noop so
 # our scripts, which do contain sudo calls, will work
-RUN if ! type sudo 2>/dev/null; then echo "#!/bin/sh\n\${@}" > /usr/sbin/sudo; chmod +x /usr/sbin/sudo; fi
+RUN if [ ! -x "$(command -v sudo)" ] && [ ! type sudo 2>/dev/null ]; then echo "#!/bin/sh\n\${@}" > /usr/sbin/sudo; chmod +x /usr/sbin/sudo; fi
 
 # Environment vars ------------------------------------------------------------
 
@@ -47,16 +47,22 @@ ENV DOTNET_RUNNING_IN_CONTAINER=true
 # noninteractive frontend means no prompts or questions are asked and whenever a call requires an
 # answer, the default will be used. Installs will be non-interrupted and so won't hang. The Python
 # installs, for instance, require this in this current environment
-ENV DEBIAN_FRONTEND noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
 
 # Grab the values passed in via command line here so we can use inside this stage
 ARG UBUNTU_VERSION=22.04
-ARG DOTNET_VERSION=8.0
+ARG DOTNET_VERSION=9.0
 ARG CPAI_VERSION
 
 ENV CPAI_VERSION=$CPAI_VERSION
 ENV UBUNTU_VERSION=$UBUNTU_VERSION
 ENV DOTNET_VERSION=$DOTNET_VERSION
+
+# This is so perl doesn't get upset
+ENV LANGUAGE=C
+ENV LC_ALL=C
+ENV LANG=C
+ENV LC_CTYPE=C
 
 # Setup the ports -------------------------------------------------------------
 
@@ -68,16 +74,19 @@ EXPOSE 32168/udp
 
 LABEL "Application"="CodeProject.AI Server"
 LABEL "Publisher"="CodeProject Solutions Inc"
-LABEL "Version"="${CPAI_VERSION}"
-LABEL "Target"="arm64 Ubuntu ${UBUNTU_VERSION}"
-LABEL "Description"="CodeProject.AI Server for Arm64 on ${UBUNTU_VERSION}. \
-Suitable for Apple Silicon macs, Orange Pi, Radxa ROCK and Raspberry Pi."
+LABEL "Version"="$CPAI_VERSION"
+LABEL "Target"="x64 Ubuntu $UBUNTU_VERSION CPU"
+LABEL "Description"="CodeProject.AI Server with CPU-only processing."
 
 # Install required libraries --------------------------------------------------
 
+# *** TODO: *** all of this is in /app/server/install.sh. This script should be 
+# called rather than having the same commands copy and pasted here.
+
+# RUN apt-get update -y && apt-get upgrade -y --no-install-recommends apt-utils
+
 # Install packages. In order:
-# Required to allow packages to build
-#   apt-utils
+#
 # Required for SkiaSharp
 #   libfontconfig1
 # Required for System.Drawing
@@ -88,62 +97,56 @@ Suitable for Apple Silicon macs, Orange Pi, Radxa ROCK and Raspberry Pi."
 #   ffmpeg libsm6 libxext6 libc6-dev
 # So we can query glxinfo for GPU info
 #   mesa-utils
-# So we can build psutils (and other wheels)
-#   gcc python3-dev
 # So we can install modules
 #   curl jq unzip wget rsync ca-certificates (ca-certificates so we can do --no-check-certificate, jq for json parsing)
 # This stops the "lsmod: not found" error
 #   kmod
+# This allows us to query process info
+# Install pstree
+#   psmisc
 
-RUN apt-get update  -y && \
-    apt-get upgrade -y --no-install-recommends apt-utils && \
-    apt-get install -y --no-install-recommends \
-        libfontconfig1  \
-        libgdiplus      \
-        libjpeg-dev     \
-        zlib1g-dev      \
-                        \
-        ffmpeg          \
-        libc6-dev       \
-        libsm6          \
-        libxext6        \
-                        \
-        mesa-utils      \
-                        \
-        gcc             \
-        python3-dev     \
-                        \
-        ca-certificates \
-        curl            \
-        jq              \
-        rsync           \
-        unzip           \
-        wget            \
-                        \
-        psmisc          \
-                        \
-        kmod            > /dev/null
+RUN apt-get update -y && apt-get install -y --no-install-recommends \
+    libfontconfig1  \
+    libgdiplus      \
+    libjpeg-dev     \
+    zlib1g-dev      \
+                    \
+    ffmpeg          \
+    libc6-dev       \
+    libsm6          \
+    libxext6        \
+                    \
+    mesa-utils      \
+                    \
+    ca-certificates \
+    curl            \
+    jq              \
+    rsync           \
+    unzip           \
+    wget            \
+                    \
+    psmisc          \
+                    \
+    kmod            > /dev/null
 
 
 # .NET -------------------------------------------------------------------------
 
 # Update packages and install .NET
-
-# See https://learn.microsoft.com/en-us/dotnet/core/install/linux-scripted-manual#scripted-install
-RUN wget https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh
-RUN chmod +x ./dotnet-install.sh
-
-# Install .NET. For just the runtime use "--channel $DOTNET_VERSION --runtime aspnetcore"
-RUN ./dotnet-install.sh --channel $DOTNET_VERSION --runtime aspnetcore
-
-# The install script is for CI/CD and doesn't actually register .NET. So add 
-# link and env variable
-RUN ln -fs $HOME/.dotnet/dotnet /usr/local/bin/dotnet
-RUN echo 'export DOTNET_ROOT=~/.dotnet' >> $HOME/.bashrc
-RUN echo 'export PATH=$PATH:$DOTNET_ROOT' >> $HOME/.bashrc
+RUN wget "https://packages.microsoft.com/config/ubuntu/${UBUNTU_VERSION}/packages-microsoft-prod.deb" \
+         -O packages-microsoft-prod.deb --no-check-certificate                                     && \
+    dpkg -i packages-microsoft-prod.deb                                                            && \
+    rm packages-microsoft-prod.deb                                                                 && \
+    apt update && apt install aspnetcore-runtime-$DOTNET_VERSION -y                      > /dev/null
 
 
 # Setup Python ----------------------------------------------------------------
+
+# *** TODO: *** all of this is in /app/SDK/Scripts/utils.sh under "setupPython". 
+# We should use that method rather than having the same commands copy and pasted 
+# here. BEWARE that the list of apt installed here differs a little from what is
+# installed via setupPython. installRequiredPythonPackages also installs some 
+# tools from the list below
 
 # Combining all these together into a single layer
 # 1. Add deadsnakes repo
@@ -191,6 +194,19 @@ RUN apt-get install -y --no-install-recommends            \
     python3.9 -m pip install --upgrade pip        &&      \
     python3.9 -m pip install virtualenv virtualenvwrapper > /dev/null
 
+# Install Python3.11, distutils and dev tools (so packages can be built if needed)
+# and pip install so we can install python packages. We don't need this for the
+# built in modules, but we know we have downloadable modules that could use Python3.9
+# so we preempt the need.
+RUN apt-get install python3.11 -y && \
+   apt-get install python3.11-distutils -y && \
+   apt-get install python3.11-dev -y && \ 
+   python3.11 -m pip install --upgrade setuptools && \
+   python3.11 -m pip install --upgrade pip
+
+#RUN apt python3.11-venv -y
+RUN apt install python3.11-venv -y && \
+    python3.11 -m pip install virtualenv virtualenvwrapper
 
 # Build the .NET source in a separate, discardable build container --------------
 
@@ -199,7 +215,7 @@ FROM mcr.microsoft.com/dotnet/sdk:$DOTNET_VERSION AS build
 # Grab the values passed in via command line here so we can use inside this stage
 # See https://docs.docker.com/engine/reference/builder/#scope
 ARG UBUNTU_VERSION=22.04
-ARG DOTNET_VERSION=8.0
+ARG DOTNET_VERSION=9.0
 ARG CPAI_VERSION
 ARG REPO_NAME
 ARG MODULES_REPO_NAME=CodeProject.AI-Modules
@@ -209,6 +225,29 @@ ENV UBUNTU_VERSION=$UBUNTU_VERSION
 ENV DOTNET_VERSION=$DOTNET_VERSION
 ENV REPO_NAME=$REPO_NAME
 ENV MODULES_REPO_NAME=$MODULES_REPO_NAME
+
+# REVIEW: [Matthew] This seems way too messy.
+# 1. We should do a "cd / && mkdir CodeProject.AI" so we have a clean folder that's ours
+#    Instead of COPY src/server/ src/server/ it will be COPY src/server/ CodeProject.AI/server/
+#    WORKDIR /src would be WORKDIR /CodeProject.AI 
+#    WORKDIR /src/src/server would be /CodeProject.AI/src/server
+# 2. We don't need to copy any of the Python stuff to this .NET build server. We should
+#    only copy ObjectDetectionYOLOv5Net, not the other modules
+#    So, in the "FROM base AS final" stage we would do copy over the Python modules:
+#    COPY ["src/modules/FaceProcessing/", "/app/preinstalled-modules/FaceProcessing"]
+#    RUN mv  -f "/app/preinstalled-modules/FaceProcessing/modulesettings.docker.build.json" \
+#               "/app/preinstalled-modules/FaceProcessing/modulesettings.docker.json"    && \
+#        rm -rf /app/preinstalled-modules/FaceProcessing/intelligencelayer/__pycache__   && \
+#        rm -rf /app/preinstalled-modules/FaceProcessing/bin                             && \
+#        rm -f /app/preinstalled-modules/FaceProcessing/*.zip        \
+#              /app/preinstalled-modules/FaceProcessing/package.bat  \
+#              /app/preinstalled-modules/FaceProcessing/*.pyprog     > /dev/null
+# 3. Similarly, we shouldn't copy over the .NET assets. ie:
+#    Do not do in the build stage
+#      COPY [ "/src/modules/ObjectDetectionYOLOv5Net/assets", "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net/assets" 
+#    Instead, in the last stage:
+#      COPY [ "/src/modules/ObjectDetectionYOLOv5Net/assets", "/app/preinstalled-modules/ObjectDetectionYOLOv5Net/assets" 
+
 
 # change directory to /src in the build image
 WORKDIR /src
@@ -221,7 +260,7 @@ COPY /${REPO_NAME}/modules/ObjectDetectionYOLOv5Net/  modules/ObjectDetectionYOL
 
 # Build and publish Server
 WORKDIR "/src/src/server"
-RUN dotnet publish "Server.csproj" -c Release --no-self-contained --force -o /app/publish/server
+RUN dotnet publish "Server.csproj" -c Release --no-self-contained --force -o /app/publish/server > /dev/null
 
 # Build and publish .NET modules, copy over docker-specific modulesettings, and 
 # then copy over models
@@ -242,13 +281,14 @@ RUN dotnet publish "Server.csproj" -c Release --no-self-contained --force -o /ap
 #            already installed still be visible, while also allowing us to add
 #            installed modules to the folder. This  probably involves volumes
 
-WORKDIR /src/modules/ObjectDetectionYOLOv5Net
+WORKDIR "/src/modules/ObjectDetectionYOLOv5Net"
 RUN dotnet publish ObjectDetectionYOLOv5Net.csproj -c Release --no-self-contained /p:DefineConstants=GPU_NONE \
-                   --force -o /app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net/bin &&               \
-    mv -f /app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net/bin/modulesettings.*                     \
-          /app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net/  &&                                     \
-    mv -f /app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net/modulesettings.docker.build.json         \
+                   --force -o /app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net/bin &&       \
+    mv -f /app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net/bin/modulesettings.*             \
+          /app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net/                        &&       \
+    mv -f /app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net/modulesettings.docker.build.json \
           /app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net/modulesettings.docker.json > /dev/null
+
 
 # BEGIN REVIEW ================================================================
 
@@ -264,8 +304,7 @@ COPY [ "/${REPO_NAME}/modules/ObjectDetectionYOLOv5Net/custom-models", "/app/pub
 # And ensure required assets are copied over. 
 COPY [ "/${REPO_NAME}/modules/ObjectDetectionYOLOv5Net/explore.html", "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net" ]
 
-
-# Move non-compiled code (Python, script) into place --------------------------
+## Move non-compiled code (Python, script) into place --------------------------
 
 WORKDIR /src
 
@@ -286,24 +325,23 @@ WORKDIR /src
 # This enables us to have a modulesettings for inside a docker image, and module
 # settings for modules outside the docker image.
 
-
 COPY [ "/${MODULES_REPO_NAME}/CodeProject.AI-FaceProcessing/", "/app/publish/preinstalled-modules/FaceProcessing"]
 RUN mv  -f "/app/publish/preinstalled-modules/FaceProcessing/modulesettings.docker.build.json" \
            "/app/publish/preinstalled-modules/FaceProcessing/modulesettings.docker.json"    && \
-    rm -rf /app/publish/preinstalled-modules/FaceProcessing/intelligencelayer/__pycache__   && \
-    rm -rf /app/publish/preinstalled-modules/FaceProcessing/bin                             && \
-    rm -f /app/publish/preinstalled-modules/FaceProcessing/*.zip        \
-          /app/publish/preinstalled-modules/FaceProcessing/package.bat  \
-          /app/publish/preinstalled-modules/FaceProcessing/*.pyprog     > /dev/null
+    rm -rf "/app/publish/preinstalled-modules/FaceProcessing/intelligencelayer/__pycache__" && \
+    rm -rf "/app/publish/preinstalled-modules/FaceProcessing/bin"                           && \
+    rm -f "/app/publish/preinstalled-modules/FaceProcessing/*.zip"        \
+          "/app/publish/preinstalled-modules/FaceProcessing/package.bat"  \
+          "/app/publish/preinstalled-modules/FaceProcessing/*.pyprog"     > /dev/null
 
 COPY ["/${REPO_NAME}/modules/ObjectDetectionYOLOv5-6.2/", "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2"]
-RUN mv -f "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2/modulesettings.docker.build.arm64.json" \
-          "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2/modulesettings.docker.json" && \
-    rm -rf /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2/__pycache__                 && \
-    rm -rf /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2/bin                         && \
-    rm -f /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2/*.zip       \
-          /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2/package.bat \
-          /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2/*.pyprog    > /dev/null
+RUN mv -f  "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2/modulesettings.docker.build.json" \
+           "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2/modulesettings.docker.json" &&    \
+    rm -rf "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2/__pycache__"                &&    \
+    rm -rf "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2/bin"                        &&    \
+    rm -f  "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2/*.zip"       \
+           "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2/package.bat" \
+           "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2/*.pyprog"    > /dev/null
 
 # SDK and install scripts
 COPY ["/${REPO_NAME}/src/SDK/Python",        "/app/publish/SDK/Python"]
@@ -335,18 +373,32 @@ COPY --from=build /app/publish .
 
 # Install required Python packages --------------------------------------------
 
+# *** TODO: *** all of this is in /app/SDK/Scripts/utils.sh under 
+# "installRequiredPythonPackages". We should use that method rather than having
+# the same commands copy and pasted here. NOTE that installRequiredPythonPackages
+# installs some packages that, combined with the packages installed by setupPython,
+# provide coverage for *almost* all the packages installed in this docker file. 
+# When switching to using our scripts we need to ensure we cover all installs and
+# test.
+
+# *** WARNING ON ABOVE NOTE *** To save space in the Docker containers we don't
+# create venv's for pre-installed/hardcoded modules. We install these modules
+# directly into the system's python installation folders. This means that if we
+# choose to use the utils.sh script for setting up python then we'd need to take
+# this into account
+
 # See https://towardsdatascience.com/how-to-shrink-numpy-scipy-pandas-and-matplotlib-for-your-data-product-4ec8d7e86ee4
 # for a discussion on reducing PIP install sizes. That article is woefully out of date, with the
 # --compile and --global-option now deprecated, the CLFAGS to nothing, but the --no-cache-dir does help
 
 RUN python3.8 -m pip --no-cache-dir install \
-    -r /app/preinstalled-modules/ObjectDetectionYOLOv5-6.2/requirements.linux.arm64.txt \
-    -r /app/preinstalled-modules/FaceProcessing/requirements.linux.arm64.txt \
-    -r /app/SDK/Python/requirements.txt
+    -r "/app/SDK/Python/requirements.txt" \
+    -r "/app/preinstalled-modules/FaceProcessing/requirements.linux.txt" \
+    -r "/app/preinstalled-modules/ObjectDetectionYOLOv5-6.2/requirements.linux.txt"
 
 RUN python3.9 -m pip --no-cache-dir install \
     -r /app/SDK/Python/requirements.txt
-
+    
 # Add folders for storing persisted user data and modules. This should be mapped
 # to a folder on the host. Typically C:\ProgramData\CodeProject\AI on Windows, 
 # /etc/codeproject/ai on Linux, and /Library/Application Support/CodeProject/AI 
@@ -362,12 +414,8 @@ COPY [ "/${REPO_NAME}/.vscode/launch.docker.json", "/app/.vscode/launch.json" ]
 COPY [ "/${REPO_NAME}/.vscode/tasks.docker.json",  "/app/.vscode/tasks.json" ]
 
 # Start the server
-RUN set DOTNET_ROOT=~/.dotnet
-RUN PATH=${PATH}:${DOTNET_ROOT}
-
 WORKDIR /app/server
-# ENTRYPOINT ["dotnet CodeProject.AI.Server.dll"]
-CMD ["dotnet", "CodeProject.AI.Server.dll"]
+ENTRYPOINT ["./CodeProject.AI.Server"]
 
 # For debug
 # ENTRYPOINT ["tail", "-f", "/dev/null"]
