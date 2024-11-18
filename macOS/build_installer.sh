@@ -159,7 +159,7 @@ copyTemplatesDirectory(){
     chmod 755 "${BUILD_DIRECTORY}/${TEMPLATES_DEST_DIRNAME}/Distribution"
 
     # handle slashes in paths
-    exe_path="${APPLICATION_FILE_PATH//\//\\\/}"
+    #exe_path="${APPLICATION_FILE_PATH//\//\\\//}"
     exe_path="${exe_path//\./\\.}"
 
     echo "$APPLICATION_FILE_PATH"
@@ -305,7 +305,11 @@ function addUninstallerToApp(){
 function addLauncherdInfoToApp(){
 
     # handle slashes in paths
-    exe_path="${APPLICATION_FILE_PATH//\//\\/}"
+    # exe_path="${APPLICATION_FILE_PATH//\//\\\//}"
+    exe_path="${exe_path//\./\\.}"
+
+    echo "$APPLICATION_FILE_PATH"
+    echo "$exe_path"
 
     cp "$SCRIPT_PATH/templates/launchd.plist" "${APPLICATION_DIRECTORY}/${SERVICE_ID}.plist"
     sed -i -e "s/__PRODUCT__/${PRODUCT}/g"                "${APPLICATION_DIRECTORY}/${SERVICE_ID}.plist"
