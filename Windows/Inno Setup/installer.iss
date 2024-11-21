@@ -6,7 +6,7 @@
 #define AppName              "CodeProject.AI Server"
 #define SetupExeBaseName     "CodeProject.AI-Server"
 #define Architecture         "x64"
-#define AppVersion           "2.9.1"
+#define AppVersion           "2.9.2"
 #define InstalledAppPath     "server\CodeProject.AI.Server.exe"
 #define ServerRepoRelPath    "..\..\..\CodeProject.AI-Server"
 
@@ -130,7 +130,9 @@ CloseApplications=no
 ; where to get the certificate.
 ;
 ; if you don't have the signing token, comment out the following line
-SignTool={#SigningType}
+;#if SigningType == "EvSigning"
+;  SignTool="EvSigning"
+;#endif
 
 [Types]
 Name: "full";    Description: "Full installation"
