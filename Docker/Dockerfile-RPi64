@@ -51,7 +51,7 @@ ENV DOTNET_RUNNING_IN_CONTAINER=true
 # noninteractive frontend means no prompts or questions are asked and whenever a call requires an
 # answer, the default will be used. Installs will be non-interrupted and so won't hang. The Python
 # installs, for instance, require this in this current environment
-ENV DEBIAN_FRONTEND noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
 
 # Grab the values passed in via command line here so we can use inside this stage
 ARG UBUNTU_VERSION=22.04
