@@ -107,6 +107,7 @@ do
 done <<< "$(dotnet --list-runtimes 2>/dev/null)"
 unset IFS
 
+# TODO: Either install .NET or let the user know it needs to be installed
 
 if [ "${ADD_TO_STARTUP}" = "true" ]; then
     echo "Adding CodeProject.AI Server to Daemon list"

@@ -6,19 +6,21 @@ set starttime=%time%
 
 :: Set the parameters ----------------------------------------------------------
 
-REM Set to blank for no signing
-REM set "Signing="
-set Signing=EvSigning
-
-REM The location of the root of the server repo relative to this script
-set repo_base=..\..\..\CodeProject.AI-Server
-
 set architecture=%PROCESSOR_ARCHITECTURE%
 if /i "!architecture!" == "arm64" (
     set architecture=arm64
 ) else (
     set architecture=x64
 )
+
+REM Set to blank for no signing
+REM set "Signing="
+set Signing=EvSigning
+if /i "!architecture!" == "arm64" set "Signing=NoSigning"
+
+REM The location of the root of the server repo relative to this script
+set repo_base=..\..\..\CodeProject.AI-Server
+
 
 set "DotNetVersion=9.0"
 set "DotNetHostingVersion=9.0.0"
