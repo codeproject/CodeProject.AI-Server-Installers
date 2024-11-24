@@ -20,7 +20,7 @@
 
 # INITIAL SETUP ===============================================================
 
-# Note: we're before the first 'FROM' statment so these values are not available
+# Note: we're before the first 'FROM' statement so these values are not available
 # inside the build stages. If you wish to use these inside a stage, re-grab them 
 # inside that stage
 ARG UBUNTU_VERSION=22.04
@@ -98,8 +98,7 @@ Suitable for Orange Pi, Radxa ROCK and Raspberry Pi."
 # This stops the "lsmod: not found" error
 #   kmod
 
-RUN apt-get update -y && \
-    apt-get install -y --no-install-recommends \
+RUN apt-get update -y && apt-get install -y --no-install-recommends \
         libfontconfig1  \
         libgdiplus      \
         libjpeg-dev     \

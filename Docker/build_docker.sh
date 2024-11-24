@@ -103,6 +103,7 @@ fi
 
 if [ "$do_jetson" = true ]; then
     docker pull gpuci/cuda-l4t:10.2-runtime-ubuntu18.04
+    # docker pull nvcr.io/nvidia/l4t-base:r32.7.1
     docker buildx build --no-cache --platform linux/arm64 --build-arg REPO_NAME=$repo_name --build-arg CPAI_VERSION=$VERSION --build-arg DOTNET_VERSION=$dotnet_version --tag codeproject/ai-server:jetson -f Dockerfile-Jetson "${repo_base}"
 fi
 
