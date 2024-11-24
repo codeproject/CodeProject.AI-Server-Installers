@@ -18,14 +18,15 @@
 
 # INITIAL SETUP ===============================================================
 
-# Note: we're before the first 'FROM' statment so these values are not available
+# Note: we're before the first 'FROM' statement so these values are not available
 # inside the build stages. If you wish to use these inside a stage, re-grab them 
 # inside that stage
-ARG CUDA_VERSION=10.2
-ARG CUDA_MAJOR=11
+ARG CPAI_VERSION
 ARG UBUNTU_VERSION=18.04
 ARG DOTNET_VERSION=9.0
-ARG CPAI_VERSION
+
+ARG CUDA_VERSION=10.2
+ARG CUDA_MAJOR=11
 
 FROM cupy/nvidia-cuda:$CUDA_VERSION-runtime-ubuntu$UBUNTU_VERSION AS base
 
@@ -62,6 +63,12 @@ ARG CPAI_VERSION
 ENV CPAI_VERSION=$CPAI_VERSION
 ENV UBUNTU_VERSION=$UBUNTU_VERSION
 ENV DOTNET_VERSION=$DOTNET_VERSION
+
+ARG CUDA_VERSION=10.2
+ARG CUDA_MAJOR=10
+
+ENV CUDA_VERSION=$CUDA_VERSION
+ENV CUDA_MAJOR=$CUDA_MAJOR
 
 # Setup the ports -------------------------------------------------------------
 
