@@ -23,14 +23,15 @@
 
 ; File downloads: Use a specific version URL and hash if you want to ensure file
 ; integrity, but it is a MS download site, so we can trust it. You can use the 
-; Microsoft DevToys Checksum tool to caclulate the file SHA256 but other tools 
+; Microsoft DevToys Checksum tool to calculate the file SHA256 but other tools 
 ; are available such as https://emn178.github.io/online-tools/sha256_checksum.html
 ; NOTE: An empty SHA256 string disables the hash check
  
 ; .NET Hosting Bundle
 #define HostingBundleInstallerExe "dotnet-hosting-9.0.0-win.exe"
 #define HostingBundleDownloadURL  "https://download.visualstudio.microsoft.com/download/pr/e1ae9d41-3faf-4755-ac27-b24e84eef3d1/5e3a24eb8c1a12272ea1fe126d17dfca/dotnet-hosting-9.0.0-win.exe"
-#define HostingBundleSHA256       "342681a5e594163ca18167160fc7dd969171184584dfaed4f2745b462ade7b0b"
+;#define HostingBundleSHA256       "342681a5e594163ca18167160fc7dd969171184584dfaed4f2745b462ade7b0b"
+#define HostingBundleSHA256       ""
 
 ; VC++ redistributable. 14.40.33810.0
 #define VCRedistInstallerExe      "vc_redist.x64.exe"
@@ -76,7 +77,7 @@
 AppId={{403D27BC-6BBD-4935-A991-21890C1A9007}
 AppName={#AppName}
 AppPublisher=CodeProject
-AppPublisherURL=https://www.codeproject.com/AI
+AppPublisherURL=https://codeproject.github.io/codeproject.ai
 AppSupportURL=https://github.com/codeproject/CodeProject.AI-Server/discussions
 AppUpdatesURL=https://codeproject.github.io/codeproject.ai/latest.html
 AppVersion={#AppVersion}
@@ -131,7 +132,7 @@ CloseApplications=no
 ;
 ; if you don't have the signing token, comment out the following line
 ;#if SigningType == "EvSigning"
-;  SignTool="EvSigning"
+SignTool="EvSigning"
 ;#endif
 
 [Types]
@@ -153,6 +154,7 @@ Source: "{#ServerRepoRelPath}\src\SDK\Python\*"; Excludes:"*.pyc,*.pyproj,*.pypr
 
 ; Setup script for modules and SDK
 Source: "{#ServerRepoRelPath}\src\setup.bat"; DestDir: "{app}"; 
+Source: "{#ServerRepoRelPath}\.env"; DestDir: "{app}"; 
 
 ; General scripts and utilities to help with setup
 Source: "{#ServerRepoRelPath}\src\scripts\*"; Excludes:"*.sh,"; DestDir: "{app}\scripts\"; \
@@ -167,7 +169,7 @@ Source: "{#ServerRepoRelPath}\utils\ParseJSON\bin\Release\net{#DotNetVersion}\*"
 ; No longer including the full test data
 ; Test data files
 ; Source: "{#ServerRepoRelPath}\demos\TestData\*"; DestDir: "{app}\TestData\"; Flags: ignoreversion recursesubdirs createallsubdirs; \
-;		 Components: testdata
+;		 Components: testData
 
 
 [Icons]
@@ -187,7 +189,7 @@ Name: "{group}\Uninstall";                        Filename: "{uninstallexe}"
 
 [Components]
 ;Name: "demo";     Description: "Install demo application"; Types: full custom; 
-;Name: "testdata"; Description: "Install test images";      Types: full custom;
+;Name: "testData"; Description: "Install test images";      Types: full custom;
 
 [Tasks]
 Name: "clean";    Description: "Remove Previously installed Modules and Data. "; 
