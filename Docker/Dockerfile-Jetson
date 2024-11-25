@@ -346,6 +346,7 @@ COPY ["/${REPO_NAME}/src/SDK/install.sh",    "/app/publish/SDK/install.sh"]
 COPY ["/${REPO_NAME}/src/server/install.sh", "/app/publish/server/install.sh"]
 COPY ["/${REPO_NAME}/src/scripts",           "/app/publish/scripts"]
 COPY ["/${REPO_NAME}/src/setup.sh",          "/app/publish/setup.sh"]
+COPY ["/${REPO_NAME}/.env",                  "/app/publish/.env"]
 
 # Cleanup / setup
 RUN rm -rf /app/publish/SDK/Python/__pycache__ \

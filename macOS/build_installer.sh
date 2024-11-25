@@ -219,6 +219,7 @@ copyApplicationDirectory() {
     cp "${repo_base}/src/server/install.sh" "${APPLICATION_DIRECTORY}/server/"
 
     cp "${repo_base}/src/setup.sh" "${APPLICATION_DIRECTORY}/"
+    cp "${repo_base}/.env"         "${APPLICATION_DIRECTORY}/"
 
     # Quick cleanup
     find "${APPLICATION_DIRECTORY}" -name __pycache__ -type d -exec rm -rf {} \; >/dev/null 2>&1

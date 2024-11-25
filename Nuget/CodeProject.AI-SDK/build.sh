@@ -1,6 +1,6 @@
 # This file builds the package
 
-Nuget_Version="1.0.2"
+Nuget_Version="1.1.0"
 
 cp ../../../CodeProject.AI-server/src/SDK/Python/readme.md .
 rm -rf dist

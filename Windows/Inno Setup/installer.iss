@@ -23,7 +23,7 @@
 
 ; File downloads: Use a specific version URL and hash if you want to ensure file
 ; integrity, but it is a MS download site, so we can trust it. You can use the 
-; Microsoft DevToys Checksum tool to caclulate the file SHA256 but other tools 
+; Microsoft DevToys Checksum tool to calculate the file SHA256 but other tools 
 ; are available such as https://emn178.github.io/online-tools/sha256_checksum.html
 ; NOTE: An empty SHA256 string disables the hash check
  
@@ -37,8 +37,6 @@
 #define VCRedistDownloadURL       "https://aka.ms/vs/17/release/vc_redist.x64.exe"
 #define VCRedistSHA256            ""
 
-#define SigningType               "EvSigning"
-
 ; Allow some overrides
 #ifdef basepath
   #define ServerRepoRelPath basepath
@@ -49,25 +47,22 @@
 #ifdef version
   #define AppVersion version
 #endif
-#ifdef dotnet
-  #define DotNetVersion dotnet
-#endif
-#ifdef dotnethostingExe
-  #define HostingBundleInstallerExe dotnethostingExe
-  #define HostingBundleDownloadURL  ""
-  #define HostingBundleSHA256       ""
-#endif
-#ifdef dotnethostingUrl
-  #define HostingBundleDownloadURL dotnethostingUrl
-#endif
-#ifdef dotnethostingSHA
-  #define HostingBundleSHA256 dotnethostingSHA
-#endif
-#ifdef sign
-  #define SigningType sign
-#endif
+;#ifdef dotnet
+;  #define DotNetVersion dotnet
+;#endif
+;#ifdef dotnethostingExe
+;  #define HostingBundleInstallerExe dotnethostingExe
+;  #define HostingBundleDownloadURL  ""
+;  #define HostingBundleSHA256       ""
+;#endif
+;#ifdef dotnethostingUrl
+;  #define HostingBundleDownloadURL dotnethostingUrl
+;#endif
+;#ifdef dotnethostingSHA
+;  #define HostingBundleSHA256 dotnethostingSHA
+;#endif
 
-#if (HostingBundleDownloadURL = "") || (dotnethostingSHA = "")
+#if (HostingBundleDownloadURL == "") || (dotnethostingSHA == "")
     #expr RaiseException("Error: Both HostingBundleDownloadURL and HostingBundleSHA256 need to be provided")
 #endif
 
@@ -76,7 +71,7 @@
 AppId={{403D27BC-6BBD-4935-A991-21890C1A9007}
 AppName={#AppName}
 AppPublisher=CodeProject
-AppPublisherURL=https://www.codeproject.com/AI
+AppPublisherURL=https://codeproject.github.io/codeproject.ai
 AppSupportURL=https://github.com/codeproject/CodeProject.AI-Server/discussions
 AppUpdatesURL=https://codeproject.github.io/codeproject.ai/latest.html
 AppVersion={#AppVersion}
@@ -87,6 +82,7 @@ WizardSmallImageFile=.\assets\logo.bmp
 ;WizardImageStretch=no
 DisableWelcomePage=no
 
+SetupLogging=yes
 OutputDir=Output
 OutputBaseFilename={#SetupExeBaseName}_{#AppVersion}_win_{#Architecture}
 SetupIconFile=.\assets\favicon.ico
@@ -130,9 +126,7 @@ CloseApplications=no
 ; where to get the certificate.
 ;
 ; if you don't have the signing token, comment out the following line
-;#if SigningType == "EvSigning"
-;  SignTool="EvSigning"
-;#endif
+SignTool="EvSigning"
 
 [Types]
 Name: "full";    Description: "Full installation"
@@ -153,6 +147,7 @@ Source: "{#ServerRepoRelPath}\src\SDK\Python\*"; Excludes:"*.pyc,*.pyproj,*.pypr
 
 ; Setup script for modules and SDK
 Source: "{#ServerRepoRelPath}\src\setup.bat"; DestDir: "{app}"; 
+Source: "{#ServerRepoRelPath}\.env"; DestDir: "{app}"; 
 
 ; General scripts and utilities to help with setup
 Source: "{#ServerRepoRelPath}\src\scripts\*"; Excludes:"*.sh,"; DestDir: "{app}\scripts\"; \
@@ -167,7 +162,7 @@ Source: "{#ServerRepoRelPath}\utils\ParseJSON\bin\Release\net{#DotNetVersion}\*"
 ; No longer including the full test data
 ; Test data files
 ; Source: "{#ServerRepoRelPath}\demos\TestData\*"; DestDir: "{app}\TestData\"; Flags: ignoreversion recursesubdirs createallsubdirs; \
-;		 Components: testdata
+;		 Components: testData
 
 
 [Icons]
@@ -187,7 +182,7 @@ Name: "{group}\Uninstall";                        Filename: "{uninstallexe}"
 
 [Components]
 ;Name: "demo";     Description: "Install demo application"; Types: full custom; 
-;Name: "testdata"; Description: "Install test images";      Types: full custom;
+;Name: "testData"; Description: "Install test images";      Types: full custom;
 
 [Tasks]
 Name: "clean";    Description: "Remove Previously installed Modules and Data. "; 
@@ -241,6 +236,8 @@ var
 
 begin
   checkDir := ExpandConstant('{commonpf}\dotnet\host\fxr\{#DotNetVersion}.*');
+  Log('Checking for .NET in ' + checkDir);
+
   Result := FindFirst(checkDir, findRec);
 
   if Result then
@@ -291,35 +288,37 @@ end;
 procedure InitModules;
 begin
   num_menuitems := 0;
-  AddGroup('Computer Audition');
-  AddModule('SoundClassifierTF', 'Sound Classifier', False);
+
+  AddGroup('Computer Audio');
+  AddModule('SoundClassifierTF',        'Sound Classifier', False);
 
   AddGroup('Computer Vision');
-  AddModule('ALPR', 'License Plate Reader', False);
-  AddModule('ObjectDetectionCoral', 'Object Detection (Coral)', False);
-  AddModule('ObjectDetectionYOLOv5Net', 'Object Detection (YOLOv5 .NET)', True);
-  AddModule('ObjectDetectionYOLOv5-3.1','Object Detection (YOLOv5 3.1)', False);
+  AddModule('ALPR',                      'License Plate Reader', False);
+  AddModule('ObjectDetectionCoral',      'Object Detection (Coral)', False);
+  AddModule('ObjectDetectionYOLOv5Net',  'Object Detection (YOLOv5 .NET)', True);
+  AddModule('ObjectDetectionYOLOv5-3.1', 'Object Detection (YOLOv5 3.1)', False);
   AddModule('ObjectDetectionYOLOv5-6.2', 'Object Detection (YOLOv5 6.2)', True);
-  AddModule('ObjectDetectionYOLOv8', 'Object Detection (YOLOv8)', False);
-  AddModule('OCR', 'Optical Character Recognition', False);
-  AddModule('SceneClassifier', 'Scene Classification', False);
+  AddModule('ObjectDetectionYOLOv8',     'Object Detection (YOLOv8)', False);
+  AddModule('OCR',                       'Optical Character Recognition', False);
+  AddModule('SceneClassifier',           'Scene Classification', False);
 
   AddGroup('Face Recognition');
-  AddModule('FaceProcessing','Face Processing', True);
+  AddModule('FaceProcessing',            'Face Processing', True);
 
   AddGroup('Generative AI');
-  AddModule('Text2Image', 'Text to Image', False);
-  AddModule('LlamaChat', 'LLM Chat', False);
+  AddModule('Text2Image',                'Text to Image', False);
+  AddModule('LlamaChat',                 'LLM Chat', False);
+  AddModule('MultiModeLLM',              'Multi-Modal LLM', False);
 
   AddGroup('Image Processing');
-  AddModule('BackgroundRemover', 'Background Remover', False);
-  AddModule('Cartooniser', 'Cartooniser', False);
-  AddModule('PortraitFilter', 'Portrait Filter', False);
-  AddModule('SuperResolution', 'Super Resolution', False);
+  AddModule('BackgroundRemover',         'Background Remover', False);
+  AddModule('Cartooniser',               'Cartooniser', False);
+  AddModule('PortraitFilter',            'Portrait Filter', False);
+  AddModule('SuperResolution',           'Super Resolution', False);
 
   AddGroup('Natural Language');
-  AddModule('SentimentAnalysis', 'Sentiment Analysis', False);
-  AddModule('TextSummary', 'Text Summary', False);
+  AddModule('SentimentAnalysis',         'Sentiment Analysis', False);
+  AddModule('TextSummary',               'Text Summary', False);
 
   AddGroup('Training');
   AddModule('TrainingObjectDetectionYOLOv5', 'Training for YOLOv5 6.2', False);
@@ -368,7 +367,7 @@ var
 begin
   FileName := ExpandConstant('{app}\Server\installmodules.json');
   FileDir  := ExpandConstant('{app}\Server\');
-  Log(FileName);
+  Log('Creating install JSON file: ' + FileName);
 
   output := '{' + #13#10;
   output := output + '  "ModuleOptions": {' + #13#10;
@@ -381,7 +380,7 @@ begin
   begin
     if (not Modules[i].isGroup and checkboxList.Checked[i-1]) then
     begin
-      Log(checkboxList.ItemCaption[i-1]);
+      Log('Adding ' + checkboxList.ItemCaption[i-1]);
       if (not FirstItem) then
       begin
         output  := output + '; ';
@@ -395,7 +394,7 @@ begin
   output := output + '  }' + #13#10;
   output := output + '}' + #13#10;
 
-  Log(output);
+  ; Log(output);
 
   ForceDirectories(FileDir);
   SaveStringToFile(FileName, output, False);
@@ -431,10 +430,16 @@ begin
 
     // Use AddEx to specify a username and password
     if InstallHostingBundle then
+    begin
+      Log('Preparing to download hosting bundle from {#HostingBundleDownloadURL}');
       DownloadPage.Add('{#HostingBundleDownloadURL}', '{#HostingBundleInstallerExe}', '{#HostingBundleSHA256}');
+    end;
 
     if InstallVCRedist then
+    begin
+      Log('Preparing to download VC++ redistributable from {#VCRedistDownloadURL}');
       DownloadPage.Add('{#VCRedistDownloadURL}', '{#VCRedistInstallerExe}', '{#VCRedistSHA256}');
+    end;
 
     DownloadPage.Show;
 
