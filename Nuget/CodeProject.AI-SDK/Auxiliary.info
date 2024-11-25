@@ -2,12 +2,12 @@
 	
 	<!-- Nuget setup -->
 	<PropertyGroup>
-    	<Version>1.0.2</Version>
+    	<Version>1.1.0</Version>
 		<Title>CodeProject.AI Module SDK</Title>
 		<Authors>CodeProject</Authors>
 		<Copyright>CodeProject 2024</Copyright>
 		<Company>CodeProject Solutions Inc.</Company>
-		<PackageProjectUrl>https://www.codeproject.com/AI</PackageProjectUrl>
+		<PackageProjectUrl>https://codeproject.github.io/codeproject.ai</PackageProjectUrl>
 		<RepositoryUrl>https://www.github.com/CodeProject/CodeProject.AI-Server</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 		<PackageTags>CodeProject.AI; AI; CodeProject;</PackageTags>
