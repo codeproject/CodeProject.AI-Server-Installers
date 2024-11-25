@@ -1,6 +1,6 @@
 @echo off
 
-set NUGET_VERSION=1.0.2
+set NUGET_VERSION=1.1.0
 
 echo Copying over .NET SDK
 robocopy /e "..\..\..\CodeProject.AI-Server\src\SDK\NET " ".\build "  >NUL
