@@ -30,15 +30,12 @@
 ; .NET Hosting Bundle
 #define HostingBundleInstallerExe "dotnet-hosting-9.0.0-win.exe"
 #define HostingBundleDownloadURL  "https://download.visualstudio.microsoft.com/download/pr/e1ae9d41-3faf-4755-ac27-b24e84eef3d1/5e3a24eb8c1a12272ea1fe126d17dfca/dotnet-hosting-9.0.0-win.exe"
-;#define HostingBundleSHA256       "342681a5e594163ca18167160fc7dd969171184584dfaed4f2745b462ade7b0b"
-#define HostingBundleSHA256       ""
+#define HostingBundleSHA256       "342681a5e594163ca18167160fc7dd969171184584dfaed4f2745b462ade7b0b"
 
 ; VC++ redistributable. 14.40.33810.0
 #define VCRedistInstallerExe      "vc_redist.x64.exe"
 #define VCRedistDownloadURL       "https://aka.ms/vs/17/release/vc_redist.x64.exe"
 #define VCRedistSHA256            ""
-
-#define SigningType               "EvSigning"
 
 ; Allow some overrides
 #ifdef basepath
@@ -50,25 +47,22 @@
 #ifdef version
   #define AppVersion version
 #endif
-#ifdef dotnet
-  #define DotNetVersion dotnet
-#endif
-#ifdef dotnethostingExe
-  #define HostingBundleInstallerExe dotnethostingExe
-  #define HostingBundleDownloadURL  ""
-  #define HostingBundleSHA256       ""
-#endif
-#ifdef dotnethostingUrl
-  #define HostingBundleDownloadURL dotnethostingUrl
-#endif
-#ifdef dotnethostingSHA
-  #define HostingBundleSHA256 dotnethostingSHA
-#endif
-#ifdef sign
-  #define SigningType sign
-#endif
+;#ifdef dotnet
+;  #define DotNetVersion dotnet
+;#endif
+;#ifdef dotnethostingExe
+;  #define HostingBundleInstallerExe dotnethostingExe
+;  #define HostingBundleDownloadURL  ""
+;  #define HostingBundleSHA256       ""
+;#endif
+;#ifdef dotnethostingUrl
+;  #define HostingBundleDownloadURL dotnethostingUrl
+;#endif
+;#ifdef dotnethostingSHA
+;  #define HostingBundleSHA256 dotnethostingSHA
+;#endif
 
-#if (HostingBundleDownloadURL = "") || (dotnethostingSHA = "")
+#if (HostingBundleDownloadURL == "") || (dotnethostingSHA == "")
     #expr RaiseException("Error: Both HostingBundleDownloadURL and HostingBundleSHA256 need to be provided")
 #endif
 
@@ -88,6 +82,7 @@ WizardSmallImageFile=.\assets\logo.bmp
 ;WizardImageStretch=no
 DisableWelcomePage=no
 
+SetupLogging=yes
 OutputDir=Output
 OutputBaseFilename={#SetupExeBaseName}_{#AppVersion}_win_{#Architecture}
 SetupIconFile=.\assets\favicon.ico
@@ -131,9 +126,7 @@ CloseApplications=no
 ; where to get the certificate.
 ;
 ; if you don't have the signing token, comment out the following line
-;#if SigningType == "EvSigning"
 SignTool="EvSigning"
-;#endif
 
 [Types]
 Name: "full";    Description: "Full installation"
@@ -243,6 +236,8 @@ var
 
 begin
   checkDir := ExpandConstant('{commonpf}\dotnet\host\fxr\{#DotNetVersion}.*');
+  Log('Checking for .NET in ' + checkDir);
+
   Result := FindFirst(checkDir, findRec);
 
   if Result then
@@ -293,35 +288,37 @@ end;
 procedure InitModules;
 begin
   num_menuitems := 0;
-  AddGroup('Computer Audition');
-  AddModule('SoundClassifierTF', 'Sound Classifier', False);
+
+  AddGroup('Computer Audio');
+  AddModule('SoundClassifierTF',        'Sound Classifier', False);
 
   AddGroup('Computer Vision');
-  AddModule('ALPR', 'License Plate Reader', False);
-  AddModule('ObjectDetectionCoral', 'Object Detection (Coral)', False);
-  AddModule('ObjectDetectionYOLOv5Net', 'Object Detection (YOLOv5 .NET)', True);
-  AddModule('ObjectDetectionYOLOv5-3.1','Object Detection (YOLOv5 3.1)', False);
+  AddModule('ALPR',                      'License Plate Reader', False);
+  AddModule('ObjectDetectionCoral',      'Object Detection (Coral)', False);
+  AddModule('ObjectDetectionYOLOv5Net',  'Object Detection (YOLOv5 .NET)', True);
+  AddModule('ObjectDetectionYOLOv5-3.1', 'Object Detection (YOLOv5 3.1)', False);
   AddModule('ObjectDetectionYOLOv5-6.2', 'Object Detection (YOLOv5 6.2)', True);
-  AddModule('ObjectDetectionYOLOv8', 'Object Detection (YOLOv8)', False);
-  AddModule('OCR', 'Optical Character Recognition', False);
-  AddModule('SceneClassifier', 'Scene Classification', False);
+  AddModule('ObjectDetectionYOLOv8',     'Object Detection (YOLOv8)', False);
+  AddModule('OCR',                       'Optical Character Recognition', False);
+  AddModule('SceneClassifier',           'Scene Classification', False);
 
   AddGroup('Face Recognition');
-  AddModule('FaceProcessing','Face Processing', True);
+  AddModule('FaceProcessing',            'Face Processing', True);
 
   AddGroup('Generative AI');
-  AddModule('Text2Image', 'Text to Image', False);
-  AddModule('LlamaChat', 'LLM Chat', False);
+  AddModule('Text2Image',                'Text to Image', False);
+  AddModule('LlamaChat',                 'LLM Chat', False);
+  AddModule('MultiModeLLM',              'Multi-Modal LLM', False);
 
   AddGroup('Image Processing');
-  AddModule('BackgroundRemover', 'Background Remover', False);
-  AddModule('Cartooniser', 'Cartooniser', False);
-  AddModule('PortraitFilter', 'Portrait Filter', False);
-  AddModule('SuperResolution', 'Super Resolution', False);
+  AddModule('BackgroundRemover',         'Background Remover', False);
+  AddModule('Cartooniser',               'Cartooniser', False);
+  AddModule('PortraitFilter',            'Portrait Filter', False);
+  AddModule('SuperResolution',           'Super Resolution', False);
 
   AddGroup('Natural Language');
-  AddModule('SentimentAnalysis', 'Sentiment Analysis', False);
-  AddModule('TextSummary', 'Text Summary', False);
+  AddModule('SentimentAnalysis',         'Sentiment Analysis', False);
+  AddModule('TextSummary',               'Text Summary', False);
 
   AddGroup('Training');
   AddModule('TrainingObjectDetectionYOLOv5', 'Training for YOLOv5 6.2', False);
@@ -370,7 +367,7 @@ var
 begin
   FileName := ExpandConstant('{app}\Server\installmodules.json');
   FileDir  := ExpandConstant('{app}\Server\');
-  Log(FileName);
+  Log('Creating install JSON file: ' + FileName);
 
   output := '{' + #13#10;
   output := output + '  "ModuleOptions": {' + #13#10;
@@ -383,7 +380,7 @@ begin
   begin
     if (not Modules[i].isGroup and checkboxList.Checked[i-1]) then
     begin
-      Log(checkboxList.ItemCaption[i-1]);
+      Log('Adding ' + checkboxList.ItemCaption[i-1]);
       if (not FirstItem) then
       begin
         output  := output + '; ';
@@ -397,7 +394,7 @@ begin
   output := output + '  }' + #13#10;
   output := output + '}' + #13#10;
 
-  Log(output);
+  ; Log(output);
 
   ForceDirectories(FileDir);
   SaveStringToFile(FileName, output, False);
@@ -433,10 +430,16 @@ begin
 
     // Use AddEx to specify a username and password
     if InstallHostingBundle then
+    begin
+      Log('Preparing to download hosting bundle from {#HostingBundleDownloadURL}');
       DownloadPage.Add('{#HostingBundleDownloadURL}', '{#HostingBundleInstallerExe}', '{#HostingBundleSHA256}');
+    end;
 
     if InstallVCRedist then
+    begin
+      Log('Preparing to download VC++ redistributable from {#VCRedistDownloadURL}');
       DownloadPage.Add('{#VCRedistDownloadURL}', '{#VCRedistInstallerExe}', '{#VCRedistSHA256}');
+    end;
 
     DownloadPage.Show;
 

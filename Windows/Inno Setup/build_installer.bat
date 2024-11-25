@@ -26,8 +26,8 @@ set "DotNetVersion=9.0"
 set "DotNetHostingVersion=9.0.0"
 
 REM Note the hosting bundle is architecture agnostic. (arm64, x64 same file)
-set "HostingBundleInstallerExe=dotnet-hosting-!DotNetHostingVersion!-win.exe"
-set "HostingBundleDownloadURL=https://download.visualstudio.microsoft.com/download/pr/e1ae9d41-3faf-4755-ac27-b24e84eef3d1/5e3a24eb8c1a12272ea1fe126d17dfca/!HostingBundleInstallerExe!"
+set "HostingBundleInstallerExe=dotnet-hosting-9.0.0-win.exe"
+set "HostingBundleDownloadURL=https://download.visualstudio.microsoft.com/download/pr/e1ae9d41-3faf-4755-ac27-b24e84eef3d1/5e3a24eb8c1a12272ea1fe126d17dfca/dotnet-hosting-9.0.0-win.exe"
 REM Use https://emn178.github.io/online-tools/sha256_checksum.html to calculate this:
 set "HostingBundleSHA256=342681a5e594163ca18167160fc7dd969171184584dfaed4f2745b462ade7b0b"
 
