@@ -133,11 +133,9 @@ RUN apt-get update -y && apt-get install -y --no-install-recommends \
 # .NET -------------------------------------------------------------------------
 
 # Update packages and install .NET
-RUN wget "https://packages.microsoft.com/config/ubuntu/${UBUNTU_VERSION}/packages-microsoft-prod.deb" \
-         -O packages-microsoft-prod.deb --no-check-certificate                                     && \
-    dpkg -i packages-microsoft-prod.deb                                                            && \
-    rm packages-microsoft-prod.deb                                                                 && \
-    apt update && apt install aspnetcore-runtime-$DOTNET_VERSION -y                      > /dev/null
+RUN apt install software-properties-common -y                               && \
+    add-apt-repository ppa:dotnet/backports -y                              && \
+    apt-get update && apt-get install aspnetcore-runtime-$DOTNET_VERSION -y > /dev/null
 
 
 # Setup Python ----------------------------------------------------------------

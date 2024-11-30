@@ -130,17 +130,22 @@ RUN apt-get update  -y && \
 # Update packages and install .NET
 
 # See https://learn.microsoft.com/en-us/dotnet/core/install/linux-scripted-manual#scripted-install
-RUN wget https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh
-RUN chmod +x ./dotnet-install.sh
+# RUN wget https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh
+# RUN chmod +x ./dotnet-install.sh
 
 # Install .NET. For just the runtime use "--channel $DOTNET_VERSION --runtime aspnetcore"
-RUN ./dotnet-install.sh --channel $DOTNET_VERSION --runtime aspnetcore
+# RUN ./dotnet-install.sh --channel $DOTNET_VERSION --runtime aspnetcore
 
 # The install script is for CI/CD and doesn't actually register .NET. So add 
 # link and env variable
-RUN ln -fs $HOME/.dotnet/dotnet /usr/local/bin/dotnet
-RUN echo 'export DOTNET_ROOT=~/.dotnet' >> $HOME/.bashrc
-RUN echo 'export PATH=$PATH:$DOTNET_ROOT' >> $HOME/.bashrc
+# RUN ln -fs $HOME/.dotnet/dotnet /usr/local/bin/dotnet
+# RUN echo 'export DOTNET_ROOT=~/.dotnet' >> $HOME/.bashrc
+# RUN echo 'export PATH=$PATH:$DOTNET_ROOT' >> $HOME/.bashrc
+
+# Update packages and install .NET
+RUN apt install software-properties-common -y                               && \
+    add-apt-repository ppa:dotnet/backports -y                              && \
+    apt-get update && apt-get install aspnetcore-runtime-$DOTNET_VERSION -y > /dev/null
 
 
 # Setup Python ----------------------------------------------------------------
@@ -286,7 +291,6 @@ WORKDIR /src
 # This enables us to have a modulesettings for inside a docker image, and module
 # settings for modules outside the docker image.
 
-
 COPY [ "/${MODULES_REPO_NAME}/CodeProject.AI-FaceProcessing/", "/app/publish/preinstalled-modules/FaceProcessing"]
 RUN mv  -f "/app/publish/preinstalled-modules/FaceProcessing/modulesettings.docker.build.json" \
            "/app/publish/preinstalled-modules/FaceProcessing/modulesettings.docker.json"    && \
@@ -317,7 +321,7 @@ COPY ["/${REPO_NAME}/.env",                  "/app/publish/.env"]
 RUN rm -rf /app/publish/SDK/Python/__pycache__ \
     mkdir /app/publish/runtimes
 
-# END REVIEW ===================================================================
+# END REVIEW ==================================================================
 
 
 # CREATE THE FINAL IMAGE ======================================================
@@ -341,9 +345,9 @@ COPY --from=build /app/publish .
 # --compile and --global-option now deprecated, the CLFAGS to nothing, but the --no-cache-dir does help
 
 RUN python3.8 -m pip --no-cache-dir install \
-    -r /app/preinstalled-modules/ObjectDetectionYOLOv5-6.2/requirements.linux.arm64.txt \
-    -r /app/preinstalled-modules/FaceProcessing/requirements.linux.arm64.txt \
-    -r /app/SDK/Python/requirements.txt
+    -r "/app/preinstalled-modules/ObjectDetectionYOLOv5-6.2/requirements.linux.arm64.txt" \
+    -r "/app/preinstalled-modules/FaceProcessing/requirements.linux.arm64.txt" \
+    -r "/app/SDK/Python/requirements.txt"
 
 RUN python3.9 -m pip --no-cache-dir install \
     -r /app/SDK/Python/requirements.txt
@@ -354,9 +358,9 @@ RUN python3.9 -m pip --no-cache-dir install \
 # on macOS.
 # We also make a .vscode folder so we have some bits in place if we wish to run
 # VSCode inside the container
-RUN mkdir --parents /etc/codeproject/ai                 && \
-    mkdir --parents /app/downloads/modules /app/modules && \
-    mkdir /app/.vscode
+RUN mkdir --parents "/etc/codeproject/ai"                   && \
+    mkdir --parents "/app/downloads/modules" "/app/modules" && \
+    mkdir "/app/.vscode"
 
 # For debugging the live container using VS Code
 COPY [ "/${REPO_NAME}/.vscode/launch.docker.json", "/app/.vscode/launch.json" ]

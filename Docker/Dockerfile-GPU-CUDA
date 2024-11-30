@@ -12,9 +12,7 @@
 # is set in the build_docker script as the last param to the docker buildx command,
 # namely the "../..". This takes us from /Installers/Docker to /. and then this
 # image file proceeds
-#
-# BE AWARE: this cuDNN equipped build may lock up when two YOLO equipped modules
-# are installed on it. Without cuDNN, .NET ONNX runtime for GPU doesn't work.
+
 
 # INITIAL SETUP ===============================================================
 
@@ -26,8 +24,7 @@ ARG DOTNET_VERSION=9.0
 ARG CPAI_VERSION
 
 # CUDA_VERSION = 11.7.1-cudnn8, 11.8.0-cudnn8, 12.0.1-cudnn8, 12.2.2-cudnn8
-# or cuDNN free: 11.7.1, 12.3.1
-ARG CUDA_VERSION=11.7.1-cudnn8
+ARG CUDA_VERSION=12.2.2-cudnn8
 ARG CUDA_MAJOR=11
 
 FROM nvidia/cuda:$CUDA_VERSION-runtime-ubuntu$UBUNTU_VERSION AS base
@@ -127,72 +124,77 @@ RUN apt-get update -y && apt-get install -y --no-install-recommends \
                     \
     psmisc          \
                     \
-    kmod            \
-     > /dev/null
-#    libnvidia-compute-535 > /dev/null
-
-    # Not needed. Probably.
-    # apt-utils
+    kmod            > /dev/null
 
 
 # .NET ------------------------------------------------------------------------
 
-# Update packages and install NET
-RUN wget "https://packages.microsoft.com/config/ubuntu/${UBUNTU_VERSION}/packages-microsoft-prod.deb" \
-         -O packages-microsoft-prod.deb --no-check-certificate                                   && \
-    dpkg -i packages-microsoft-prod.deb                                                          && \
-    rm packages-microsoft-prod.deb                                                               && \
-    apt update && apt install aspnetcore-runtime-$DOTNET_VERSION -y                      > /dev/null
+# Update packages and install .NET
+RUN apt install software-properties-common -y                               && \
+    add-apt-repository ppa:dotnet/backports -y                              && \
+    apt-get update && apt-get install aspnetcore-runtime-$DOTNET_VERSION -y > /dev/null
 
 
 # Setup Python ----------------------------------------------------------------
 
-RUN apt-get install software-properties-common -y && add-apt-repository ppa:deadsnakes/ppa -y
+# Combining all these together into a single layer
+# 1. Add deadsnakes repo
+# 2. Install pip for python3,  python3-apt and python3-setuptools
+#    Note that this (currently) installs python3.8 as a dependency. It could be
+#    in the future that a different version of python is installed instead, in
+#    which case we may need to pin the installed python version.
+# 3. Install Python 3.8 as well as dev and distutils so packages can be built
+#    if needed, and venv for creating virtual environments
+# 4. Using the now installed Python 3.8, upgrade the python setuptools and dev
+#    packages to the latest
+# 5. Install virtualenv virtualenvwrapper for python 3.8
 
-# This (currently) installs python3.8 as a dependency. It could be in the future
-# that a different version of python is installed instead, in which case we may
-# need to pin the installed python version.
-RUN apt-get install python3-pip -y && apt-get install python3-apt -y
+RUN apt-get install software-properties-common -y &&      \
+    add-apt-repository ppa:deadsnakes/ppa -y      &&      \
+    apt-get install -y --no-install-recommends            \
+        python3-pip                                       \
+        python3-apt                                       \
+        python3-setuptools                        &&      \
+    apt-get install -y --no-install-recommends            \
+        python3.8                                 &&      \
+    apt-get install -y --no-install-recommends            \
+        python3.8-distutils                               \
+        python3.8-dev                                     \ 
+        python3.8-venv                            &&      \
+    python3.8 -m pip install --upgrade setuptools &&      \
+    python3.8 -m pip install --upgrade pip        &&      \
+    python3.8 -m pip install virtualenv virtualenvwrapper > /dev/null
 
-# Install Python3.8, distutils and dev tools (so packages can be built if needed)
-# and pip install so we can install python packages
-RUN apt-get install python3.8 -y && \
-    apt-get install python3.8-distutils -y && \
-    apt-get install python3.8-dev -y && \ 
-    python3.8 -m pip install --upgrade setuptools && \
-    python3.8 -m pip install --upgrade pip
+# Python 3.9: Combining all these together into a single layer, but leveraging
+# the work done in Python 3.8:
+# 1. Install Python 3.9 as well as dev and distutils so packages can be built
+#    if needed, and venv for creating virtual environments
+# 4. Using the now installed Python 3.8, upgrade the python setuptools and dev
+#    packages to the latest
+# 5. Install virtualenv virtualenvwrapper for python 3.8
 
-# install virtual env tools
-RUN apt install python3-pip python3-setuptools python3.8-venv -y && \
-    python3.8 -m pip install virtualenv virtualenvwrapper
+RUN apt-get install -y --no-install-recommends            \
+        python3.9                                 &&      \
+    apt-get install -y --no-install-recommends            \
+        python3.9-distutils                               \
+        python3.9-dev                                     \ 
+        python3.9-venv                            &&      \
+    python3.9 -m pip install --upgrade setuptools &&      \
+    python3.9 -m pip install --upgrade pip        &&      \
+    python3.9 -m pip install virtualenv virtualenvwrapper > /dev/null
+    
+# Same for Python3.11
 
-# Install Python3.9, distutils and dev tools (so packages can be built if needed)
-# and pip install so we can install python packages. We don't need this for the
-# built in modules, but we know we have downloadable modules that could use Python3.9
-# so we preempt the need.
-RUN apt-get install python3.9 -y && \
-   apt-get install python3.9-distutils -y && \
-   apt-get install python3.9-dev -y && \ 
-   python3.9 -m pip install --upgrade setuptools && \
-   python3.9 -m pip install --upgrade pip
+RUN apt-get install -y --no-install-recommends            \
+        python3.11                                &&      \
+    apt-get install -y --no-install-recommends            \
+        python3.11-distutils                              \
+        python3.11-dev                                    \ 
+        python3.11-venv                            &&     \
+    python3.11 -m pip install --upgrade setuptools &&     \
+    python3.11 -m pip install --upgrade pip        &&     \
+    python3.11 -m pip install virtualenv virtualenvwrapper > /dev/null
 
-#RUN apt python3.9-venv -y
-RUN apt install python3.9-venv -y && \
-    python3.9 -m pip install virtualenv virtualenvwrapper
-
-# Install Python3.11, distutils and dev tools (so packages can be built if needed)
-# and pip install so we can install python packages. We don't need this for the
-# built in modules, but we know we have downloadable modules that could use Python3.9
-# so we preempt the need.
-RUN apt-get install python3.11 -y && \
-   apt-get install python3.11-distutils -y && \
-   apt-get install python3.11-dev -y && \ 
-   python3.11 -m pip install --upgrade setuptools && \
-   python3.11 -m pip install --upgrade pip
-
-#RUN apt python3.11-venv -y
-RUN apt install python3.11-venv -y && \
-    python3.11 -m pip install virtualenv virtualenvwrapper
 
 # Build the .NET source in a separate, discardable build container --------------
 
@@ -252,7 +254,6 @@ RUN dotnet publish ObjectDetectionYOLOv5Net.csproj -c Release --no-self-containe
     mv -f /app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net/modulesettings.docker.build.json         \
           /app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net/modulesettings.docker.json > /dev/null
 
-
 # BEGIN REVIEW ================================================================
 
 # REVIEW: [Matthew] This section should go in the "FROM base AS final" part, not
@@ -291,18 +292,21 @@ WORKDIR /src
 
 COPY ["${MODULES_REPO_NAME}/CodeProject.AI-FaceProcessing/", "/app/publish/preinstalled-modules/FaceProcessing"]
 RUN mv  -f /app/publish/preinstalled-modules/FaceProcessing/modulesettings.docker.build.json \
-          /app/publish/preinstalled-modules/FaceProcessing/modulesettings.docker.json
-RUN rm -rf /app/publish/preinstalled-modules/FaceProcessing/intelligencelayer/__pycache__ && \
+          /app/publish/preinstalled-modules/FaceProcessing/modulesettings.docker.json     && \
+    rm -rf /app/publish/preinstalled-modules/FaceProcessing/intelligencelayer/__pycache__ && \
+    rm -rf /app/publish/preinstalled-modules/FaceProcessing/bin                           && \
     rm -f /app/publish/preinstalled-modules/FaceProcessing/*.zip        \
           /app/publish/preinstalled-modules/FaceProcessing/package.bat  \
-          /app/publish/preinstalled-modules/FaceProcessing/*.pyprog
+          /app/publish/preinstalled-modules/FaceProcessing/*.pyprog     > /dev/null
 
 COPY ["/${REPO_NAME}/modules/ObjectDetectionYOLOv5-6.2/", "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2"]
-RUN mv -f "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2/modulesettings.docker.build.gpu.json" "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2/modulesettings.docker.json"
-RUN rm -rf /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2/__pycache__ && \
+RUN mv -f "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2/modulesettings.docker.build.gpu.json" \
+          "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2/modulesettings.docker.json" && \
+    rm -rf /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2/__pycache__                 && \
+    rm -rf /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2/bin                         && \
     rm -f /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2/*.zip       \
           /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2/package.bat \
-          /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2/*.pyprog
+          /app/publish/preinstalled-modules/ObjectDetectionYOLOv5-6.2/*.pyprog    > /dev/null
 
 # SDK and install scripts
 COPY ["/${REPO_NAME}/src/SDK/Python",        "/app/publish/SDK/Python"]

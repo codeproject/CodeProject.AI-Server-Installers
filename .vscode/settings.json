@@ -10,6 +10,7 @@
         "CPAI",
         "createallsubdirs",
         "CTYPE",
+        "cuda",
         "cudnn",
         "deadsnakes",
         "discardable",

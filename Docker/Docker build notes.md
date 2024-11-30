@@ -1,6 +1,6 @@
 # Managing disk usage
 
-Docker can be a space hog. Two things can be done to reclaim space
+Docker can be a space hog. Three things can be done to reclaim space
 
 1. Install the "Disk Usage" docker desktop extension and use it to remove build cache, hanging images, or anything else you don't need
 
@@ -16,9 +16,10 @@ Docker can be a space hog. Two things can be done to reclaim space
     - `compact vdisk`
     - `exit`
 
-Your docker VM disk should now be as compact as it can get
+   Your docker VM disk should, hopefully, be a little smaller
+
+3. Use the PowerShell script `devops\utils\compact_wsl_disks.ps1` in the CodeProject.AI-Server project
 
 # Permissions issues
 
 1. `docker login --username` - this will prompt you for your password. Enter your docker hub password.
-2. `docker login --username` - same, but instead of your docker hub password, use a 
