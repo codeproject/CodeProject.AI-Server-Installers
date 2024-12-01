@@ -1,6 +1,6 @@
 # CodeProject.AI Server 3.0+
 #
-# Docker file for arm64 CPU enabled image (eg Apple Silicon)
+# Docker file for arm64 CPU enabled image (eg Apple Silicon). To use:
 #
 # docker run --name CodeProject.AI-Server -d
 #    -p 32168:32168 -p 32168:32168/udp \
@@ -8,11 +8,10 @@
 #   --mount type=bind,source=/Library/Application Support/CodeProject/AI/docker/modules,target=/app/modules \
 #   codeproject/ai-server:arm64
 #
-# ASSUMPTION: This is being build from the root directory of the solution. This
+# ASSUMPTION: This is being built from the root directory of the solution. This
 # is set in the build_docker script as the last param to the docker buildx command,
 # namely the "../..". This takes us from /Installers/Docker to /. and then this
 # image file proceeds
-
 
 # INITIAL SETUP ===============================================================
 
@@ -76,6 +75,7 @@ Suitable for Apple Silicon macs, Orange Pi, Radxa ROCK and Raspberry Pi."
 # Install required libraries --------------------------------------------------
 
 # Install packages. In order:
+#
 # Required to allow packages to build
 #   apt-utils
 # Required for SkiaSharp
@@ -247,7 +247,7 @@ RUN dotnet publish "Server.csproj" -c Release --no-self-contained --force -o /ap
 #            already installed still be visible, while also allowing us to add
 #            installed modules to the folder. This  probably involves volumes
 
-WORKDIR /src/modules/ObjectDetectionYOLOv5Net
+WORKDIR "/src/modules/ObjectDetectionYOLOv5Net"
 RUN dotnet publish ObjectDetectionYOLOv5Net.csproj -c Release --no-self-contained /p:DefineConstants=GPU_NONE \
                    --force -o /app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net/bin &&               \
     mv -f /app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net/bin/modulesettings.*                     \
