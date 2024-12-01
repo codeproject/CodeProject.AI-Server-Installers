@@ -8,7 +8,7 @@
 #   --mount type=bind,source=C:\ProgramData\CodeProject\AI\docker/modules,target=/app/modules \
 #   codeproject/ai-server
 #
-# ASSUMPTION: This is being build from the root directory of the solution. This
+# ASSUMPTION: This is being built from the root directory of the solution. This
 # is set in the build_docker script as the last param to the docker buildx command,
 # namely the "../..". This takes us from /Installers/Docker to /. and then this
 # image file proceeds

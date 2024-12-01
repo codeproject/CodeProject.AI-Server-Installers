@@ -12,11 +12,10 @@
 #
 # NOTE: Evidently Macs with Apple Silicon do not support USB passthrough.
 #
-# ASSUMPTION: This is being build from the root directory of the solution. This
+# ASSUMPTION: This is being built from the root directory of the solution. This
 # is set in the build_docker script as the last param to the docker buildx command,
 # namely the "../..". This takes us from /Installers/Docker to /. and then this
 # image file proceeds
-
 
 # INITIAL SETUP ===============================================================
 
@@ -81,6 +80,8 @@ Suitable for Orange Pi, Radxa ROCK and Raspberry Pi."
 
 # Install packages. In order:
 #
+# Required to allow packages to build
+#   apt-utils
 # Required for SkiaSharp
 #   libfontconfig1
 # Required for System.Drawing
@@ -98,7 +99,9 @@ Suitable for Orange Pi, Radxa ROCK and Raspberry Pi."
 # This stops the "lsmod: not found" error
 #   kmod
 
-RUN apt-get update -y && apt-get install -y --no-install-recommends \
+RUN apt-get update  -y && \
+    apt-get upgrade -y --no-install-recommends apt-utils && \
+    apt-get install -y --no-install-recommends \
         libfontconfig1  \
         libgdiplus      \
         libjpeg-dev     \
@@ -109,9 +112,10 @@ RUN apt-get update -y && apt-get install -y --no-install-recommends \
         libsm6          \
         libxext6        \
                         \
-        gnupg           \
-                        \
         mesa-utils      \
+                        \
+        gcc             \
+        python3-dev     \
                         \
         ca-certificates \
         curl            \
@@ -130,17 +134,22 @@ RUN apt-get update -y && apt-get install -y --no-install-recommends \
 # Update packages and install .NET
 
 # See https://learn.microsoft.com/en-us/dotnet/core/install/linux-scripted-manual#scripted-install
-RUN wget https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh
-RUN chmod +x ./dotnet-install.sh
+# RUN wget https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh
+# RUN chmod +x ./dotnet-install.sh
 
 # Install .NET. For just the runtime use "--channel $DOTNET_VERSION --runtime aspnetcore"
-RUN ./dotnet-install.sh --channel $DOTNET_VERSION --runtime aspnetcore
+# RUN ./dotnet-install.sh --channel $DOTNET_VERSION --runtime aspnetcore
 
 # The install script is for CI/CD and doesn't actually register .NET. So add 
 # link and env variable
-RUN ln -fs $HOME/.dotnet/dotnet /usr/local/bin/dotnet
-RUN echo 'export DOTNET_ROOT=~/.dotnet' >> $HOME/.bashrc
-RUN echo 'export PATH=$PATH:$DOTNET_ROOT' >> $HOME/.bashrc
+# RUN ln -fs $HOME/.dotnet/dotnet /usr/local/bin/dotnet
+# RUN echo 'export DOTNET_ROOT=~/.dotnet' >> $HOME/.bashrc
+# RUN echo 'export PATH=$PATH:$DOTNET_ROOT' >> $HOME/.bashrc
+
+# Update packages and install .NET
+RUN apt install software-properties-common -y                               && \
+    add-apt-repository ppa:dotnet/backports -y                              && \
+    apt-get update && apt-get install aspnetcore-runtime-$DOTNET_VERSION -y > /dev/null
 
 
 # Coral Edge TPU runtime ------------------------------------------------------
@@ -261,7 +270,6 @@ RUN dotnet publish ObjectDetectionYOLOv5Net.csproj -c Release --no-self-containe
     mv -f /app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net/modulesettings.docker.build.rpi64.json   \
           /app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net/modulesettings.docker.json > /dev/null
 
-
 # BEGIN REVIEW ================================================================
 
 # REVIEW: [Matthew] This section should go in the "FROM base AS final" part, not
@@ -360,14 +368,11 @@ COPY --from=build /app/publish .
 # --compile and --global-option now deprecated, the CLFAGS to nothing, but the --no-cache-dir does help
 
 #### The FaceProcessing module is not currently being used, so we're not installing it ####
-# RUN python3.8 -m pip --no-cache-dir install \
-#     -r /app/preinstalled-modules/ObjectDetectionYOLOv5-3.1/requirements.raspberrypi.txt \
-#     -r /app/preinstalled-modules/FaceProcessing/requirements.raspberrypi.txt \
-#     -r /app/SDK/Python/requirements.txt
-
 RUN python3.8 -m pip --no-cache-dir install \
-    -r /app/preinstalled-modules/ObjectDetectionYOLOv5-3.1/requirements.raspberrypi.txt \
-    -r /app/SDK/Python/requirements.txt
+     -r /app/preinstalled-modules/ObjectDetectionYOLOv5-3.1/requirements.raspberrypi.txt \
+     -r /app/SDK/Python/requirements.txt
+#    -r /app/preinstalled-modules/FaceProcessing/requirements.raspberrypi.txt \
+
 
 ## Not including Coral yet
 # RUN python3.9 -m pip --no-cache-dir install \
