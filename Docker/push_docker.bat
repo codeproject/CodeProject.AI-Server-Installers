@@ -90,8 +90,8 @@ if /i "!do_cpu!" == "true" (
 if /i "!do_gpu!" == "true" (
     REM docker push codeproject/ai-server:cuda10_2
     REM docker push codeproject/ai-server:cuda10_2-!version!
-    docker push codeproject/ai-server:cuda11_7
-    docker push codeproject/ai-server:cuda11_7-!version!
+    docker push codeproject/ai-server:cuda11_8
+    docker push codeproject/ai-server:cuda11_8-!version!
     docker push codeproject/ai-server:cuda12_2
     docker push codeproject/ai-server:cuda12_2-!version!
     REM docker push codeproject/ai-server:gpu-no-cudnn
