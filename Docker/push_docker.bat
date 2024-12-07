@@ -25,6 +25,14 @@ set do_arm=false
 set do_jetson=false
 set do_rpi=false
 
+set do_cuda10=false
+set do_cuda11=true
+set do_cuda12=true
+
+set cuda10_id=10_2
+set cuda11_id=11_8
+set cuda12_id=12_2
+
 set argCount=0
 for %%x in (%*) do (
     set /A argCount+=1
@@ -88,14 +96,12 @@ if /i "!do_cpu!" == "true" (
 )
 
 if /i "!do_gpu!" == "true" (
-    REM docker push codeproject/ai-server:cuda10_2
-    REM docker push codeproject/ai-server:cuda10_2-!version!
-    docker push codeproject/ai-server:cuda11_8
-    docker push codeproject/ai-server:cuda11_8-!version!
-    docker push codeproject/ai-server:cuda12_2
-    docker push codeproject/ai-server:cuda12_2-!version!
-    REM docker push codeproject/ai-server:gpu-no-cudnn
-    REM docker push codeproject/ai-server:gpu-no-cudnn-!version!
+    if /i "!do_cuda10!" == "true" docker push codeproject/ai-server:cuda!cuda10_id!
+    if /i "!do_cuda10!" == "true" docker push codeproject/ai-server:cuda!cuda10_id!-!version!
+    if /i "!do_cuda11!" == "true" docker push codeproject/ai-server:cuda!cuda11_id!
+    if /i "!do_cuda11!" == "true" docker push codeproject/ai-server:cuda!cuda11_id!-!version!
+    if /i "!do_cuda12!" == "true" docker push codeproject/ai-server:cuda!cuda12_id!
+    if /i "!do_cuda12!" == "true" docker push codeproject/ai-server:cuda!cuda12_id!-!version!
 )
 
 if /i "!do_arm!" == "true" (
