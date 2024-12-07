@@ -25,6 +25,15 @@ do_arm=false
 do_jetson=false
 do_rpi=false
 
+do_cuda10=false
+do_cuda11=true
+do_cuda12=true
+
+cuda10_id="10_2"
+cuda11_id="11_8"
+cuda12_id="12_2"
+
+
 if [ "$#" == "0" ]; then 
     do_all=true; 
 else
@@ -74,14 +83,18 @@ if [ "$do_cpu" = true ]; then
 fi
 
 if [ "$do_gpu" = true ]; then
-    # docker push codeproject/ai-server:cuda10_2
-    # docker push codeproject/ai-server:cuda10_2-$VERSION
-    docker push codeproject/ai-server:cuda11_7
-    docker push codeproject/ai-server:cuda11_7-$VERSION
-    docker push codeproject/ai-server:cuda12_2
-    docker push codeproject/ai-server:cuda12_2-$VERSION
-    # docker push codeproject/ai-server:gpu-no-cudnn
-    # docker push codeproject/ai-server:gpu-no-cudnn-$VERSION
+    if [ "$do_cuda10" = true ]; then
+        docker push "codeproject/ai-server:${cuda10_id}"
+        docker push "codeproject/ai-server:${cuda10_id}-$VERSION"
+    fi
+    if [ "$do_cuda11" = true ]; then
+        docker push "codeproject/ai-server:${cuda11_id}"
+        docker push "codeproject/ai-server:${cuda11_id}-$VERSION"
+    fi
+    if [ "$do_cuda12" = true ]; then
+        docker push "codeproject/ai-server:${cuda12_id}"
+        docker push "codeproject/ai-server:${cuda12_id}-$VERSION"
+    fi
 fi
 
 if [ "$do_arm" = true ]; then

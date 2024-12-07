@@ -19,6 +19,17 @@ repo_name="CodeProject.AI-Server"
 
 dotnet_version="9.0"
 
+cuda10_version="10.2"
+cuda10_id="10_2"
+
+cuda11_id="11_8"
+cuda11_version="11.8.0-cudnn8"
+
+cuda12_id="12_2"
+cuda12_version="12.2.2-cudnn8"
+
+cache_policy="--no-cache"
+
 # Sniff Parameters
 
 do_all=false
@@ -83,33 +94,38 @@ docker pull mcr.microsoft.com/dotnet/sdk:$dotnet_version
 
 if [ "$do_cpu" = true ]; then
     docker pull docker.io/amd64/ubuntu:22.04
-    docker buildx build --no-cache --platform linux/amd64 --build-arg CPAI_VERSION=$VERSION --build-arg DOTNET_VERSION=$dotnet_version --tag codeproject/ai-server -f Dockerfile "${repo_base}"
+    docker buildx build $cache_policy --platform linux/amd64 --build-arg CPAI_VERSION=$VERSION --build-arg DOTNET_VERSION=$dotnet_version --tag codeproject/ai-server -f Dockerfile "${repo_base}"
 fi
 
 if [ "$do_gpu" = true ]; then
-    # docker pull docker pull cupy/nvidia-cuda:10.2-runtime-ubuntu18.04
-    docker pull nvidia/cuda:11.7.1-cudnn8-runtime-ubuntu22.04
-    docker pull nvidia/cuda:12.2.0-runtime-ubuntu22.04
-
-    # docker buildx build --no-cache --platform linux/amd64 --build-arg REPO_NAME=$repo_name --build-arg CPAI_VERSION=$VERSION --build-arg DOTNET_VERSION=$dotnet_version --build-arg CUDA_VERSION=10.2          --build-arg CUDA_MAJOR=10 --tag codeproject/ai-server:cuda10_2 -f Dockerfile-GPU-CUDA10_2 "${repo_base}"
-    docker buildx build --no-cache   --platform linux/amd64 --build-arg REPO_NAME=$repo_name --build-arg CPAI_VERSION=$VERSION --build-arg DOTNET_VERSION=$dotnet_version --build-arg CUDA_VERSION=11.8.0-cudnn8 --build-arg CUDA_MAJOR=11 --tag codeproject/ai-server:cuda11_7 -f Dockerfile-GPU-CUDA "${repo_base}"
-    docker buildx build --no-cache   --platform linux/amd64 --build-arg REPO_NAME=$repo_name --build-arg CPAI_VERSION=$VERSION --build-arg DOTNET_VERSION=$dotnet_version --build-arg CUDA_VERSION=12.2.2-cudnn8 --build-arg CUDA_MAJOR=12 --tag codeproject/ai-server:cuda12_2 -f Dockerfile-GPU-CUDA "${repo_base}"
+    if [ "$do_cuda10" = true ]; then
+        # docker pull docker pull cupy/nvidia-cuda:$cuda10_version-runtime-ubuntu18.04
+        docker buildx build $cache_policy --platform linux/amd64 --build-arg REPO_NAME=$repo_name --build-arg CPAI_VERSION=$VERSION --build-arg DOTNET_VERSION=$dotnet_version --build-arg CUDA_VERSION=$cuda10_version   --build-arg CUDA_MAJOR=10 --tag codeproject/ai-server:cuda$cuda10_id -f Dockerfile-GPU-CUDA10 "${repo_base}"
+    fi
+    if [ "$do_cuda11" = true ]; then
+        # docker pull nvidia/cuda:$cuda11_version-runtime-ubuntu22.04
+        docker buildx build $cache_policy   --platform linux/amd64 --build-arg REPO_NAME=$repo_name --build-arg CPAI_VERSION=$VERSION --build-arg DOTNET_VERSION=$dotnet_version --build-arg CUDA_VERSION=$cuda11_version --build-arg CUDA_MAJOR=11 --tag codeproject/ai-server:cuda$cuda11_id -f Dockerfile-GPU-CUDA "${repo_base}"
+    fi
+    if [ "$do_cuda12" = true ]; then
+        # docker pull nvidia/cuda:$cuda12_version-runtime-ubuntu22.04
+        docker buildx build $cache_policy   --platform linux/amd64 --build-arg REPO_NAME=$repo_name --build-arg CPAI_VERSION=$VERSION --build-arg DOTNET_VERSION=$dotnet_version --build-arg CUDA_VERSION=$cuda12_version --build-arg CUDA_MAJOR=12 --tag codeproject/ai-server:cuda$cuda12_id -f Dockerfile-GPU-CUDA "${repo_base}"
+    fi
 fi
 
 if [ "$do_arm" = true ]; then
     docker pull arm64v8/ubuntu:22.04
-    docker buildx build --no-cache --platform linux/arm64 --build-arg REPO_NAME=$repo_name --build-arg CPAI_VERSION=$VERSION --build-arg DOTNET_VERSION=$dotnet_version --tag codeproject/ai-server:arm64 -f Dockerfile-Arm64 "${repo_base}"
+    docker buildx build $cache_policy --platform linux/arm64 --build-arg REPO_NAME=$repo_name --build-arg CPAI_VERSION=$VERSION --build-arg DOTNET_VERSION=$dotnet_version --tag codeproject/ai-server:arm64 -f Dockerfile-Arm64 "${repo_base}"
 fi
 
 if [ "$do_jetson" = true ]; then
-    docker pull gpuci/cuda-l4t:10.2-runtime-ubuntu18.04
+    docker pull gpuci/cuda-l4t:$cuda10_version-runtime-ubuntu18.04
     # docker pull nvcr.io/nvidia/l4t-base:r32.7.1
-    docker buildx build --no-cache --platform linux/arm64 --build-arg REPO_NAME=$repo_name --build-arg CPAI_VERSION=$VERSION --build-arg DOTNET_VERSION=$dotnet_version --tag codeproject/ai-server:jetson -f Dockerfile-Jetson "${repo_base}"
+    docker buildx build $cache_policy --platform linux/arm64 --build-arg REPO_NAME=$repo_name --build-arg CPAI_VERSION=$VERSION --build-arg DOTNET_VERSION=$dotnet_version --tag codeproject/ai-server:jetson -f Dockerfile-Jetson "${repo_base}"
 fi
 
 if [ "$do_rpi" = true ]; then
-    docker pull arm64v8/ubuntu:22.04
-    docker buildx build --no-cache --platform linux/arm64 --build-arg REPO_NAME=$repo_name --build-arg CPAI_VERSION=$VERSION --build-arg DOTNET_VERSION=$dotnet_version --tag codeproject/ai-server:rpi64 -f Dockerfile-RPi64 "${repo_base}"
+    # docker pull arm64v8/ubuntu:22.04
+    docker buildx build $cache_policy --platform linux/arm64 --build-arg REPO_NAME=$repo_name --build-arg CPAI_VERSION=$VERSION --build-arg DOTNET_VERSION=$dotnet_version --tag codeproject/ai-server:rpi64 -f Dockerfile-RPi64 "${repo_base}"
 fi
 
 
@@ -121,9 +137,9 @@ if [ "$do_cpu" = true ]; then
 fi
 
 if [ "$do_gpu" = true ]; then
-    # docker tag codeproject/ai-server:cuda10_2 codeproject/ai-server:cuda10_2-$VERSION
-    docker tag codeproject/ai-server:cuda11_7 codeproject/ai-server:cuda11_7-$VERSION
-    docker tag codeproject/ai-server:cuda12_2 codeproject/ai-server:cuda12_2-$VERSION
+    if [ "$do_cuda10" = true ]; then docker tag codeproject/ai-server:cuda$cuda10_id codeproject/ai-server:cuda$cuda10_id-$VERSION; fi
+    if [ "$do_cuda11" = true ]; then docker tag codeproject/ai-server:cuda$cuda11_id codeproject/ai-server:cuda$cuda11_id-$VERSION; fi
+    if [ "$do_cuda12" = true ]; then docker tag codeproject/ai-server:cuda$cuda12_id codeproject/ai-server:cuda$cuda12_id-$VERSION; fi
 fi
 
 if [ "$do_arm" = true ]; then
