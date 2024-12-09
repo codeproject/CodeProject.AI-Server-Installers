@@ -355,6 +355,14 @@ function cleanDirectories(){
     rm -rf "${INSTALLER_DIRECTORY}"
 }
 
+function zipUpInstaller () {
+    log_info "Zipping up installer."
+    sudo apt-get install zip > /dev/null
+    zip "${INSTALLER_FILENAME%.*}.zip" "${INSTALLER_FILENAME}"
+    sudo chmod a+rw "${INSTALLER_FILENAME%.*}.zip"
+    chown $USER "${INSTALLER_FILENAME%.*}.zip"
+}
+
 
 # Let's begin
 log_info "Installer generating process started."
@@ -368,10 +376,8 @@ addLaunchShortcutToApp
 createInstaller
 moveInstallPackage
 cleanDirectories
+zipUpInstaller
 
-log_info "Zipping up installer."
-sudo apt-get install zip > /dev/null
-zip "${INSTALLER_FILENAME%.*}.zip" "${INSTALLER_FILENAME}"
 
 writeLine
 log_info "DONE! Installer is in ${INSTALLER_FILENAME}"
