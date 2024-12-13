@@ -112,17 +112,17 @@ if /i "!do_gpu!" == "true" (
     if /i "!do_cuda10!" == "true" (
         echo Building CUDA 10 image
         REM docker pull cupy/nvidia-cuda:!cuda10_version!-runtime-ubuntu18.04 
-        docker buildx build --platform linux/amd64 !cache_policy! --build-arg REPO_NAME=!repo_name! --build-arg CPAI_VERSION=!version! --build-arg DOTNET_VERSION=!dotnet_version! --build-arg CUDA_VERSION=!cuda10_version! --build-arg CUDA_MAJOR=10 --tag codeproject/ai-server:!cuda10_id! -f Dockerfile-GPU-CUDA10 "!repo_base!"
+        docker buildx build --platform linux/amd64 !cache_policy! --build-arg REPO_NAME=!repo_name! --build-arg CPAI_VERSION=!version! --build-arg DOTNET_VERSION=!dotnet_version! --build-arg CUDA_VERSION=!cuda10_version! --build-arg CUDA_MAJOR=10 --tag codeproject/ai-server:cuda_!cuda10_id! -f Dockerfile-GPU-CUDA10 "!repo_base!"
     )
     if /i "!do_cuda11!" == "true" (
         echo Building CUDA 11 image
         REM docker pull nvidia/cuda:!cuda11_version!-runtime-ubuntu22.04 
-        docker buildx build --platform linux/amd64 !cache_policy! --build-arg REPO_NAME=!repo_name! --build-arg CPAI_VERSION=!version! --build-arg DOTNET_VERSION=!dotnet_version! --build-arg CUDA_VERSION=!cuda11_version! --build-arg CUDA_MAJOR=11 --tag codeproject/ai-server:!cuda11_id! -f Dockerfile-GPU-CUDA "!repo_base!"
+        docker buildx build --platform linux/amd64 !cache_policy! --build-arg REPO_NAME=!repo_name! --build-arg CPAI_VERSION=!version! --build-arg DOTNET_VERSION=!dotnet_version! --build-arg CUDA_VERSION=!cuda11_version! --build-arg CUDA_MAJOR=11 --tag codeproject/ai-server:cuda_!cuda11_id! -f Dockerfile-GPU-CUDA "!repo_base!"
     )
     if /i "!do_cuda12!" == "true" (
         echo Building CUDA 12 image
         REM docker pull nvidia/cuda:!cuda12_version!-runtime-ubuntu22.04
-        docker buildx build --platform linux/amd64 !cache_policy! --build-arg REPO_NAME=!repo_name! --build-arg CPAI_VERSION=!version! --build-arg DOTNET_VERSION=!dotnet_version! --build-arg CUDA_VERSION=!cuda12_version! --build-arg CUDA_MAJOR=12 --tag codeproject/ai-server:!cuda12_id! -f Dockerfile-GPU-CUDA "!repo_base!"
+        docker buildx build --platform linux/amd64 !cache_policy! --build-arg REPO_NAME=!repo_name! --build-arg CPAI_VERSION=!version! --build-arg DOTNET_VERSION=!dotnet_version! --build-arg CUDA_VERSION=!cuda12_version! --build-arg CUDA_MAJOR=12 --tag codeproject/ai-server:cuda_!cuda12_id! -f Dockerfile-GPU-CUDA "!repo_base!"
     )
 )
 
