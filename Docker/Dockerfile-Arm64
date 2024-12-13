@@ -92,6 +92,8 @@ Suitable for Apple Silicon macs, Orange Pi, Radxa ROCK and Raspberry Pi."
 #   gcc python3-dev
 # So we can install modules
 #   curl jq unzip wget rsync ca-certificates (ca-certificates so we can do --no-check-certificate, jq for json parsing)
+# So we can build the wheels of some modules (eg PaddleOCR)
+#   patch
 # This stops the "lsmod: not found" error
 #   kmod
 
@@ -121,6 +123,8 @@ RUN apt-get update  -y && \
         wget            \
                         \
         psmisc          \
+                        \
+        patch           \
                         \
         kmod            > /dev/null
 

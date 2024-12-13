@@ -124,7 +124,7 @@ if [ "$do_jetson" = true ]; then
 fi
 
 if [ "$do_rpi" = true ]; then
-    # docker pull arm64v8/ubuntu:22.04
+    docker pull arm64v8/ubuntu:22.04
     docker buildx build $cache_policy --platform linux/arm64 --build-arg REPO_NAME=$repo_name --build-arg CPAI_VERSION=$VERSION --build-arg DOTNET_VERSION=$dotnet_version --tag codeproject/ai-server:rpi64 -f Dockerfile-RPi64 "${repo_base}"
 fi
 

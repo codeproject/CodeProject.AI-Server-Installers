@@ -96,6 +96,8 @@ Suitable for Orange Pi, Radxa ROCK and Raspberry Pi."
 #   mesa-utils
 # So we can install modules
 #   curl jq unzip wget rsync ca-certificates (ca-certificates so we can do --no-check-certificate, jq for json parsing)
+# So we can build the wheels of some modules (eg PaddleOCR)
+#   patch
 # This stops the "lsmod: not found" error
 #   kmod
 
@@ -126,6 +128,8 @@ RUN apt-get update  -y && \
                         \
         psmisc          \
                         \
+        patch           \
+                        \
         kmod            > /dev/null
 
 
@@ -154,10 +158,16 @@ RUN apt install software-properties-common -y                               && \
 
 # Coral Edge TPU runtime ------------------------------------------------------
 
+# Old way:
 RUN echo "deb https://packages.cloud.google.com/apt coral-edgetpu-stable main" | sudo tee /etc/apt/sources.list.d/coral-edgetpu.list
 RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
 RUN apt-get update && apt-get install libedgetpu1-std
 # RUN apt-get update && apt-get install libedgetpu1-max - for those who like burning holes in desks
+
+# New way - which doesn't work
+# RUN curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo tee /etc/apt/trusted.gpg.d/google.gpg
+# RUN apt-get clean && apt-get update && apt-get install libedgetpu1-std
+# RUN apt-get clean && apt-get update && apt-get install libedgetpu1-max - for those who like burning holes in desks
 
 # PyCoral library - not needed
 # RUN apt-get install python3-pycoral
