@@ -96,6 +96,8 @@ Suitable for Apple Silicon macs, Orange Pi, Radxa ROCK and Raspberry Pi."
 #   patch
 # This stops the "lsmod: not found" error
 #   kmod
+# This allows us to query process info
+#   psmisc
 
 RUN apt-get update  -y && \
     apt-get upgrade -y --no-install-recommends apt-utils && \
@@ -272,7 +274,6 @@ COPY [ "/${REPO_NAME}/modules/ObjectDetectionYOLOv5Net/custom-models", "/app/pub
 
 # And ensure required assets are copied over. 
 COPY [ "/${REPO_NAME}/modules/ObjectDetectionYOLOv5Net/explore.html", "/app/publish/preinstalled-modules/ObjectDetectionYOLOv5Net" ]
-
 
 # Move non-compiled code (Python, script) into place --------------------------
 
