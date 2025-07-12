@@ -23,13 +23,14 @@ set repo_base=..\..\..\CodeProject.AI-Server
 
 
 set "DotNetVersion=9.0"
-set "DotNetHostingVersion=9.0.0"
+set "DotNetHostingVersion=9.0.7"
 
 REM Note the hosting bundle is architecture agnostic. (arm64, x64 same file)
-set "HostingBundleInstallerExe=dotnet-hosting-9.0.0-win.exe"
-set "HostingBundleDownloadURL=https://download.visualstudio.microsoft.com/download/pr/e1ae9d41-3faf-4755-ac27-b24e84eef3d1/5e3a24eb8c1a12272ea1fe126d17dfca/dotnet-hosting-9.0.0-win.exe"
+set "HostingBundleInstallerExe=dotnet-hosting-9.0.7-win.exe"
+set "HostingBundleDownloadURL=https://builds.dotnet.microsoft.com/dotnet/aspnetcore/Runtime/9.0.7/dotnet-hosting-9.0.7-win.exe"
 REM Use https://emn178.github.io/online-tools/sha256_checksum.html to calculate this:
-set "HostingBundleSHA256=342681a5e594163ca18167160fc7dd969171184584dfaed4f2745b462ade7b0b"
+set "HostingBundleSHA256=49f3d8b16e45e83a638ef61ac49e4d7d3c3711b2037d086b9ff11dc00062a66b"
+set "HostingBundleSHA512=4c26a2d2c23679605dc519075830416fe96204804bdb9bd3f2e2cac786a80645fba528f5bb0432fa19b2f6a3e5d618bea833bfe859200eee099c3a728402dcf2"
 
 
 :: Make sure that the code is up to date ---------------------------------------
@@ -85,7 +86,8 @@ if not exist "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" (
                                                    -ddotnet="%DotNetVersion%"                       ^
                                                    -ddotnethostingExe="%HostingBundleInstallerExe%" ^
                                                    -ddotnethostingUrl"%HostingBundleDownloadURL%"   ^
-                                                   -ddotnethostingSHA="%HostingBundleSHA256%"       ^
+                                                   -ddotnethostingSHA256="%HostingBundleSHA256%"    ^
+                                                   -ddotnethostingSHA512="%HostingBundleSHA512%"    ^
                                                    -dsign="EvSigning"                               ^
                                                    installer.iss
 
